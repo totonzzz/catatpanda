@@ -64,14 +64,35 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .spin{display:inline-block;animation:rot .9s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 .ptr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 74px);text-align:center;font-size:12px;color:var(--mut);opacity:0;pointer-events:none;z-index:14}
-.view{max-width:520px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-inset-bottom,0px));animation:fade .22s ease}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+.view{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-inset-bottom,0px));animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.view > *{animation:rise .34s cubic-bezier(.2,.8,.2,1) both}
+.view > *:nth-child(2){animation-delay:.03s}.view > *:nth-child(3){animation-delay:.06s}
+.view > *:nth-child(4){animation-delay:.09s}.view > *:nth-child(5){animation-delay:.12s}
+.view > *:nth-child(6){animation-delay:.15s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view > *{animation:none}}
 .card{background:linear-gradient(160deg,rgba(255,255,255,.105),rgba(255,255,255,.055));border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:14px;
   backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:0 10px 30px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.07)}
-.card h2{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);display:flex;justify-content:space-between;align-items:center}
+.card h2{margin:0 0 14px;font-size:13.5px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--tx);display:flex;justify-content:space-between;align-items:center;position:relative;padding-left:11px}
+.card h2::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,var(--mint),#9B8CFF)}
 .card h2 a{font-size:12px;letter-spacing:0;text-transform:none;color:var(--mint);font-weight:500;background:none;border:none;cursor:pointer;padding:0}
 .hero .k{font-size:12px;letter-spacing:.09em;color:var(--mut);font-weight:700;text-transform:uppercase}
-.hero .big{font-size:38px;font-weight:500;margin:6px 0 2px;letter-spacing:-.02em}
+.hero .big{font-size:38px;font-weight:500;margin:6px 0 2px;letter-spacing:-.025em}
+.hero2{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(150deg,#12365e 0%,#1b2a63 46%,#2b2168 100%);
+  box-shadow:0 18px 40px rgba(12,20,50,.45),inset 0 1px 0 rgba(255,255,255,.18)}
+.hero2::before{content:'';position:absolute;inset:-30% -20%;pointer-events:none;
+  background:radial-gradient(55% 55% at 82% 8%,rgba(140,130,255,.45),transparent 62%),radial-gradient(45% 45% at 6% 92%,rgba(70,180,255,.30),transparent 62%)}
+.hero2 .k,.hero2 .sub{color:rgba(255,255,255,.65)}
+.hero2 .big{color:#fff;font-size:42px}
+.hero2 .stat{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12);backdrop-filter:blur(6px)}
+.hero2 .stat .k{color:rgba(255,255,255,.6)}
+.hero2 .pos{color:#8BE0C4}.hero2 .neg{color:#FFB3A8}
+.herochip{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 11px;border-radius:999px;
+  background:rgba(255,255,255,.14);font-size:11.5px;font-weight:600;color:#fff}
 .hero .sub{font-size:13px;color:var(--mut)}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
 .stat{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -99,11 +120,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .legend2 i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
 .tx{display:flex;align-items:center;gap:12px;padding:10px 0;border:none;border-top:1px solid var(--line);background:none;width:100%;text-align:left;cursor:pointer}
 .tx:first-child{border-top:none}
-.ico{width:40px;height:40px;border-radius:13px;background:var(--s2);display:grid;place-items:center;font-size:19px;flex:none}
+.ico{width:42px;height:42px;border-radius:14px;background:var(--s2);display:grid;place-items:center;font-size:19px;flex:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 .tx .m{flex:1;min-width:0}
 .tx .d{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx .s{font-size:12px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tx .a{font-size:14px;font-weight:500;white-space:nowrap}
+.tx .a{font-size:14.5px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:6px;background:var(--s2);margin-left:6px;color:var(--mut);vertical-align:1px}
 .tag.cek{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber)}
 .empty{color:var(--mut);font-size:14px;padding:6px 0}
@@ -124,7 +146,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   box-shadow:0 14px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.10)}
 .tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--mut);padding:4px 0;cursor:pointer}
 .tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tab.on{color:var(--mint)}
+.tab.on{color:var(--mint);background:rgba(111,195,255,.12);border-radius:16px}
 .add{justify-self:center;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),#9B8CFF);color:var(--mint-ink);font-size:30px;font-weight:500;margin-top:-26px;box-shadow:0 12px 26px rgba(111,195,255,.35);cursor:pointer;transition:transform .15s}
 .add:active{transform:scale(.93)}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;animation:fadebg .2s}
@@ -325,10 +347,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 (function () {
   'use strict';
-  var VERSION = '1.9';
-  // Notifikasi push butuh server kecil di baliknya (fungsi /api/push, mis. Netlify/Vercel).
-  // Di hosting statis seperti GitHub Pages biarkan kosong: kartu notifikasi akan menjelaskan keadaannya,
-  // bukan menampilkan tombol yang pasti gagal.
+  var VERSION = '2.0';
+  // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
+  // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
+  //   var PUSH_ENDPOINT = 'https://catat-panda-push.budi.workers.dev/api/push';
+  // Selama kosong, kartu Notifikasi hanya menjelaskan bahwa fitur ini butuh server.
   var PUSH_ENDPOINT = '';
   function $(id) { return document.getElementById(id); }
   var LS = {
@@ -514,11 +537,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (rv.pending) h += '<button class="bc" data-act="review">Review &amp; add now →</button>';
       h += '</div>';
     }
-    h += '<div class="card hero"><div class="k">' + (isCur ? 'Spending this month' : 'Spending ' + esc(d.label)) + '</div>' +
+    var pv = (d.trend && d.trend.length > 1) ? d.trend[d.trend.length - 2] : null;
+    var moDelta = (pv && pv.keluar) ? Math.round((k.keluar - pv.keluar) / pv.keluar * 100) : 0;
+    h += '<div class="card hero2"><div class="k">' + (isCur ? 'Spending this month' : 'Spending ' + esc(d.label)) + '</div>' +
       '<div class="big mono" id="heroNum" data-to="' + k.keluar + '">' + rp(k.keluar) + '</div>' +
       '<div class="sub">' + k.count + (k.count === 1 ? ' transaction' : ' transactions') + (isCur ? ' · ' + (d.todayFilled ? '✅ logged today' : '⏳ nothing logged today') : '') + '</div>' +
       '<div class="stats"><div class="stat"><div class="k">Income</div><div class="v mono pos">' + rp(k.masuk) + '</div></div>' +
-      '<div class="stat"><div class="k">Difference</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + rp(sel) + '</div></div></div></div>';
+      '<div class="stat"><div class="k">Difference</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + rp(sel) + '</div></div></div>' +
+      ((pv && pv.keluar) ? '<div class="herochip">' + (moDelta <= 0 ? '↓' : '↑') + ' ' + Math.abs(moDelta) + '% vs last month</div>' : '') + '</div>';
 
     var w = d.week;
     if (w) {
