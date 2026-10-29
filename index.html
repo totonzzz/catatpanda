@@ -19,23 +19,41 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0B1220; --s1:#121B2E; --s2:#19243A; --line:#243350; --tx:#E8EEF8; --mut:#8C9AB3;
-  --mint:#5AA9FF; --mint-ink:#061A33; --coral:#FF7B6F; --amber:#F2B84B; --shadow:0 12px 32px rgba(0,0,0,.4);
+  --bg:#070B14; --s1:rgba(255,255,255,.055); --s2:rgba(255,255,255,.09); --line:rgba(255,255,255,.10);
+  --tx:#EDF2FB; --mut:#8FA0BD;
+  --mint:#6FC3FF; --mint-ink:#04121F; --coral:#FF8A7A; --amber:#FFC46B;
+  --shadow:0 18px 40px rgba(0,0,0,.45);
+  --glass:blur(20px) saturate(140%);
   font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 @media (prefers-color-scheme: light){
-  :root{ --bg:#EEF2F9; --s1:#FFFFFF; --s2:#F3F6FB; --line:#D6DEEB; --tx:#111B2E; --mut:#5B6880;
-         --mint:#1F6FD1; --mint-ink:#FFFFFF; --coral:#D6453A; --amber:#B07A12; --shadow:0 12px 32px rgba(20,30,60,.14); }
+  :root{ --bg:#E9F1FC; --s1:rgba(255,255,255,.72); --s2:rgba(255,255,255,.55); --line:rgba(16,40,80,.10);
+         --tx:#0E1A2E; --mut:#5A6B86; --mint:#1668D6; --mint-ink:#FFFFFF; --coral:#D6453A; --amber:#B07A12;
+         --shadow:0 18px 40px rgba(20,40,80,.14); }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg)}
-body{color:var(--tx);-webkit-font-smoothing:antialiased;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+body{color:var(--tx);-webkit-font-smoothing:antialiased;overscroll-behavior-y:none;-webkit-text-size-adjust:100%;min-height:100vh;
+  background:
+    radial-gradient(62% 44% at 8% -10%, rgba(96,164,255,.22), transparent 62%),
+    radial-gradient(52% 38% at 102% -2%, rgba(150,120,255,.18), transparent 60%),
+    radial-gradient(72% 46% at 50% 108%, rgba(60,220,180,.10), transparent 62%),
+    var(--bg);
+  background-attachment:fixed}
+@media (prefers-color-scheme: light){
+  body{background:
+    radial-gradient(62% 44% at 8% -10%, rgba(96,164,255,.34), transparent 62%),
+    radial-gradient(52% 38% at 102% -2%, rgba(160,120,255,.26), transparent 60%),
+    radial-gradient(72% 46% at 50% 108%, rgba(60,200,170,.18), transparent 62%),
+    var(--bg);background-attachment:fixed}
+}
 .mono{font-family:'DM Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 button{font-family:inherit;color:inherit}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
 .hdr{position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:8px;
-  padding:calc(env(safe-area-inset-top,0px) + 16px) 12px 10px;
-  background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 12px 10px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 78%,transparent),color-mix(in srgb,var(--bg) 55%,transparent));
+  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
 .monthbar{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
 .monthbar button{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--s1);font-size:22px;line-height:1;cursor:pointer;flex:none;touch-action:manipulation;display:flex;align-items:center;justify-content:center}
 .monthbar button:active{background:var(--s2);transform:scale(.96)}
@@ -46,16 +64,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .spin{display:inline-block;animation:rot .9s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 .ptr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 74px);text-align:center;font-size:12px;color:var(--mut);opacity:0;pointer-events:none;z-index:14}
-.view{max-width:520px;margin:0 auto;padding:6px 16px calc(110px + env(safe-area-inset-bottom,0px));animation:fade .22s ease}
+.view{max-width:520px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-inset-bottom,0px));animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.card{background:var(--s1);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.085),rgba(255,255,255,.035));border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:14px;
+  backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:0 10px 30px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.07)}
 .card h2{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);display:flex;justify-content:space-between;align-items:center}
 .card h2 a{font-size:12px;letter-spacing:0;text-transform:none;color:var(--mint);font-weight:500;background:none;border:none;cursor:pointer;padding:0}
 .hero .k{font-size:12px;letter-spacing:.09em;color:var(--mut);font-weight:700;text-transform:uppercase}
 .hero .big{font-size:38px;font-weight:500;margin:6px 0 2px;letter-spacing:-.02em}
 .hero .sub{font-size:13px;color:var(--mut)}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-.stat{background:var(--s2);border-radius:14px;padding:11px 12px;min-width:0}
+.stat{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .stat .k{font-size:11px;color:var(--mut);font-weight:500}
 .stat .v{font-size:16px;font-weight:500;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pos{color:var(--mint)} .neg{color:var(--coral)} .warn{color:var(--amber)}
@@ -93,23 +112,30 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .kv small{display:block;color:var(--mut);font-size:11.5px;margin-top:2px}
 .day{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);font-weight:700;letter-spacing:.04em;padding:14px 2px 4px;text-transform:uppercase}
 .day span.mono{text-transform:none;font-weight:500}
-.search{width:100%;background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16px;color:var(--tx);font-family:inherit;margin-bottom:10px}
+.search{width:100%;background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:16px;color:var(--tx);font-family:inherit;margin-bottom:10px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px;scrollbar-width:none}
 .filters::-webkit-scrollbar{display:none}
 .filters button{flex:none;border:1px solid var(--line);background:var(--s1);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
 .filters button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr 74px 1fr 1fr;align-items:end;
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
-  background:color-mix(in srgb,var(--s1) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:1fr 1fr 74px 1fr 1fr;align-items:end;
+  padding:6px 8px;border:1px solid var(--line);border-radius:26px;
+  background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.045));
+  backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);
+  box-shadow:0 14px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.10)}
 .tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--mut);padding:4px 0;cursor:pointer}
 .tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab.on{color:var(--mint)}
-.add{justify-self:center;width:56px;height:56px;border-radius:20px;border:none;background:var(--mint);color:var(--mint-ink);font-size:30px;font-weight:500;margin-top:-26px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s}
+.add{justify-self:center;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),#9B8CFF);color:var(--mint-ink);font-size:30px;font-weight:500;margin-top:-26px;box-shadow:0 12px 26px rgba(111,195,255,.35);cursor:pointer;transition:transform .15s}
 .add:active{transform:scale(.93)}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;animation:fadebg .2s}
 @keyframes fadebg{from{opacity:0}}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;max-width:540px;margin:0 auto;background:var(--s1);border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:none;
-  padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto;box-shadow:var(--shadow);animation:up .28s cubic-bezier(.2,.8,.2,1)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;max-width:540px;margin:0 auto;border-radius:28px 28px 0 0;border:1px solid var(--line);border-bottom:none;
+  background:linear-gradient(180deg,rgba(28,38,58,.92),rgba(14,20,32,.96));
+  backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+  padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto;box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:up .28s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-color-scheme: light){
+  .sheet{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,248,255,.98))}
+}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
 .grab{width:38px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 12px}
 .sheet h3{margin:0 0 12px;font-size:18px;display:flex;justify-content:space-between;align-items:center}
@@ -132,9 +158,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .hint{font-size:12px;color:var(--mut);margin:-4px 0 12px}
 .chk{display:flex;align-items:center;gap:10px;font-size:13.5px;margin:2px 0 8px;cursor:pointer}
 .chk input{width:20px;height:20px;accent-color:var(--mint);flex:none}
-.btn{width:100%;border:none;background:var(--mint);color:var(--mint-ink);font-weight:700;font-size:16px;padding:15px;border-radius:16px;cursor:pointer;margin-top:4px}
+.btn{width:100%;border:none;background:linear-gradient(135deg,var(--mint),#9B8CFF);color:var(--mint-ink);font-weight:700;font-size:16px;padding:15px;border-radius:16px;cursor:pointer;margin-top:4px;
+  box-shadow:0 10px 24px rgba(111,195,255,.22),inset 0 1px 0 rgba(255,255,255,.35)}
 .btn:disabled{opacity:.55}
-.btn.ghost{background:var(--s2);color:var(--tx);border:1px solid var(--line);font-weight:500}
+.btn.ghost{background:var(--s2);color:var(--tx);border:1px solid var(--line);font-weight:500;box-shadow:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .btn.danger{background:color-mix(in srgb,var(--coral) 18%,var(--s2));color:var(--coral);border:1px solid color-mix(in srgb,var(--coral) 45%,var(--line))}
 .err{color:var(--coral);font-size:13px;min-height:18px;margin:6px 2px 0}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:88vw;text-align:center}
@@ -215,6 +242,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .cc-mandiri{background:linear-gradient(135deg,#0b3a6f,#1a5fa8 62%,#0e4a86)}
 .cc-other{background:linear-gradient(135deg,#243350,#3b4d73 65%,#2b3b5c)}
 .cc-hint{font-size:11px;color:var(--mut);text-align:center;margin-top:6px}
+.cc-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
+.cc-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+.cc-dots i.on{background:var(--mint);transform:scale(1.3)}
 /* kunci PIN */
 .lock{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
 .lockbox{width:100%;max-width:300px;text-align:center}
@@ -232,56 +262,56 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 <header class="hdr" id="hdr" hidden>
   <div class="monthbar">
-    <button id="prev" aria-label="Bulan sebelumnya">‹</button>
+    <button id="prev" aria-label="Previous month">‹</button>
     <div class="lbl">Catat Panda<small id="monthLabel">…</small></div>
-    <button id="next" aria-label="Bulan berikutnya">›</button>
+    <button id="next" aria-label="Next month">›</button>
   </div>
   <span class="chip" id="streak">🔥 –</span>
 </header>
-<div class="ptr" id="ptr">↓ Tarik untuk muat ulang</div>
+<div class="ptr" id="ptr">↓ Pull to refresh</div>
 <main id="view" class="view"></main>
 
-<nav class="tabbar" id="tabbar" hidden aria-label="Menu utama">
-  <button class="tab on" data-tab="ringkasan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg><span>Ringkasan</span></button>
-  <button class="tab" data-tab="transaksi"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg><span>Transaksi</span></button>
-  <button class="add" id="fab" aria-label="Catat transaksi">+</button>
-  <button class="tab" data-tab="dompet"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3"/><path d="M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16.5" cy="14" r="1.2"/></svg><span>Dompet</span></button>
-  <button class="tab" data-tab="setelan"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Setelan</span></button>
+<nav class="tabbar" id="tabbar" hidden aria-label="Main menu">
+  <button class="tab on" data-tab="ringkasan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg><span>Overview</span></button>
+  <button class="tab" data-tab="transaksi"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg><span>Transactions</span></button>
+  <button class="add" id="fab" aria-label="Add transaction">+</button>
+  <button class="tab" data-tab="dompet"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3"/><path d="M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16.5" cy="14" r="1.2"/></svg><span>Wallet</span></button>
+  <button class="tab" data-tab="setelan"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Settings</span></button>
 </nav>
 
 <div class="sheetbg" id="sheetBg" hidden></div>
-<section class="sheet" id="sheetAdd" hidden aria-label="Catat transaksi">
+<section class="sheet" id="sheetAdd" hidden aria-label="Add transaction">
   <div class="grab"></div>
-  <h3><span id="addTitle">Catat transaksi</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>
+  <h3><span id="addTitle">Add transaction</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>
   <div class="revnote" id="revNote" hidden></div>
-  <div class="seg" id="segTipe"><button data-v="Keluar" class="on">Keluar</button><button data-v="Masuk">Masuk</button></div>
+  <div class="seg" id="segTipe"><button data-v="Keluar" class="on">Expense</button><button data-v="Masuk">Income</button></div>
   <div class="amtbox"><span>Rp</span><input id="amt" class="mono" inputmode="numeric" placeholder="0" autocomplete="off"></div>
   <div class="quick" id="quick"><button data-v="15000">15.000</button><button data-v="25000">25.000</button><button data-v="50000">50.000</button><button data-v="100000">100.000</button></div>
-  <div class="fld"><label for="desc">Untuk apa?</label><input id="desc" maxlength="80" placeholder="Contoh: Makan siang" autocomplete="off"></div>
-  <div class="fld"><label for="kat">Kategori</label><select id="kat"></select></div>
+  <div class="fld"><label for="desc">What for?</label><input id="desc" maxlength="80" placeholder="e.g. Lunch" autocomplete="off"></div>
+  <div class="fld"><label for="kat">Category</label><select id="kat"></select></div>
   <div id="loanBox" hidden>
-    <div class="fld"><label for="nama">Nama orang</label><input id="nama" maxlength="40" placeholder="Contoh: Budi" autocomplete="off"></div>
-    <div class="seg" id="segJenis"><button data-v="Hutang">Hutang (saya pinjam)</button><button data-v="Piutang">Piutang (saya pinjamkan)</button></div>
+    <div class="fld"><label for="nama">Person</label><input id="nama" maxlength="40" placeholder="e.g. Budi" autocomplete="off"></div>
+    <div class="seg" id="segJenis"><button data-v="Hutang">Debt (I borrowed)</button><button data-v="Piutang">Receivable (I lent)</button></div>
     <div class="hint" id="loanHint"></div>
   </div>
   <div class="row2 m">
-    <div class="fld"><label for="met">Metode</label><select id="met"></select></div>
-    <div class="fld"><label for="tgl">Tanggal</label><input id="tgl" type="date"></div>
+    <div class="fld"><label for="met">Method</label><select id="met"></select></div>
+    <div class="fld"><label for="tgl">Date</label><input id="tgl" type="date"></div>
   </div>
-  <label class="chk" id="rememberBox" hidden><input type="checkbox" id="remember" checked><span>Ingat kategori ini untuk merchant yang sama</span></label>
+  <label class="chk" id="rememberBox" hidden><input type="checkbox" id="remember" checked><span>Remember this category for the same merchant</span></label>
   <div class="err" id="formErr"></div>
-  <button class="btn" id="save">Simpan</button>
+  <button class="btn" id="save">Save</button>
 </section>
-<section class="sheet" id="sheetDetail" hidden aria-label="Detail transaksi"></section>
+<section class="sheet" id="sheetDetail" hidden aria-label="Transaction details"></section>
 <div class="lock" id="lock" hidden>
   <div class="lockbox">
     <img class="lockico" src="icons/icon-192.png" alt="">
     <div class="lockttl">Catat Panda</div>
-    <div class="locksub">Masukkan PIN untuk membuka</div>
+    <div class="locksub">Enter your PIN to unlock</div>
     <input id="pin" class="mono" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="••••">
     <div class="err" id="pinErr"></div>
-    <button class="btn" id="pinGo">Buka</button>
-    <button class="btn ghost" id="pinForget" style="margin-top:8px">Lupa PIN</button>
+    <button class="btn" id="pinGo">Unlock</button>
+    <button class="btn ghost" id="pinForget" style="margin-top:8px">Forgot PIN</button>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -289,7 +319,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 (function () {
   'use strict';
-  var VERSION = '1.6';
+  var VERSION = '1.7';
   // Notifikasi push butuh server kecil di baliknya (fungsi /api/push, mis. Netlify/Vercel).
   // Di hosting statis seperti GitHub Pages biarkan kosong: kartu notifikasi akan menjelaskan keadaannya,
   // bukan menampilkan tombol yang pasti gagal.
@@ -307,21 +337,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function rp(n) { n = Math.round(Number(n) || 0); return (n < 0 ? '−' : '') + 'Rp ' + grp(n); }
   function short(n) {
     n = Math.abs(n);
-    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace('.', ',') + ' jt';
-    if (n >= 1e3) return Math.round(n / 1e3) + ' rb';
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2).replace('.', ',') + 'M';
+    if (n >= 1e3) return Math.round(n / 1e3) + 'K';
     return String(n);
   }
-  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  var DOW = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   function dlabel(d) { return parseInt(d.slice(8, 10), 10) + ' ' + MON[parseInt(d.slice(5, 7), 10) - 1]; }
   function prevDay(d) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); }
   function dayHeader(d, today) {
-    if (d === today) return 'Hari ini';
-    if (d === prevDay(today)) return 'Kemarin';
+    if (d === today) return 'Today';
+    if (d === prevDay(today)) return 'Yesterday';
     return DOW[new Date(d + 'T00:00:00Z').getUTCDay()] + ', ' + dlabel(d);
   }
   var COLORS = ['#5AA9FF', '#3DDC97', '#F2B84B', '#FF7B6F', '#B28DFF', '#4FD1D9', '#FF9AD5', '#A3E635', '#FB923C', '#94A3B8'];
-  var SRC = { form: 'Form Tally', app: 'Aplikasi ini', notif: 'Notifikasi bank (otomatis)' };
+  var SRC = { form: 'Tally form', app: 'This app', notif: 'Bank notification (auto)' };
 
   var state = {
     url: LS.get('ck_url', ''), token: LS.get('ck_token', ''),
@@ -337,7 +367,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function persistPending() { LS.set('ck_pending', JSON.stringify(state.pending)); }
   function connected() { return !!(state.url && state.token); }
   function todayStr() { return (state.data && state.data.today) || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()); }
-  function setSpin(on) { var c = $('streak'); if (state.data) c.innerHTML = (on ? '<span class="spin">⟳</span> ' : '🔥 ') + state.data.streak + (on ? '' : ' hari'); }
+  function setSpin(on) { var c = $('streak'); if (state.data) c.innerHTML = (on ? '<span class="spin">⟳</span> ' : '🔥 ') + state.data.streak + (on ? '' : ' days'); }
 
   // ================= jaringan =================
   function api(action, payload) {
@@ -382,8 +412,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return api('data', { month: month || '' }).then(function (d) {
       state.busy = false;
       if (!d || d.ok === false) {
-        if (d && d.error === 'auth') { state.setupMsg = 'Kode rahasia ditolak. Periksa lagi.'; return goSetup(); }
-        setSpin(false); return fail((d && d.error) || 'Data tidak bisa dimuat');
+        if (d && d.error === 'auth') { state.setupMsg = 'Secret code rejected. Please check again.'; return goSetup(); }
+        setSpin(false); return fail((d && d.error) || 'Could not load data');
       }
       state.data = d; state.month = d.month; state.fromCache = false;
       LS.set(cacheKey(d.month), JSON.stringify(d)); pruneCache(6);
@@ -394,17 +424,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       state.busy = false; setSpin(false);
       if (e.code === 'NET') {
         state.fromCache = !!state.data; renderAll();
-        if (!state.data) fail('Tidak ada sambungan dan belum ada data tersimpan di HP ini.');
-        else if (opts.manual) toast('Offline, menampilkan data tersimpan');
+        if (!state.data) fail('No connection and nothing saved on this phone yet.');
+        else if (opts.manual) toast('Offline — showing saved data');
         return;
       }
-      fail('Alamat Web App tidak menjawab dengan benar. Periksa URL, dan pastikan akses deployment adalah "Anyone".');
+      fail('The Web App did not respond correctly. Check the URL and make sure deployment access is "Anyone".');
     });
   }
 
   function fail(msg) {
     if (state.tab === 'setelan') return toast(msg);
-    $('view').innerHTML = '<div class="card"><div style="font-weight:700;margin-bottom:6px">Belum bisa memuat</div><div class="empty">' + esc(msg) + '</div><button class="btn" data-act="retry" style="margin-top:12px">Coba lagi</button></div>';
+    $('view').innerHTML = '<div class="card"><div style="font-weight:700;margin-bottom:6px">Could not load</div><div class="empty">' + esc(msg) + '</div><button class="btn" data-act="retry" style="margin-top:12px">Try again</button></div>';
   }
 
   // ================= antrean offline =================
@@ -416,9 +446,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       flushing = false;
       if (r && r.error === 'auth') return;
       state.pending.shift(); persistPending();
-      if (r && r.ok === false) toast('Catatan "' + p.desc + '" ditolak: ' + r.error);
+      if (r && r.ok === false) toast('Entry "' + p.desc + '" rejected: ' + r.error);
       if (state.pending.length) flushPending();
-      else { toast('✅ Catatan offline sudah terkirim'); loadMonth(state.month, { silent: true }); }
+      else { toast('✅ Offline entries sent'); loadMonth(state.month, { silent: true }); }
     }).catch(function () { flushing = false; });
   }
 
@@ -431,7 +461,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         Math.max(len - gap, 0.1).toFixed(2) + ' ' + C.toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 60 60)"/>';
       off += len;
     });
-    return '<svg viewBox="0 0 120 120" role="img" aria-label="Pengeluaran per kategori"><circle cx="60" cy="60" r="' + R + '" fill="none" stroke="var(--s2)" stroke-width="15"/>' + segs +
+    return '<svg viewBox="0 0 120 120" role="img" aria-label="Spending by category"><circle cx="60" cy="60" r="' + R + '" fill="none" stroke="var(--s2)" stroke-width="15"/>' + segs +
       '<text x="60" y="57" text-anchor="middle" font-size="9" fill="var(--mut)">Total</text><text x="60" y="73" text-anchor="middle" font-size="15" font-weight="500" fill="var(--tx)" class="mono">' + esc(short(total)) + '</text></svg>';
   }
   function trendSvg(tr) {
@@ -444,7 +474,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       out += '<rect x="' + (cx + 1.5) + '" y="' + (base - hk) + '" width="' + bw + '" height="' + hk + '" rx="4" fill="var(--coral)"/>';
       out += '<text x="' + cx + '" y="142" text-anchor="middle" font-size="11" fill="' + (i === tr.length - 1 ? 'var(--tx)' : 'var(--mut)') + '">' + esc(t.label) + '</text>';
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Pemasukan dan pengeluaran 6 bulan terakhir"><line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)"/>' + out + '</svg>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Income and spending, last 6 months"><line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)"/>' + out + '</svg>';
   }
 
   // ================= layar =================
@@ -455,57 +485,57 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
     var meta = dlabel(t.date) + (t.metode ? ' · ' + t.metode : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
     return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico">' + esc(t.emoji) + '</div><div class="m"><div class="d">' + esc(t.desc) +
-      (t.flag ? '<span class="tag cek">cek</span>' : (t.src === 'notif' ? '<span class="tag">otomatis</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
+      (t.flag ? '<span class="tag cek">check</span>' : (t.src === 'notif' ? '<span class="tag">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
       '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button>';
   }
   function pendingRow(p, i) {
     var o = (state.data && state.data.options) || { emoji: {} };
     return '<div class="tx" style="cursor:default"><div class="ico">' + esc(o.emoji[p.kategori] || '🕓') + '</div><div class="m"><div class="d">' + esc(p.desc) +
-      '<span class="tag cek">menunggu sinyal</span></div><div class="s">' + esc(dlabel(p.tanggal) + ' · ' + p.metode) + '</div></div><div class="a mono">' + rp(p.amount) + '</div></div>';
+      '<span class="tag cek">waiting</span></div><div class="s">' + esc(dlabel(p.tanggal) + ' · ' + p.metode) + '</div></div><div class="a mono">' + rp(p.amount) + '</div></div>';
   }
 
   function viewRingkasan(d) {
     var h = '', k = d.kpi, sel = k.selisih, isCur = d.month === d.today.slice(0, 7);
     if (isIOS() && !standalone() && LS.get('ck_hint', '') !== '1') {
-      h += '<div class="banner info"><b>Pasang di layar utama.</b> Ketuk ikon Bagikan di Safari, lalu "Tambah ke Layar Utama". Setelah itu terbuka seperti aplikasi biasa.<br><button data-act="hint-ok">Mengerti</button></div>';
+      h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Got it</button></div>';
     }
-    if (state.pending.length) h += '<div class="banner"><b>' + state.pending.length + ' catatan menunggu sinyal.</b> Akan terkirim otomatis begitu online.</div>';
+    if (state.pending.length) h += '<div class="banner"><b>' + state.pending.length + (state.pending.length === 1 ? ' entry is' : ' entries are') + ' waiting for signal.</b> They will be sent automatically once online.</div>';
     var rv = d.review || { pending: 0, items: [] }, need = (rv.pending || 0) + (d.flagged || 0);
     if (need > 0) {
-      h += '<div class="banner"><b>' + need + ' catatan otomatis perlu dicek.</b> ';
-      if (d.flagged) h += d.flagged + ' ditandai "cek" di bulan ini. ';
-      if (rv.pending) h += rv.pending + ' notifikasi belum bisa dibaca.';
-      if (rv.pending) h += '<button class="bc" data-act="review">Periksa &amp; catat sekarang →</button>';
+      h += '<div class="banner"><b>' + need + ' automatic entries need review.</b> ';
+      if (d.flagged) h += d.flagged + ' flagged "check" this month. ';
+      if (rv.pending) h += rv.pending + ' notifications could not be read.';
+      if (rv.pending) h += '<button class="bc" data-act="review">Review &amp; add now →</button>';
       h += '</div>';
     }
-    h += '<div class="card hero"><div class="k">' + (isCur ? 'Pengeluaran bulan ini' : 'Pengeluaran ' + esc(d.label)) + '</div>' +
+    h += '<div class="card hero"><div class="k">' + (isCur ? 'Spending this month' : 'Spending ' + esc(d.label)) + '</div>' +
       '<div class="big mono" id="heroNum" data-to="' + k.keluar + '">' + rp(k.keluar) + '</div>' +
-      '<div class="sub">' + k.count + ' transaksi' + (isCur ? ' · ' + (d.todayFilled ? '✅ sudah mencatat hari ini' : '⏳ belum ada catatan hari ini') : '') + '</div>' +
-      '<div class="stats"><div class="stat"><div class="k">Pemasukan</div><div class="v mono pos">' + rp(k.masuk) + '</div></div>' +
-      '<div class="stat"><div class="k">Selisih</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + rp(sel) + '</div></div></div></div>';
+      '<div class="sub">' + k.count + (k.count === 1 ? ' transaction' : ' transactions') + (isCur ? ' · ' + (d.todayFilled ? '✅ logged today' : '⏳ nothing logged today') : '') + '</div>' +
+      '<div class="stats"><div class="stat"><div class="k">Income</div><div class="v mono pos">' + rp(k.masuk) + '</div></div>' +
+      '<div class="stat"><div class="k">Difference</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + rp(sel) + '</div></div></div></div>';
 
     var w = d.week;
     if (w) {
       var delta = w.prevKeluar ? Math.round((w.keluar - w.prevKeluar) / w.prevKeluar * 100) : 0;
-      var deltaTxt = !w.prevKeluar ? 'Minggu lalu belum ada catatan pengeluaran.'
-        : (delta === 0 ? 'Sama dengan minggu lalu (' + rp(w.prevKeluar) + ').'
-          : (delta > 0 ? delta + '% lebih boros' : Math.abs(delta) + '% lebih hemat') + ' dari minggu lalu (' + rp(w.prevKeluar) + ').');
-      h += '<div class="card"><h2>Minggu ini</h2><div class="wkrow">' +
-        '<div><div class="k">Keluar</div><div class="v mono">' + rp(w.keluar) + '</div></div>' +
-        '<div><div class="k">Masuk</div><div class="v mono pos">' + rp(w.masuk) + '</div></div></div>' +
+      var deltaTxt = !w.prevKeluar ? 'No spending recorded last week.'
+        : (delta === 0 ? 'Same as last week (' + rp(w.prevKeluar) + ').'
+          : (delta > 0 ? delta + '% more' : Math.abs(delta) + '% less') + ' than last week (' + rp(w.prevKeluar) + ').');
+      h += '<div class="card"><h2>This week</h2><div class="wkrow">' +
+        '<div><div class="k">Spent</div><div class="v mono">' + rp(w.keluar) + '</div></div>' +
+        '<div><div class="k">Received</div><div class="v mono pos">' + rp(w.masuk) + '</div></div></div>' +
         '<div class="wkmeta">' + deltaTxt +
-        (w.topCat ? '<br><span style="color:var(--mut)">Paling banyak: </span>' + esc((d.options && d.options.emoji && d.options.emoji[w.topCat]) || '🏷️') + ' ' + esc(w.topCat) + ' · ' + rp(w.topCatAmount) : '') +
+        (w.topCat ? '<br><span style="color:var(--mut)">Top category: </span>' + esc((d.options && d.options.emoji && d.options.emoji[w.topCat]) || '🏷️') + ' ' + esc(w.topCat) + ' · ' + rp(w.topCatAmount) : '') +
         '</div></div>';
     }
 
-    h += '<div class="card"><h2>Kategori</h2>';
-    if (!d.categories.length) h += '<div class="empty">Belum ada pengeluaran di bulan ini. Panda menunggu catatan pertamamu 🐼</div>';
+    h += '<div class="card"><h2>Categories</h2>';
+    if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
     else {
       h += '<div class="donutwrap">' + donut(d.categories, k.keluar) + '<div class="legend">';
       d.categories.slice(0, 5).forEach(function (c, i) {
         h += '<div class="lg"><span class="dot" style="background:' + COLORS[i % COLORS.length] + '"></span><span class="n">' + esc(c.name) + '</span><span class="p mono">' + c.pct + '%</span></div>';
       });
-      if (d.categories.length > 5) h += '<div class="lg"><span class="n" style="color:var(--mut)">+' + (d.categories.length - 5) + ' lainnya</span></div>';
+      if (d.categories.length > 5) h += '<div class="lg"><span class="n" style="color:var(--mut)">+' + (d.categories.length - 5) + ' more</span></div>';
       h += '</div></div><div class="catrow">';
       d.categories.forEach(function (c, i) {
         h += '<div><div class="cr"><span>' + esc(c.emoji) + ' ' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
@@ -514,10 +544,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       h += '</div>';
     }
     h += '</div>';
-    h += '<div class="card"><h2>6 bulan terakhir</h2>' + trendSvg(d.trend) +
-      '<div class="legend2"><span><i style="background:var(--mint)"></i>Pemasukan</span><span><i style="background:var(--coral)"></i>Pengeluaran</span></div></div>';
-    h += '<div class="card"><h2>Terbaru <a data-act="goto-transaksi">Lihat semua</a></h2>';
-    if (!d.recent.length) h += '<div class="empty">Belum ada transaksi.</div>';
+    h += '<div class="card"><h2>Last 6 months</h2>' + trendSvg(d.trend) +
+      '<div class="legend2"><span><i style="background:var(--mint)"></i>Income</span><span><i style="background:var(--coral)"></i>Spending</span></div></div>';
+    h += '<div class="card"><h2>Latest <a data-act="goto-transaksi">See all</a></h2>';
+    if (!d.recent.length) h += '<div class="empty">No transactions yet.</div>';
     d.recent.slice(0, 5).forEach(function (t) { h += txRow(t); });
     h += '</div>';
     return h;
@@ -537,9 +567,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function txListHtml(d) {
     var list = filtered(d), h = '', today = d.today;
     if (state.pending.length && (state.filter === 'semua') && !state.q) {
-      h += '<div class="day"><span>Menunggu sinyal</span></div>' + state.pending.map(pendingRow).join('');
+      h += '<div class="day"><span>Waiting for signal</span></div>' + state.pending.map(pendingRow).join('');
     }
-    if (!list.length) return h + '<div class="empty" style="padding:18px 2px">Tidak ada transaksi yang cocok.</div>';
+    if (!list.length) return h + '<div class="empty" style="padding:18px 2px">No matching transactions.</div>';
     var i = 0;
     while (i < list.length) {
       var date = list[i].date, group = [], sum = 0;
@@ -549,8 +579,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return h;
   }
   function viewTransaksi(d) {
-    var F = [['semua', 'Semua'], ['keluar', 'Keluar'], ['masuk', 'Masuk'], ['hutang', 'Hutang/Piutang'], ['otomatis', 'Otomatis']];
-    return '<input class="search" id="q" type="search" placeholder="Cari transaksi" value="' + esc(state.q) + '" autocomplete="off">' +
+    var F = [['semua', 'All'], ['keluar', 'Out'], ['masuk', 'In'], ['hutang', 'Debts'], ['otomatis', 'Auto']];
+    return '<input class="search" id="q" type="search" placeholder="Search transactions" value="' + esc(state.q) + '" autocomplete="off">' +
       '<div class="filters">' + F.map(function (x) { return '<button data-act="filter" data-v="' + x[0] + '" class="' + (state.filter === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>' +
       '<div id="txlist">' + (state.search ? searchHtml() : txListHtml(d)) + '</div>';
   }
@@ -564,12 +594,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function searchHtml() {
     var s = state.search;
     if (!s) return '';
-    if (s.loading) return '<div class="empty" style="padding:18px 2px">Mencari di semua bulan…</div>';
-    if (s.err) return '<div class="empty" style="padding:18px 2px">Pencarian gagal. Periksa sinyal lalu coba lagi.</div>';
-    if (!s.items.length) return '<div class="empty" style="padding:18px 2px">Tidak ada yang cocok di semua bulan.</div>';
-    var h = '<div class="day"><span>' + s.items.length + ' hasil' + (s.total > s.items.length ? ' dari ' + s.total : '') + '</span></div>';
+    if (s.loading) return '<div class="empty" style="padding:18px 2px">Searching all months…</div>';
+    if (s.err) return '<div class="empty" style="padding:18px 2px">Search failed. Check your connection and try again.</div>';
+    if (!s.items.length) return '<div class="empty" style="padding:18px 2px">Nothing matches in any month.</div>';
+    var h = '<div class="day"><span>' + s.items.length + (s.items.length === 1 ? ' result' : ' results') + (s.total > s.items.length ? ' of ' + s.total : '') + '</span></div>';
     h += '<div class="card" style="padding:4px 14px;margin-bottom:0">' + s.items.map(searchRow).join('') + '</div>';
-    return h + '<div class="empty" style="font-size:12px;text-align:center;margin-top:10px">Ketuk hasil untuk membuka bulannya.</div>';
+    return h + '<div class="empty" style="font-size:12px;text-align:center;margin-top:10px">Tap a result to open that month.</div>';
   }
 
   function methodIcon(name) {
@@ -591,20 +621,23 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   function creditDeck(items) {
     var extra = Math.min(items.length - 1, 3) * 16;
-    var h = '<div class="card"><h2>Kartu kredit</h2><div class="ccdeck" id="ccdeck" style="height:' + (176 + extra) + 'px">';
+    var h = '<div class="card"><h2>Credit cards</h2><div class="ccdeck" id="ccdeck" style="height:' + (176 + extra) + 'px">';
     items.forEach(function (m, i) {
       var b = bankOf(m.name);
       h += '<div class="cc cc-' + b.id + '" data-act="card" data-i="' + i + '">' +
-        '<div class="cc-top"><div><div class="cc-bank">' + esc(b.label) + '</div><div class="cc-kind">Kartu Kredit' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
+        '<div class="cc-top"><div><div class="cc-bank">' + esc(b.label) + '</div><div class="cc-kind">Credit Card' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
         '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
         '<div class="cc-chip"></div>' +
         '<div class="cc-bot">' +
-        '<div><div class="cc-lbl">Tagihan</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div>' +
-        '<div style="text-align:right"><div class="cc-lbl">Bulan ini</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div></div>' +
+        '<div><div class="cc-lbl">Balance</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div>' +
+        '<div style="text-align:right"><div class="cc-lbl">This month</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div></div>' +
         '</div>';
     });
     h += '</div>';
-    if (items.length > 1) h += '<div class="cc-hint">Ketuk kartu untuk melihat kartu lainnya</div>';
+    if (items.length > 1) {
+      h += '<div class="cc-dots" id="cc-dots">' + items.map(function (_, i) { return '<i' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('') + '</div>';
+      h += '<div class="cc-hint">Tap a card to see the others</div>';
+    }
     return h + '</div>';
   }
   // Kartu disusun bertumpuk; kartu terpilih ada paling depan, sisanya mengintip di bawah.
@@ -618,32 +651,34 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       el.style.opacity = rel > 3 ? '0' : '1';
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
     }
+    var dots = $('cc-dots');
+    if (dots && dots.children) for (var d = 0; d < dots.children.length; d++) dots.children[d].className = d === act ? 'on' : '';
   }
   function viewDompet(d) {
     var h = '', methods = d.methods || [];
     var kk = d.kkTotal || 0, saldo = 0;
     methods.forEach(function (m) { if (m.kind !== 'utang') saldo += m.value; });
 
-    h += '<div class="card"><h2>Dompet</h2><div class="wkrow">' +
-      '<div><div class="k">Saldo tersedia</div><div class="v mono ' + (saldo < 0 ? 'neg' : 'pos') + '">' + rp(saldo) + '</div></div>' +
-      '<div><div class="k">Utang kartu kredit</div><div class="v mono ' + (kk > 0 ? 'neg' : '') + '">' + rp(Math.abs(kk)) + '</div></div>' +
+    h += '<div class="card"><h2>Wallet</h2><div class="wkrow">' +
+      '<div><div class="k">Available balance</div><div class="v mono ' + (saldo < 0 ? 'neg' : 'pos') + '">' + rp(saldo) + '</div></div>' +
+      '<div><div class="k">Credit card debt</div><div class="v mono ' + (kk > 0 ? 'neg' : '') + '">' + rp(Math.abs(kk)) + '</div></div>' +
       '</div></div>';
 
     if (!methods.length) {
-      h += '<div class="card"><h2>Metode pembayaran</h2><div class="empty">Belum ada transaksi dengan metode pembayaran.</div></div>';
+      h += '<div class="card"><h2>Payment methods</h2><div class="empty">No transactions with a payment method yet.</div></div>';
     } else {
       var saldoItems = methods.filter(function (m) { return m.kind !== 'utang'; });
       var kkItems = methods.filter(function (m) { return m.kind === 'utang'; });
       if (saldoItems.length) {
         var maxOut = 1;
         saldoItems.forEach(function (m) { maxOut = Math.max(maxOut, m.monthOut || 0); });
-        h += '<div class="card"><h2>Saldo</h2><div class="methods">';
+        h += '<div class="card"><h2>Balance</h2><div class="methods">';
         saldoItems.forEach(function (m) {
           var pct = Math.round((m.monthOut || 0) / maxOut * 100);
           h += '<div class="mth"><div class="mthico">' + methodIcon(m.name) + '</div>' +
             '<div class="mthmain"><div class="mthname">' + esc(m.name) + '</div>' +
             '<div class="mthbar"><span style="width:' + Math.max(pct, 3) + '%;background:var(--mint)"></span></div>' +
-            '<div class="mthsub">Keluar bulan ini ' + rp(m.monthOut || 0) + '</div></div>' +
+            '<div class="mthsub">Spent this month ' + rp(m.monthOut || 0) + '</div></div>' +
             '<div class="mthval mono ' + (m.value < 0 ? 'neg' : (m.value > 0 ? 'pos' : '')) + '">' + rp(m.value) + '</div></div>';
         });
         h += '</div></div>';
@@ -652,65 +687,65 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
 
     var L = d.loans || { persons: [] };
-    h += '<details class="card drop"' + (L.persons.length ? ' open' : '') + '><summary><span>Hutang &amp; piutang</span><span class="chev">›</span></summary>';
-    if (!L.persons.length) h += '<div class="empty" style="margin-top:10px">Belum ada catatan hutang atau piutang.</div>';
+    h += '<details class="card drop"' + (L.persons.length ? ' open' : '') + '><summary><span>Debts &amp; receivables</span><span class="chev">›</span></summary>';
+    if (!L.persons.length) h += '<div class="empty" style="margin-top:10px">No debts or receivables yet.</div>';
     else {
-      h += '<div class="lsum"><span>Piutang <b class="pos mono">' + rp(L.piutang || 0) + '</b></span><span>Hutang <b class="neg mono">' + rp(L.hutang || 0) + '</b></span></div>';
+      h += '<div class="lsum"><span>Owed to you <b class="pos mono">' + rp(L.piutang || 0) + '</b></span><span>You owe <b class="neg mono">' + rp(L.hutang || 0) + '</b></span></div>';
       L.persons.forEach(function (p) {
-        var n = p.net, txt = n > 0 ? 'Dia berutang ke kamu' : (n < 0 ? 'Kamu berutang ke dia' : 'Lunas');
+        var n = p.net, txt = n > 0 ? 'Owes you' : (n < 0 ? 'You owe them' : 'Settled');
         h += '<div class="kv"><span>' + esc(p.name) + '<small>' + txt + '</small></span><span class="mono ' + (n > 0 ? 'pos' : (n < 0 ? 'neg' : '')) + '">' + rp(Math.abs(n)) + '</span></div>';
       });
     }
-    h += '<div class="empty" style="font-size:12px;margin-top:10px">Saldo dihitung dari semua catatan. Bayar tagihan kartu: catat sebagai Masuk dengan metode kartu yang sama.</div></details>';
+    h += '<div class="empty" style="font-size:12px;margin-top:10px">Balances are calculated from all entries. To pay a card bill, add an Income entry with the same card method.</div></details>';
     return h;
   }
 
   function fmtSync(iso) {
-    if (!iso) return 'belum pernah';
-    var d = new Date(iso); if (isNaN(d)) return 'belum pernah';
+    if (!iso) return 'never';
+    var d = new Date(iso); if (isNaN(d)) return 'never';
     function z(n) { return n < 10 ? '0' + n : n; }
     return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + z(d.getHours()) + '.' + z(d.getMinutes());
   }
   function viewSetelan() {
     var host = '';
     try { var u = new URL(state.url); host = u.host + u.pathname.slice(0, 22) + '…'; } catch (e) { host = state.url; }
-    return '<div style="display:flex;align-items:center;gap:14px;margin:8px 2px 18px"><img src="icons/icon-192.png" alt="" style="width:60px;height:60px;border-radius:17px;box-shadow:var(--shadow)"><div><div style="font-weight:700;font-size:20px;letter-spacing:-.01em">Catat Panda</div><div class="empty" style="padding:0;font-size:13px">Versi ' + VERSION + '</div></div></div>' +
-      '<div class="card"><h2>Koneksi</h2>' +
-      '<div class="kv"><span>Google Sheets<small class="mono">' + esc(host) + '</small></span><span class="pos">terhubung</span></div>' +
-      '<div class="kv"><span>Terakhir diperbarui</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
-      '<div class="kv"><span>Menunggu dikirim</span><span class="mono">' + state.pending.length + '</span></div>' +
-      '<button class="btn ghost" data-act="sync" style="margin-top:10px">Muat ulang sekarang</button>' +
-      '<button class="btn ghost" data-act="ping" style="margin-top:8px">Cek versi server</button>' +
-      (state.pending.length ? '<button class="btn ghost" data-act="flush" style="margin-top:8px">Kirim catatan yang menunggu</button>' : '') + '</div>' +
+    return '<div style="display:flex;align-items:center;gap:14px;margin:8px 2px 18px"><img src="icons/icon-192.png" alt="" style="width:60px;height:60px;border-radius:17px;box-shadow:var(--shadow)"><div><div style="font-weight:700;font-size:20px;letter-spacing:-.01em">Catat Panda</div><div class="empty" style="padding:0;font-size:13px">Version ' + VERSION + '</div></div></div>' +
+      '<div class="card"><h2>Connection</h2>' +
+      '<div class="kv"><span>Google Sheets<small class="mono">' + esc(host) + '</small></span><span class="pos">connected</span></div>' +
+      '<div class="kv"><span>Last updated</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
+      '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
+      '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
+      '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
+      (state.pending.length ? '<button class="btn ghost" data-act="flush" style="margin-top:8px">Send waiting entries</button>' : '') + '</div>' +
       viewPush() +
-      '<div class="card"><h2>Pasang di iPhone</h2><ol class="steps"><li>Buka alamat aplikasi ini di <b>Safari</b></li><li>Ketuk ikon <b>Bagikan</b> (kotak dengan panah)</li><li>Pilih <b>Tambah ke Layar Utama</b></li></ol></div>' +
-      '<div class="card"><h2>Kunci aplikasi</h2>' +
+      '<div class="card"><h2>Install on iPhone</h2><ol class="steps"><li>Open this address in <b>Safari</b></li><li>Tap the <b>Share</b> icon (box with an arrow)</li><li>Choose <b>Add to Home Screen</b></li></ol></div>' +
+      '<div class="card"><h2>App lock</h2>' +
       (LS.get('ck_pin', '')
-        ? '<div class="empty" style="padding:0;font-size:13px">PIN aktif. Aplikasi meminta PIN setiap kali dibuka.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Ubah PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Hapus PIN</button>'
-        : '<div class="empty" style="padding:0;font-size:13px">Pasang PIN supaya data keuangan tidak terbuka kalau HP dipinjam orang lain.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Buat PIN</button>') +
-      '<div class="empty" style="padding:10px 0 0;font-size:11px">PIN disimpan sebagai hash di HP ini, tidak dikirim ke mana pun. Face ID/Touch ID belum dipakai di versi ini — Safari tidak membuka biometrik untuk kunci lokal seperti ini.</div>' +
+        ? '<div class="empty" style="padding:0;font-size:13px">PIN is on. The app asks for it every time it opens.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Change PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Remove PIN</button>'
+        : '<div class="empty" style="padding:0;font-size:13px">Set a PIN so your finances stay private if someone borrows your phone.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Create PIN</button>') +
+      '<div class="empty" style="padding:10px 0 0;font-size:11px">The PIN is stored as a hash on this phone and never sent anywhere. Face ID/Touch ID is not used in this version — Safari does not expose biometrics for a local lock like this.</div>' +
       '</div>' +
-      '<div class="card"><h2>Lainnya</h2><button class="btn ghost" data-act="clear">Hapus data tersimpan di HP ini</button>' +
-      '<button class="btn danger" data-act="disconnect" style="margin-top:8px">Ganti koneksi</button>' +
-      '<div class="empty" style="margin-top:10px;font-size:12px">Data keuanganmu tetap di Google Sheets milikmu.</div></div>';
+      '<div class="card"><h2>More</h2><button class="btn ghost" data-act="clear">Clear data saved on this phone</button>' +
+      '<button class="btn danger" data-act="disconnect" style="margin-top:8px">Change connection</button>' +
+      '<div class="empty" style="margin-top:10px;font-size:12px">Your finances stay in your own Google Sheets.</div></div>';
   }
 
   function viewPush() {
-    var h = '<div class="card"><h2>Notifikasi</h2>', p = state.push;
+    var h = '<div class="card"><h2>Notifications</h2>', p = state.push;
     if (!PUSH_ENDPOINT) {
-      h += '<div class="empty" style="padding:0;font-size:13px">Notifikasi push belum tersedia di hosting ini. ' +
-        'Fitur ini butuh server kecil di baliknya, sedangkan GitHub Pages hanya menyajikan berkas statis. ' +
-        'Catatan otomatis dari notifikasi bank tetap masuk ke Google Sheets seperti biasa.</div>';
+      h += '<div class="empty" style="padding:0;font-size:13px">Push notifications are not available on this host. ' +
+        'This feature needs a small server behind it, and GitHub Pages only serves static files. ' +
+        'Automatic entries from bank notifications still go to Google Sheets as usual.</div>';
     } else if (!p.supported) {
       h += '<div class="empty" style="padding:0;font-size:13px">' + (isIOS() && !standalone()
-        ? 'Di iPhone, pasang aplikasi ini di Layar Utama dulu (lihat langkah di bawah), lalu buka dari sana untuk menyalakan notifikasi.'
-        : 'Browser ini belum mendukung notifikasi push.') + '</div>';
+        ? 'On iPhone, install this app to your Home Screen first (steps below), then open it from there to turn on notifications.'
+        : 'This browser does not support push notifications.') + '</div>';
     } else {
-      h += '<div class="kv"><span>Catatan otomatis baru<small>Diberi tahu saat ada transaksi baru dari notifikasi bank, walau aplikasi ditutup</small></span>' +
+      h += '<div class="kv"><span>New automatic entries<small>Get told when a new entry arrives from a bank notification, even when the app is closed</small></span>' +
         '<span class="' + (p.on ? 'pos' : '') + '">' + (p.on ? 'aktif' : 'mati') + '</span></div>';
-      if (p.denied && !p.on) h += '<div class="empty" style="padding:0;font-size:12px">Izin notifikasi diblokir. Izinkan lewat pengaturan browser/HP, lalu coba lagi.</div>';
+      if (p.denied && !p.on) h += '<div class="empty" style="padding:0;font-size:12px">Notifications are blocked. Allow them in your browser or phone settings, then try again.</div>';
       h += '<button class="btn ' + (p.on ? 'ghost' : '') + '" data-act="push" style="margin-top:10px"' + (p.busy ? ' disabled' : '') + '>' +
-        (p.busy ? 'Sebentar…' : p.on ? 'Matikan notifikasi' : 'Nyalakan notifikasi') + '</button>';
+        (p.busy ? 'Sebentar…' : p.on ? 'Turn off notifications' : 'Turn on notifications') + '</button>';
     }
     return h + '</div>';
   }
@@ -722,11 +757,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return a;
   }
   function pushApi(action, body) {
-    if (!PUSH_ENDPOINT) return Promise.reject(new Error('Fitur notifikasi belum tersedia di hosting ini.'));
+    if (!PUSH_ENDPOINT) return Promise.reject(new Error('Notifications are not available on this host.'));
     return fetch(PUSH_ENDPOINT + '/' + action, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {})
       .then(function (r) {
         var ct = (r.headers && r.headers.get && r.headers.get('content-type')) || '';
-        if (ct.indexOf('json') < 0) throw new Error('Server notifikasi tidak menjawab. Fitur ini butuh server di balik aplikasi.');
+        if (ct.indexOf('json') < 0) throw new Error('The notification server did not answer. This feature needs a server behind the app.');
         return r.json();
       });
   }
@@ -746,33 +781,33 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return pushReg().then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
       if (!sub) return;
       return pushApi('unsubscribe', { endpoint: sub.endpoint }).catch(function () {}).then(function () { return sub.unsubscribe(); });
-    }).then(function () { if (!quiet) pushDone('Notifikasi dimatikan'); }, function () { if (!quiet) pushDone('Gagal mematikan notifikasi'); });
+    }).then(function () { if (!quiet) pushDone('Notifications turned off'); }, function () { if (!quiet) pushDone('Could not turn notifications off'); });
   }
   function pushOn() {
     Notification.requestPermission().then(function (perm) {
-      if (perm !== 'granted') { state.push.denied = perm === 'denied'; throw new Error('Izin notifikasi tidak diberikan'); }
+      if (perm !== 'granted') { state.push.denied = perm === 'denied'; throw new Error('Notification permission was not granted'); }
       return Promise.all([pushReg(), pushApi('key')]);
     }).then(function (r) {
       var reg = r[0];
-      if (!r[1] || !r[1].publicKey) throw new Error('Server notifikasi tidak menjawab');
+      if (!r[1] || !r[1].publicKey) throw new Error('The notification server did not answer');
       return reg.pushManager.getSubscription().then(function (old) {
         return old || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(r[1].publicKey) });
       });
     }).then(function (sub) {
       return pushApi('subscribe', { subscription: sub.toJSON(), url: state.url, token: state.token }).then(function (res) {
-        if (!res || !res.ok) { sub.unsubscribe(); throw new Error((res && res.error) || 'Gagal menyalakan notifikasi'); }
+        if (!res || !res.ok) { sub.unsubscribe(); throw new Error((res && res.error) || 'Could not turn notifications on'); }
       });
-    }).then(function () { pushDone('🔔 Notifikasi aktif'); }, function (e) { pushDone(e && e.message && !/^NET/.test(e.message) ? e.message : 'Gagal menyalakan notifikasi'); });
+    }).then(function () { pushDone('🔔 Notifications on'); }, function (e) { pushDone(e && e.message && !/^NET/.test(e.message) ? e.message : 'Could not turn notifications on'); });
   }
 
   function renderSetup() {
     $('hdr').hidden = true; $('tabbar').hidden = true;
     $('view').className = 'setup';
     $('view').innerHTML = '<img class="logo" src="icons/icon-192.png" alt="">' +
-      '<h1>Halo, aku Catat Panda</h1><p>Aku mencatat uang masuk dan keluarmu ke Google Sheets. Masukkan alamat Web App dari Apps Script dan kode rahasiamu. Cukup sekali; tersimpan di HP ini saja.</p>' +
-      '<div class="fld"><label for="sUrl">Alamat Web App (diakhiri /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(state.url) + '"></div>' +
-      '<div class="fld"><label for="sTok">Kode rahasia (TOKEN)</label><input id="sTok" type="password" autocomplete="off" placeholder="Kode yang sama dengan di skrip"></div>' +
-      '<div class="err" id="sErr">' + esc(state.setupMsg) + '</div><button class="btn" data-act="connect" id="sGo">Hubungkan</button>';
+      '<h1>Hi, I am Catat Panda</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough — it stays on this phone.</p>' +
+      '<div class="fld"><label for="sUrl">Web App URL (ends with /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(state.url) + '"></div>' +
+      '<div class="fld"><label for="sTok">Secret code (TOKEN)</label><input id="sTok" type="password" autocomplete="off" placeholder="Same code as in the script"></div>' +
+      '<div class="err" id="sErr">' + esc(state.setupMsg) + '</div><button class="btn" data-act="connect" id="sGo">Connect</button>';
   }
   function goSetup() { state.url = LS.get('ck_url', state.url); state.token = ''; LS.del('ck_token'); renderAll(); }
 
@@ -788,7 +823,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (d) {
       $('monthLabel').textContent = d.label + (state.fromCache ? ' ·' : '');
       $('prev').disabled = !d.prev; $('next').disabled = !d.next;
-      $('streak').innerHTML = '🔥 ' + d.streak + ' hari';
+      $('streak').innerHTML = '🔥 ' + d.streak + ' days';
     }
     var html = state.tab === 'setelan' ? viewSetelan() : (!d ? skeleton() :
       state.tab === 'ringkasan' ? viewRingkasan(d) : state.tab === 'transaksi' ? viewTransaksi(d) : viewDompet(d));
@@ -799,7 +834,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     }
     if (state.fromCache && state.tab !== 'setelan' && d) {
       var note = document.createElement('div'); note.className = 'empty'; note.style.cssText = 'text-align:center;font-size:12px;margin-top:-4px;margin-bottom:10px';
-      note.textContent = 'Data tersimpan di HP · diperbarui ' + fmtSync(state.lastSync); $('view').insertBefore(note, $('view').firstChild);
+      note.textContent = 'Saved on this phone · updated ' + fmtSync(state.lastSync); $('view').insertBefore(note, $('view').firstChild);
     }
     var hero = $('heroNum');
     if (hero) countUp(hero, state.prevKeluar, Number(hero.getAttribute('data-to')));
@@ -834,27 +869,27 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function lockNow() { $('lock').hidden = false; $('pin').value = ''; $('pinErr').textContent = ''; setTimeout(function () { try { $('pin').focus(); } catch (e) {} }, 150); }
   function unlock() {
     var v = $('pin').value.trim();
-    if (!v) { $('pinErr').textContent = 'Masukkan PIN'; return; }
+    if (!v) { $('pinErr').textContent = 'Enter your PIN'; return; }
     pinHash(v, function (h) {
-      if (h === LS.get('ck_pin', '')) { $('lock').hidden = true; $('pin').value = ''; toast('Selamat datang kembali'); }
-      else { $('pinErr').textContent = 'PIN salah'; $('pin').value = ''; $('pin').focus(); }
+      if (h === LS.get('ck_pin', '')) { $('lock').hidden = true; $('pin').value = ''; toast('Welcome back'); }
+      else { $('pinErr').textContent = 'Wrong PIN'; $('pin').value = ''; $('pin').focus(); }
     });
   }
   $('pinGo').addEventListener('click', unlock);
   $('pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
   $('pinForget').addEventListener('click', function () {
-    if (!confirm('Lupa PIN? Kunci dihapus dan cache di HP ini ikut dibersihkan. Data di Google Sheets tidak terpengaruh.')) return;
+    if (!confirm('Forgot your PIN? The lock is removed and the cache on this phone is cleared. Your Google Sheets data is untouched.')) return;
     LS.del('ck_pin');
     try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('ck_cache_') === 0) LS.del(k); }); } catch (e) {}
     $('lock').hidden = true;
   });
   function openPinSetup() {
     openBg(); $('sheetDetail').hidden = false;
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (LS.get('ck_pin', '') ? 'Ubah PIN' : 'Buat PIN') + '</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
-      '<div class="empty" style="padding:0 0 10px;font-size:12px">4–6 angka. Diminta setiap kali aplikasi dibuka.</div>' +
-      '<div class="fld"><label for="pin1">PIN baru</label><input id="pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
-      '<div class="fld"><label for="pin2">Ulangi PIN</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
-      '<div class="err" id="pinErr2"></div><button class="btn" data-act="pin-save">Simpan PIN</button>';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (LS.get('ck_pin', '') ? 'Change PIN' : 'Create PIN') + '</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 10px;font-size:12px">4–6 digits. Asked every time the app opens.</div>' +
+      '<div class="fld"><label for="pin1">New PIN</label><input id="pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
+      '<div class="fld"><label for="pin2">Repeat PIN</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
+      '<div class="err" id="pinErr2"></div><button class="btn" data-act="pin-save">Save PIN</button>';
     setTimeout(function () { try { $('pin1').focus(); } catch (e) {} }, 150);
   }
 
@@ -870,7 +905,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     $('kat').innerHTML = list.map(function (c) { return '<option value="' + esc(c) + '">' + esc((o.emoji[c] || '') + ' ' + c) + '</option>'; }).join('');
     if (list.indexOf(cur) > -1) $('kat').value = cur;
     var curM = $('met').value;
-    $('met').innerHTML = (state.editId ? '<option value="">— tanpa metode —</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
+    $('met').innerHTML = (state.editId ? '<option value="">— no method —</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
     if (curM && Array.prototype.some.call($('met').options, function (x) { return x.value === curM; })) $('met').value = curM;
     onKat();
   }
@@ -880,9 +915,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   function hint() {
     var j = state.jenis, t = state.tipe, s;
-    if (!j) s = 'Pilih Hutang atau Piutang.';
-    else if (j === 'Hutang') s = t === 'Masuk' ? 'Kamu meminjam uang, utangmu bertambah.' : 'Kamu membayar hutang, utangmu berkurang.';
-    else s = t === 'Keluar' ? 'Kamu meminjamkan uang, piutangmu bertambah.' : 'Dia membayar kembali, piutangmu berkurang.';
+    if (!j) s = 'Choose Debt or Receivable.';
+    else if (j === 'Hutang') s = t === 'Masuk' ? 'You borrowed money, so your debt goes up.' : 'You paid back, so your debt goes down.';
+    else s = t === 'Keluar' ? 'You lent money, so what they owe you goes up.' : 'They paid you back, so what they owe you goes down.';
     $('loanHint').textContent = s;
   }
   function setSeg(box, v) { Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('on', b.getAttribute('data-v') === v); }); }
@@ -898,7 +933,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     state.reqId = Math.random().toString(36).slice(2) + Date.now().toString(36);
     state.editId = ''; state.extraCat = ''; state.tipe = 'Keluar'; state.jenis = ''; state.reviewRow = '';
     $('revNote').hidden = true;
-    $('addTitle').textContent = 'Catat transaksi'; $('save').textContent = 'Simpan'; $('rememberBox').hidden = true;
+    $('addTitle').textContent = 'Add transaction'; $('save').textContent = 'Save'; $('rememberBox').hidden = true;
     $('formErr').textContent = ''; $('amt').value = ''; $('desc').value = ''; $('nama').value = '';
     $('tgl').value = todayStr(); $('tgl').max = todayStr();
     setSeg($('segTipe'), 'Keluar'); setSeg($('segJenis'), '');
@@ -914,7 +949,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var t = null; (state.data ? state.data.recent : []).forEach(function (x) { if (x.id === id) t = x; });
     if (!t) return;
     state.editId = id; state.extraCat = t.cat; state.tipe = t.tipe; state.jenis = t.jenis || '';
-    $('addTitle').textContent = 'Ubah transaksi'; $('save').textContent = 'Simpan perubahan';
+    $('addTitle').textContent = 'Edit transaction'; $('save').textContent = 'Save changes';
     $('rememberBox').hidden = t.src !== 'notif'; $('remember').checked = true;
     $('formErr').textContent = ''; $('amt').value = grp(t.amount); $('desc').value = t.desc; $('nama').value = t.nama || '';
     $('tgl').value = t.date; $('tgl').max = todayStr();
@@ -930,33 +965,33 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function openReview() {
     if (!connected()) return;
     openBg(); $('sheetDetail').hidden = false;
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
-      '<div class="empty" style="padding:18px 2px">Memuat notifikasi…</div>';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:18px 2px">Loading notifications…</div>';
     api('review_list').then(function (r) {
       if (!r || !r.ok) {
-        $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
-          '<div class="err">' + esc((r && r.error) || 'Gagal memuat notifikasi') + '</div>';
+        $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+          '<div class="err">' + esc((r && r.error) || 'Could not load notifications') + '</div>';
         return;
       }
       state.review = r.items || [];
       renderReview();
     }).catch(function () {
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
-        '<div class="err">Tidak bisa menghubungi server. Periksa sinyal.</div>';
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+        '<div class="err">Cannot reach the server. Check your connection.</div>';
     });
   }
   function renderReview() {
-    var items = state.review || [], h = '<div class="grab"></div><h3><span>Perlu dicek (' + items.length + ')</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>';
-    if (!items.length) h += '<div class="empty" style="padding:18px 2px">Tidak ada notifikasi yang menunggu. 🎉</div>';
+    var items = state.review || [], h = '<div class="grab"></div><h3><span>Needs review (' + items.length + ')</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+    if (!items.length) h += '<div class="empty" style="padding:18px 2px">Nothing waiting for review. 🎉</div>';
     else {
-      h += '<div class="empty" style="padding:0 2px 12px;font-size:12px">Notifikasi ini belum bisa dibaca otomatis. Ketuk <b>Catat</b> untuk menyimpannya sebagai transaksi, atau <b>Buang</b> kalau memang bukan transaksi.</div>';
+      h += '<div class="empty" style="padding:0 2px 12px;font-size:12px">These notifications could not be read automatically. Tap <b>Add</b> to save one as a transaction, or <b>Dismiss</b> if it is not a transaction.</div>';
       var zeros = items.filter(function (x) { return !x.amount; });
-      if (zeros.length) h += '<button class="btn ghost" data-act="rev-bulk" style="margin-bottom:12px">Buang ' + zeros.length + ' notifikasi tanpa nominal</button>';
+      if (zeros.length) h += '<button class="btn ghost" data-act="rev-bulk" style="margin-bottom:12px">Dismiss ' + zeros.length + (zeros.length === 1 ? ' notification' : ' notifications') + ' without an amount</button>';
       items.forEach(function (it, i) {
         h += '<div class="revitem"><div class="revtext">' + esc(it.text) + '</div><div class="revmeta">' + esc(it.reason || '') +
-          (it.amount ? ' · saran: ' + esc(it.kategori || '?') + ' ' + rp(it.amount) : '') + '</div>' +
-          '<div class="revbtns"><button class="btn" data-act="rev-add" data-i="' + i + '">Catat</button>' +
-          '<button class="btn ghost" data-act="rev-del" data-i="' + i + '">Buang</button></div></div>';
+          (it.amount ? ' · suggested: ' + esc(it.kategori || '?') + ' ' + rp(it.amount) : '') + '</div>' +
+          '<div class="revbtns"><button class="btn" data-act="rev-add" data-i="' + i + '">Add</button>' +
+          '<button class="btn ghost" data-act="rev-del" data-i="' + i + '">Dismiss</button></div></div>';
       });
     }
     $('sheetDetail').innerHTML = h;
@@ -965,9 +1000,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var it = (state.review || [])[i]; if (!it) return;
     openAdd();
     state.reviewRow = it.row;
-    $('addTitle').textContent = 'Catat dari notifikasi';
+    $('addTitle').textContent = 'Add from notification';
     $('revNote').hidden = false;
-    $('revNote').innerHTML = '<b>Dari notifikasi ' + esc(it.source || 'bank') + (it.when ? ' · ' + esc(it.when) : '') + '</b>' + esc(it.text.slice(0, 160));
+    $('revNote').innerHTML = '<b>From notification ' + esc(it.source || 'bank') + (it.when ? ' · ' + esc(it.when) : '') + '</b>' + esc(it.text.slice(0, 160));
     $('desc').value = (it.merchant || it.text).slice(0, 80);
     if (it.amount) $('amt').value = grp(it.amount);
     if (it.when && it.when <= todayStr()) $('tgl').value = it.when;
@@ -979,11 +1014,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   function reviewDiscard(i) {
     var it = (state.review || [])[i]; if (!it) return;
-    if (!confirm('Buang notifikasi ini tanpa dicatat?')) return;
+    if (!confirm('Dismiss this notification without recording it?')) return;
     api('review_discard', { row: it.row }).then(function (r) {
-      if (r && r.ok) { state.review.splice(i, 1); renderReview(); toast('🗑️ Notifikasi dibuang'); loadMonth(state.month, { silent: true }); }
-      else toast((r && r.error) || 'Gagal membuang');
-    }).catch(function () { toast('Tidak bisa menghubungi server'); });
+      if (r && r.ok) { state.review.splice(i, 1); renderReview(); toast('🗑️ Notification dismissed'); loadMonth(state.month, { silent: true }); }
+      else toast((r && r.error) || 'Could not dismiss');
+    }).catch(function () { toast('Cannot reach the server'); });
   }
 
   function openDetail(id, confirmDel) {
@@ -991,15 +1026,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (!t) return;
     var inc = t.tipe === 'Masuk' && !t.loan;
     function row(k, v) { return '<div class="kv"><span style="color:var(--mut)">' + k + '</span><span style="text-align:right">' + esc(v) + '</span></div>'; }
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Detail</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
       '<div style="text-align:center;margin:4px 0 14px"><div class="ico" style="margin:0 auto 8px;width:52px;height:52px;font-size:26px">' + esc(t.emoji) + '</div>' +
       '<div style="font-weight:700;font-size:17px">' + esc(t.desc) + '</div><div class="mono ' + (t.loan ? 'warn' : (inc ? 'pos' : '')) + '" style="font-size:28px;margin-top:4px">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>' +
-      row('Tanggal', dlabel(t.date) + ' ' + t.date.slice(0, 4)) + row('Kategori', t.cat) + row('Jenis', t.tipe) + (t.metode ? row('Metode', t.metode) : '') +
-      (t.loan && t.nama ? row('Nama', t.nama) : '') + row('Sumber', SRC[t.src] || 'Form') +
+      row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) + row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
+      (t.loan && t.nama ? row('Name', t.nama) : '') + row('Source', SRC[t.src] || 'Form') +
       '<div class="err" id="delErr"></div>' +
-      (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Ya, hapus catatan ini</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Batal</button>' +
-        '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">Salinannya disimpan di tab Sampah pada sheet.</div>'
-        : '<button class="btn" data-act="edit" data-id="' + esc(t.id) + '" style="margin-top:14px">Ubah</button><button class="btn danger" data-act="del1" data-id="' + esc(t.id) + '" style="margin-top:8px">Hapus catatan</button>');
+      (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
+        '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
+        : '<button class="btn" data-act="edit" data-id="' + esc(t.id) + '" style="margin-top:14px">Edit</button><button class="btn danger" data-act="del1" data-id="' + esc(t.id) + '" style="margin-top:8px">Delete entry</button>');
     openBg(); $('sheetDetail').hidden = false;
   }
 
@@ -1022,12 +1057,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   $('fab').addEventListener('click', openAdd);
 
   $('save').addEventListener('click', function () {
-    var btn = this, editing = !!state.editId, label = editing ? 'Simpan perubahan' : 'Simpan';
+    var btn = this, editing = !!state.editId, label = editing ? 'Save changes' : 'Save';
     $('formErr').textContent = '';
     var p = { desc: $('desc').value.trim(), amount: amount(), tipe: state.tipe, kategori: $('kat').value, metode: $('met').value,
               tanggal: $('tgl').value, nama: $('nama').value.trim(), jenis: state.jenis, reqId: state.reqId };
-    if (!p.amount) return ($('formErr').textContent = 'Isi nominal dulu');
-    if (!p.desc) return ($('formErr').textContent = 'Isi keterangan dulu');
+    if (!p.amount) return ($('formErr').textContent = 'Enter an amount first');
+    if (!p.desc) return ($('formErr').textContent = 'Enter a description first');
     if (editing) { p.id = state.editId; p.remember = !$('rememberBox').hidden && $('remember').checked; }
     LS.set('ck_last_met', p.metode || ''); LS.set('ck_last_kat', p.kategori || '');
     var fromReview = state.reviewRow; if (fromReview) p.row = fromReview;
@@ -1035,15 +1070,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     function done() { btn.disabled = false; btn.textContent = label; }
     api(editing ? 'update' : (fromReview ? 'review_add' : 'add'), p).then(function (r) {
       done();
-      if (r && r.ok) { closeSheets(); toast('✅ ' + (r.msg || 'Tersimpan')); state.busy = false; loadMonth(state.month, { silent: true }); }
-      else if (r && r.error === 'auth') { closeSheets(); state.setupMsg = 'Kode rahasia ditolak. Periksa lagi.'; goSetup(); }
-      else $('formErr').textContent = (r && r.error) || 'Gagal menyimpan';
+      if (r && r.ok) { closeSheets(); toast('✅ ' + (r.msg || 'Saved')); state.busy = false; loadMonth(state.month, { silent: true }); }
+      else if (r && r.error === 'auth') { closeSheets(); state.setupMsg = 'Secret code rejected. Please check again.'; goSetup(); }
+      else $('formErr').textContent = (r && r.error) || 'Could not save';
     }).catch(function (e) {
       done();
       if (e.code === 'NET') {
-        if (editing) { $('formErr').textContent = 'Perlu internet untuk menyimpan perubahan.'; return; }
-        state.pending.push(p); persistPending(); closeSheets(); toast('📥 Disimpan di HP, dikirim saat ada sinyal'); renderAll();
-      } else $('formErr').textContent = 'Alamat Web App tidak menjawab dengan benar.';
+        if (editing) { $('formErr').textContent = 'You need internet to save changes.'; return; }
+        state.pending.push(p); persistPending(); closeSheets(); toast('📥 Saved on this phone, will send when you have signal'); renderAll();
+      } else $('formErr').textContent = 'The Web App did not respond correctly.';
     });
   });
 
@@ -1067,18 +1102,18 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         else setTimeout(function () { openDetail(jid, false); }, 800);
       } else openDetail(jid, false);
     }
-    else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Memuat ulang…'); }
+    else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Reloading…'); }
     else if (act === 'ping') {
-      toast('Mengecek server…');
+      toast('Checking server…');
       api('ping').then(function (r) {
-        toast(r && r.ok ? '✅ Server versi ' + r.v : '⚠️ Server belum diperbarui (Code.gs lama)');
-      }).catch(function () { toast('Tidak bisa menghubungi server'); });
+        toast(r && r.ok ? '✅ Server version ' + r.v : '⚠️ Server not updated yet (old script)');
+      }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'flush') { flushPending(); toast('Mengirim…'); }
     else if (act === 'pin-set') openPinSetup();
-    else if (act === 'pin-off') { if (confirm('Hapus PIN? Aplikasi akan terbuka tanpa kunci.')) { LS.del('ck_pin'); renderAll(); toast('PIN dihapus'); } }
-    else if (act === 'clear') { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('ck_cache_') === 0) LS.del(k); }); LS.del('ck_lastmonth'); toast('Data tersimpan dihapus'); }
-    else if (act === 'disconnect') { if (confirm('Putuskan koneksi? Catatan di Google Sheets tidak terhapus.')) { pushOff(true); LS.del('ck_url'); LS.del('ck_token'); state.url = ''; state.token = ''; state.data = null; renderAll(); } }
+    else if (act === 'pin-off') { if (confirm('Remove PIN? The app will open without a lock.')) { LS.del('ck_pin'); renderAll(); toast('PIN removed'); } }
+    else if (act === 'clear') { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('ck_cache_') === 0) LS.del(k); }); LS.del('ck_lastmonth'); toast('Saved data cleared'); }
+    else if (act === 'disconnect') { if (confirm('Disconnect? Entries in Google Sheets are not deleted.')) { pushOff(true); LS.del('ck_url'); LS.del('ck_token'); state.url = ''; state.token = ''; state.data = null; renderAll(); } }
     else if (act === 'connect') connect();
     else if (act === 'push' && !state.push.busy) { state.push.busy = true; renderAll(); if (state.push.on) pushOff(); else pushOn(); }
   });
@@ -1113,29 +1148,29 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     else if (act === 'rev-bulk') {
       var zeros = (state.review || []).filter(function (x) { return !x.amount; });
       if (!zeros.length) return;
-      if (!confirm('Buang ' + zeros.length + ' notifikasi yang tidak ada nominalnya?')) return;
+      if (!confirm('Dismiss ' + zeros.length + (zeros.length === 1 ? ' notification' : ' notifications') + ' without an amount?')) return;
       api('review_discard_bulk', { rows: zeros.map(function (x) { return x.row; }) }).then(function (res) {
         if (res && res.ok) {
           state.review = (state.review || []).filter(function (x) { return x.amount; });
-          renderReview(); toast('🗑️ ' + (res.count || zeros.length) + ' notifikasi dibuang');
+          renderReview(); toast('🗑️ ' + (res.count || zeros.length) + ' notifications dismissed');
           loadMonth(state.month, { silent: true });
-        } else toast((res && res.error) || 'Gagal membuang');
-      }).catch(function () { toast('Tidak bisa menghubungi server'); });
+        } else toast((res && res.error) || 'Could not dismiss');
+      }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'del1') openDetail(id, true);
     else if (act === 'pin-save') {
       var p1 = $('pin1').value.trim(), p2 = $('pin2').value.trim();
-      if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN harus 4–6 angka'; return; }
-      if (p1 !== p2) { $('pinErr2').textContent = 'PIN tidak sama'; return; }
-      pinHash(p1, function (hv) { LS.set('ck_pin', hv); closeSheets(); toast('🔒 PIN aktif'); renderAll(); });
+      if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN must be 4–6 digits'; return; }
+      if (p1 !== p2) { $('pinErr2').textContent = 'PINs do not match'; return; }
+      pinHash(p1, function (hv) { LS.set('ck_pin', hv); closeSheets(); toast('🔒 PIN enabled'); renderAll(); });
     }
     else if (act === 'del0') openDetail(id, false);
     else if (act === 'del2') {
       el.disabled = true; el.textContent = 'Menghapus…';
       api('delete', { id: id }).then(function (r) {
         if (r && r.ok) { closeSheets(); toast('🗑️ ' + (r.msg || 'Dihapus')); loadMonth(state.month, { silent: true }); }
-        else { $('delErr').textContent = (r && r.error) || 'Gagal menghapus'; el.disabled = false; el.textContent = 'Ya, hapus catatan ini'; }
-      }).catch(function (e2) { $('delErr').textContent = e2.code === 'NET' ? 'Perlu internet untuk menghapus.' : 'Gagal menghapus.'; el.disabled = false; el.textContent = 'Ya, hapus catatan ini'; });
+        else { $('delErr').textContent = (r && r.error) || 'Could not delete'; el.disabled = false; el.textContent = 'Yes, delete this entry'; }
+      }).catch(function (e2) { $('delErr').textContent = e2.code === 'NET' ? 'You need internet to delete.' : 'Delete failed.'; el.disabled = false; el.textContent = 'Yes, delete this entry'; });
     }
   });
 
@@ -1147,8 +1182,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
   function connect() {
     var url = $('sUrl').value.trim().replace(/\/macros\/u\/\d+\/s\//, '/macros/s/'), tok = $('sTok').value.trim();
-    if (!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/)?macros\/s\/[^/]+\/exec$/.test(url)) { $('sErr').textContent = 'Alamat harus berbentuk https://script.google.com/macros/s/…/exec'; return; }
-    if (!tok) { $('sErr').textContent = 'Isi kode rahasia'; return; }
+    if (!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/)?macros\/s\/[^/]+\/exec$/.test(url)) { $('sErr').textContent = 'The address must look like https://script.google.com/macros/s/…/exec'; return; }
+    if (!tok) { $('sErr').textContent = 'Enter the secret code'; return; }
     var go = $('sGo'); go.disabled = true; go.textContent = 'Menghubungkan…'; $('sErr').textContent = '';
     state.url = url; state.token = tok;
     api('data', { month: '' }).then(function (d) {
@@ -1156,11 +1191,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       if (d && d.ok) {
         LS.set('ck_url', url); LS.set('ck_token', tok); state.setupMsg = ''; state.data = d; state.month = d.month; state.fromCache = false;
         LS.set(cacheKey(d.month), JSON.stringify(d)); pruneCache(6); LS.set('ck_lastmonth', d.month); state.lastSync = new Date().toISOString(); LS.set('ck_sync', state.lastSync);
-        state.tab = 'ringkasan'; renderAll(); toast('✅ Terhubung');
-      } else { state.token = ''; $('sErr').textContent = d && d.error === 'auth' ? 'Kode rahasia salah.' : ((d && d.error) || 'Gagal terhubung'); }
+        state.tab = 'ringkasan'; renderAll(); toast('✅ Connected');
+      } else { state.token = ''; $('sErr').textContent = d && d.error === 'auth' ? 'Wrong secret code.' : ((d && d.error) || 'Could not connect'); }
     }).catch(function (e) {
       go.disabled = false; go.textContent = 'Hubungkan'; state.token = '';
-      $('sErr').textContent = e.code === 'NET' ? 'Tidak bisa terhubung. Periksa sinyal, URL, dan pastikan akses deployment adalah "Anyone".' : 'Alamat itu tidak menjawab seperti Web App yang benar. Periksa lagi URL-nya.';
+      $('sErr').textContent = e.code === 'NET' ? 'Could not connect. Check your connection and the URL, and make sure deployment access is "Anyone".' : 'That address did not answer like a proper Web App. Please check the URL again.';
     });
   }
 
@@ -1169,35 +1204,19 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   document.addEventListener('touchstart', function (e) { ptrY = (window.scrollY <= 0 && e.touches.length === 1 && !sheetOpen() && connected()) ? e.touches[0].clientY : null; ptrDy = 0; }, { passive: true });
   document.addEventListener('touchmove', function (e) {
     if (ptrY == null) return; ptrDy = e.touches[0].clientY - ptrY;
-    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? '↑ Lepas untuk memuat ulang' : '↓ Tarik untuk muat ulang'; }
+    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? '↑ Release to refresh' : '↓ Pull to refresh'; }
   }, { passive: true });
   document.addEventListener('touchend', function () {
     var p = $('ptr'); p.style.opacity = 0; p.style.transform = '';
-    if (ptrY != null && ptrDy > 90) { toast('Memuat ulang…'); loadMonth(state.month, { silent: true, manual: true }); }
+    if (ptrY != null && ptrDy > 90) { toast('Reloading…'); loadMonth(state.month, { silent: true, manual: true }); }
     ptrY = null; ptrDy = 0;
   });
 
-  // geser kiri/kanan untuk pindah bulan
-  var swX = null, swY = 0;
-  document.addEventListener('touchstart', function (e) {
-    swX = null;
-    if (e.touches.length !== 1 || sheetOpen() || state.tab === 'setelan') return;
-    var tg = e.target;
-    if (tg && tg.closest && tg.closest('input,select,textarea,.sheet,.tabbar,#lock')) return;
-    swX = e.touches[0].clientX; swY = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchend', function (e) {
-    if (swX == null) return;
-    var t = e.changedTouches[0], dx = t.clientX - swX, dy = t.clientY - swY;
-    swX = null;
-    if (Math.abs(dx) < 70 || Math.abs(dy) > 45) return;
-    if (dx < 0 && state.data && state.data.next) { clearSearch(); loadMonth(state.data.next); }
-    else if (dx > 0 && state.data && state.data.prev) { clearSearch(); loadMonth(state.data.prev); }
-  }, { passive: true });
+  // Bulan hanya berpindah lewat tombol ‹ › (gestur geser dihapus: bertabrakan dengan kartu & mudah tersenggol).
   var monthLbl = document.querySelector('.monthbar .lbl');
   if (monthLbl) monthLbl.addEventListener('click', function () {
     if (!state.data) return;
-    if (state.month !== state.data.today.slice(0, 7)) { clearSearch(); loadMonth(''); toast('Kembali ke bulan ini'); }
+    if (state.month !== state.data.today.slice(0, 7)) { clearSearch(); loadMonth(''); toast('Back to this month'); }
   });
 
   window.addEventListener('online', function () { flushPending(); if (connected()) loadMonth(state.month, { silent: true }); });
