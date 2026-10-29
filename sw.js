@@ -1,9 +1,12 @@
 /* Service worker: membuat aplikasi bisa dibuka tanpa sinyal. Data keuangan TIDAK disimpan di sini. */
-var CACHE = 'catat-panda-v7';
+var CACHE = 'catat-panda-v9';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
+  // add() per berkas: kalau satu ikon hilang/404, pemasangan tetap lanjut dan aplikasi tetap bisa offline.
+  e.waitUntil(caches.open(CACHE).then(function (c) {
+    return Promise.all(SHELL.map(function (u) { return c.add(u).catch(function () {}); }));
+  }).then(function () { return self.skipWaiting(); }));
 });
 
 self.addEventListener('activate', function (e) {
@@ -19,7 +22,9 @@ self.addEventListener('fetch', function (e) {
   if (url.origin !== self.location.origin) return;           // permintaan ke Google tidak disentuh
   if (req.mode === 'navigate') {                              // halaman: coba jaringan dulu (supaya versi baru langsung terpakai)
     e.respondWith(fetch(req).then(function (res) {
-      var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('./index.html', copy); }); return res;
+      // Hanya simpan halaman yang benar-benar berhasil. Halaman error hosting tidak boleh menimpa salinan aplikasi.
+      if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('./index.html', copy); }); return res; }
+      return caches.match('./index.html').then(function (hit) { return hit || res; });
     }).catch(function () { return caches.match('./index.html'); }));
     return;
   }
