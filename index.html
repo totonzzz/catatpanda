@@ -186,6 +186,35 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .drop[open] summary .chev{transform:rotate(90deg)}
 .drop summary:focus-visible{outline:2px solid var(--mint);outline-offset:4px;border-radius:6px}
 .lsum{display:flex;gap:16px;font-size:12px;color:var(--mut);margin:12px 0 6px}
+/* kartu kredit bertumpuk */
+.ccdeck{position:relative;margin:6px 0 4px}
+.cc{position:absolute;left:0;right:0;top:0;height:176px;border-radius:20px;padding:15px 17px;color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.34);transform-origin:top center;
+  transition:transform .38s cubic-bezier(.2,.8,.2,1),box-shadow .3s,opacity .3s}
+.cc::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(130% 90% at 100% 0%,rgba(255,255,255,.20),transparent 58%)}
+.cc.front{box-shadow:0 16px 30px rgba(0,0,0,.45)}
+.cc-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.cc-bank{font-weight:800;letter-spacing:.16em;font-size:16px;line-height:1.1}
+.cc-kind{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.82;margin-top:3px}
+.cc-wave{display:flex;gap:3px;align-items:flex-end;opacity:.8;height:18px}
+.cc-wave i{display:block;width:3px;border-radius:2px;background:currentColor}
+.cc-wave i:nth-child(1){height:7px}.cc-wave i:nth-child(2){height:11px}.cc-wave i:nth-child(3){height:15px}.cc-wave i:nth-child(4){height:18px}
+.cc-chip{width:36px;height:27px;border-radius:6px;position:relative;z-index:1;
+  background:linear-gradient(135deg,#f0d08a,#c79a3f);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.cc-chip::before{content:'';position:absolute;inset:6px 7px;border:1px solid rgba(0,0,0,.28);border-radius:3px}
+.cc-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1}
+.cc-lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.78}
+.cc-val{font-size:16px;font-weight:700;font-family:'DM Mono',ui-monospace,monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+@media (max-width:360px){.cc-bank{font-size:14px}.cc-val{font-size:13px}}
+.cc-bca{background:linear-gradient(135deg,#05306f,#1168c9 62%,#0b4ea2)}
+.cc-danamon{background:linear-gradient(135deg,#7c0a0f,#d32a2a 62%,#a8101a)}
+.cc-bni{background:linear-gradient(135deg,#9c3a12,#ef7a26 58%,#d9541f)}
+.cc-dbs{background:linear-gradient(135deg,#0d0d0d,#2a2a2a 62%,#3a3a3a);box-shadow:0 10px 24px rgba(0,0,0,.45),inset 0 0 0 1px rgba(236,28,36,.5)}
+.cc-mandiri{background:linear-gradient(135deg,#0b3a6f,#1a5fa8 62%,#0e4a86)}
+.cc-other{background:linear-gradient(135deg,#243350,#3b4d73 65%,#2b3b5c)}
+.cc-hint{font-size:11px;color:var(--mut);text-align:center;margin-top:6px}
 /* kunci PIN */
 .lock{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
 .lockbox{width:100%;max-width:300px;text-align:center}
@@ -260,7 +289,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 (function () {
   'use strict';
-  var VERSION = '1.5';
+  var VERSION = '1.6';
   // Notifikasi push butuh server kecil di baliknya (fungsi /api/push, mis. Netlify/Vercel).
   // Di hosting statis seperti GitHub Pages biarkan kosong: kartu notifikasi akan menjelaskan keadaannya,
   // bukan menampilkan tombol yang pasti gagal.
@@ -300,7 +329,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     push: { supported: false, on: false, denied: false, busy: false },
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
-    review: null, reviewRow: '', search: null
+    review: null, reviewRow: '', search: null, cardActive: 0
   };
   var flushing = false;
 
@@ -551,6 +580,45 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (/wallet|ovo|gopay|dana|shopeepay/i.test(name)) return '👛';
     return '🏦';
   }
+  function bankOf(name) {
+    var n = String(name || '').toUpperCase();
+    if (n.indexOf('BCA') >= 0) return { id: 'bca', label: 'BCA', full: 'Bank Central Asia' };
+    if (n.indexOf('DANAMON') >= 0) return { id: 'danamon', label: 'DANAMON', full: 'Bank Danamon' };
+    if (n.indexOf('BNI') >= 0) return { id: 'bni', label: 'BNI', full: 'Bank Negara Indonesia' };
+    if (n.indexOf('DBS') >= 0) return { id: 'dbs', label: 'DBS', full: 'DBS Bank' };
+    if (n.indexOf('MANDIRI') >= 0) return { id: 'mandiri', label: 'MANDIRI', full: 'Bank Mandiri' };
+    return { id: 'other', label: (n.replace(/^KARTU KREDIT\s*/i, '').trim() || 'KARTU').slice(0, 14), full: '' };
+  }
+  function creditDeck(items) {
+    var extra = Math.min(items.length - 1, 3) * 16;
+    var h = '<div class="card"><h2>Kartu kredit</h2><div class="ccdeck" id="ccdeck" style="height:' + (176 + extra) + 'px">';
+    items.forEach(function (m, i) {
+      var b = bankOf(m.name);
+      h += '<div class="cc cc-' + b.id + '" data-act="card" data-i="' + i + '">' +
+        '<div class="cc-top"><div><div class="cc-bank">' + esc(b.label) + '</div><div class="cc-kind">Kartu Kredit' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
+        '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
+        '<div class="cc-chip"></div>' +
+        '<div class="cc-bot">' +
+        '<div><div class="cc-lbl">Tagihan</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div>' +
+        '<div style="text-align:right"><div class="cc-lbl">Bulan ini</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div></div>' +
+        '</div>';
+    });
+    h += '</div>';
+    if (items.length > 1) h += '<div class="cc-hint">Ketuk kartu untuk melihat kartu lainnya</div>';
+    return h + '</div>';
+  }
+  // Kartu disusun bertumpuk; kartu terpilih ada paling depan, sisanya mengintip di bawah.
+  function layoutCards() {
+    var deck = $('ccdeck'); if (!deck || !deck.querySelectorAll) return;
+    var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
+    for (var i = 0; i < n; i++) {
+      var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 3);
+      el.style.transform = 'translateY(' + (vis * 16) + 'px) scale(' + (1 - vis * 0.045).toFixed(3) + ')';
+      el.style.zIndex = String(n - rel);
+      el.style.opacity = rel > 3 ? '0' : '1';
+      if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
+    }
+  }
   function viewDompet(d) {
     var h = '', methods = d.methods || [];
     var kk = d.kkTotal || 0, saldo = 0;
@@ -564,26 +632,23 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (!methods.length) {
       h += '<div class="card"><h2>Metode pembayaran</h2><div class="empty">Belum ada transaksi dengan metode pembayaran.</div></div>';
     } else {
-      var groups = [
-        { title: 'Saldo', items: methods.filter(function (m) { return m.kind !== 'utang'; }) },
-        { title: 'Kartu kredit', items: methods.filter(function (m) { return m.kind === 'utang'; }) }
-      ];
-      groups.forEach(function (g) {
-        if (!g.items.length) return;
+      var saldoItems = methods.filter(function (m) { return m.kind !== 'utang'; });
+      var kkItems = methods.filter(function (m) { return m.kind === 'utang'; });
+      if (saldoItems.length) {
         var maxOut = 1;
-        g.items.forEach(function (m) { maxOut = Math.max(maxOut, m.monthOut || 0); });
-        h += '<div class="card"><h2>' + g.title + '</h2><div class="methods">';
-        g.items.forEach(function (m) {
+        saldoItems.forEach(function (m) { maxOut = Math.max(maxOut, m.monthOut || 0); });
+        h += '<div class="card"><h2>Saldo</h2><div class="methods">';
+        saldoItems.forEach(function (m) {
           var pct = Math.round((m.monthOut || 0) / maxOut * 100);
-          var tone = g.title === 'Kartu kredit' ? 'var(--coral)' : 'var(--mint)';
           h += '<div class="mth"><div class="mthico">' + methodIcon(m.name) + '</div>' +
             '<div class="mthmain"><div class="mthname">' + esc(m.name) + '</div>' +
-            '<div class="mthbar"><span style="width:' + Math.max(pct, 3) + '%;background:' + tone + '"></span></div>' +
+            '<div class="mthbar"><span style="width:' + Math.max(pct, 3) + '%;background:var(--mint)"></span></div>' +
             '<div class="mthsub">Keluar bulan ini ' + rp(m.monthOut || 0) + '</div></div>' +
             '<div class="mthval mono ' + (m.value < 0 ? 'neg' : (m.value > 0 ? 'pos' : '')) + '">' + rp(m.value) + '</div></div>';
         });
         h += '</div></div>';
-      });
+      }
+      if (kkItems.length) h += creditDeck(kkItems);
     }
 
     var L = d.loans || { persons: [] };
@@ -623,6 +688,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       (LS.get('ck_pin', '')
         ? '<div class="empty" style="padding:0;font-size:13px">PIN aktif. Aplikasi meminta PIN setiap kali dibuka.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Ubah PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Hapus PIN</button>'
         : '<div class="empty" style="padding:0;font-size:13px">Pasang PIN supaya data keuangan tidak terbuka kalau HP dipinjam orang lain.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Buat PIN</button>') +
+      '<div class="empty" style="padding:10px 0 0;font-size:11px">PIN disimpan sebagai hash di HP ini, tidak dikirim ke mana pun. Face ID/Touch ID belum dipakai di versi ini — Safari tidak membuka biometrik untuk kunci lokal seperti ini.</div>' +
       '</div>' +
       '<div class="card"><h2>Lainnya</h2><button class="btn ghost" data-act="clear">Hapus data tersimpan di HP ini</button>' +
       '<button class="btn danger" data-act="disconnect" style="margin-top:8px">Ganti koneksi</button>' +
@@ -727,6 +793,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var html = state.tab === 'setelan' ? viewSetelan() : (!d ? skeleton() :
       state.tab === 'ringkasan' ? viewRingkasan(d) : state.tab === 'transaksi' ? viewTransaksi(d) : viewDompet(d));
     $('view').innerHTML = html;
+    if (state.tab === 'dompet') {
+      state.cardActive = 0;
+      if (window.requestAnimationFrame) requestAnimationFrame(layoutCards); else setTimeout(layoutCards, 30);
+    }
     if (state.fromCache && state.tab !== 'setelan' && d) {
       var note = document.createElement('div'); note.className = 'empty'; note.style.cssText = 'text-align:center;font-size:12px;margin-top:-4px;margin-bottom:10px';
       note.textContent = 'Data tersimpan di HP · diperbarui ' + fmtSync(state.lastSync); $('view').insertBefore(note, $('view').firstChild);
@@ -983,6 +1053,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
+    else if (act === 'card') { state.cardActive = Number(el.getAttribute('data-i')) || 0; layoutCards(); }
     else if (act === 'goto-transaksi') setTab('transaksi');
     else if (act === 'hint-ok') { LS.set('ck_hint', '1'); renderAll(); }
     else if (act === 'filter') { state.filter = el.getAttribute('data-v'); renderAll(); }
