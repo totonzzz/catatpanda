@@ -215,31 +215,36 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .lsum{display:flex;gap:16px;font-size:12px;color:var(--mut);margin:12px 0 6px}
 /* kartu kredit bertumpuk */
 .ccdeck{position:relative;margin:6px 0 4px}
-.cc{position:absolute;left:0;right:0;top:0;height:176px;border-radius:20px;padding:15px 17px;color:#fff;
+.cc{position:absolute;left:0;right:0;top:0;height:184px;border-radius:18px;padding:15px 18px;color:#fff;
   display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,0,0,.34);transform-origin:top center;
+  box-shadow:0 12px 26px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.16);transform-origin:top center;
   transition:transform .38s cubic-bezier(.2,.8,.2,1),box-shadow .3s,opacity .3s}
+.cc::before{content:'';position:absolute;inset:-40% -25%;pointer-events:none;
+  background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.14) 48%,transparent 62%)}
 .cc::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(130% 90% at 100% 0%,rgba(255,255,255,.20),transparent 58%)}
-.cc.front{box-shadow:0 16px 30px rgba(0,0,0,.45)}
+  background:radial-gradient(130% 90% at 100% 0%,rgba(255,255,255,.18),transparent 58%)}
+.cc.front{box-shadow:0 18px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .cc-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
-.cc-bank{font-weight:800;letter-spacing:.16em;font-size:16px;line-height:1.1}
+.cc-bank{font-weight:800;letter-spacing:.16em;font-size:16px;line-height:1.1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .cc-kind{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.82;margin-top:3px}
-.cc-wave{display:flex;gap:3px;align-items:flex-end;opacity:.8;height:18px}
+.cc-wave{display:flex;gap:3px;align-items:flex-end;opacity:.85;height:20px}
 .cc-wave i{display:block;width:3px;border-radius:2px;background:currentColor}
-.cc-wave i:nth-child(1){height:7px}.cc-wave i:nth-child(2){height:11px}.cc-wave i:nth-child(3){height:15px}.cc-wave i:nth-child(4){height:18px}
-.cc-chip{width:36px;height:27px;border-radius:6px;position:relative;z-index:1;
-  background:linear-gradient(135deg,#f0d08a,#c79a3f);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
-.cc-chip::before{content:'';position:absolute;inset:6px 7px;border:1px solid rgba(0,0,0,.28);border-radius:3px}
+.cc-wave i:nth-child(1){height:8px}.cc-wave i:nth-child(2){height:12px}.cc-wave i:nth-child(3){height:16px}.cc-wave i:nth-child(4){height:20px}
+.cc-mid{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.cc-chip{width:38px;height:28px;border-radius:6px;position:relative;flex:none;
+  background:linear-gradient(135deg,#f3d791,#c99a3f 60%,#e8c37a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.cc-chip::before{content:'';position:absolute;inset:6px 7px;border:1px solid rgba(0,0,0,.3);border-radius:3px}
+.cc-chip::after{content:'';position:absolute;left:5px;right:5px;top:50%;border-top:1px solid rgba(0,0,0,.22)}
+.cc-num{font-family:'DM Mono',ui-monospace,monospace;font-size:12.5px;letter-spacing:.2em;opacity:.9}
 .cc-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1}
 .cc-lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.78}
-.cc-val{font-size:16px;font-weight:700;font-family:'DM Mono',ui-monospace,monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
-@media (max-width:360px){.cc-bank{font-size:14px}.cc-val{font-size:13px}}
-.cc-bca{background:linear-gradient(135deg,#05306f,#1168c9 62%,#0b4ea2)}
-.cc-danamon{background:linear-gradient(135deg,#7c0a0f,#d32a2a 62%,#a8101a)}
-.cc-bni{background:linear-gradient(135deg,#9c3a12,#ef7a26 58%,#d9541f)}
-.cc-dbs{background:linear-gradient(135deg,#0d0d0d,#2a2a2a 62%,#3a3a3a);box-shadow:0 10px 24px rgba(0,0,0,.45),inset 0 0 0 1px rgba(236,28,36,.5)}
-.cc-mandiri{background:linear-gradient(135deg,#0b3a6f,#1a5fa8 62%,#0e4a86)}
+.cc-val{font-size:16px;font-weight:700;font-family:'DM Mono',ui-monospace,monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}
+@media (max-width:360px){.cc-bank{font-size:14px}.cc-val{font-size:13px}.cc-num{font-size:11px;letter-spacing:.14em}}
+.cc-bca{background:linear-gradient(135deg,#003b73,#0a63c4 58%,#0a4f9e)}
+.cc-danamon{background:linear-gradient(135deg,#7f0a10,#d92b2b 60%,#a80f18)}
+.cc-bni{background:linear-gradient(135deg,#9a3412,#f97316 55%,#c2410c)}
+.cc-dbs{background:linear-gradient(135deg,#0b0b0b,#242424 60%,#3a3a3a);box-shadow:0 12px 26px rgba(0,0,0,.5),inset 0 0 0 1px rgba(236,28,36,.55)}
+.cc-mandiri{background:linear-gradient(135deg,#06305e,#14539b 60%,#0b3f77)}
 .cc-other{background:linear-gradient(135deg,#243350,#3b4d73 65%,#2b3b5c)}
 .cc.cc-empty{filter:saturate(.72) brightness(.94)}
 .cc-hint{font-size:11px;color:var(--mut);text-align:center;margin-top:6px}
@@ -320,7 +325,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 (function () {
   'use strict';
-  var VERSION = '1.8';
+  var VERSION = '1.9';
   // Notifikasi push butuh server kecil di baliknya (fungsi /api/push, mis. Netlify/Vercel).
   // Di hosting statis seperti GitHub Pages biarkan kosong: kartu notifikasi akan menjelaskan keadaannya,
   // bukan menampilkan tombol yang pasti gagal.
@@ -621,25 +626,25 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     return { id: 'other', label: (n.replace(/^KARTU KREDIT\s*/i, '').trim() || 'KARTU').slice(0, 14), full: '' };
   }
   function creditDeck(items) {
-    var extra = Math.min(items.length - 1, 3) * 16;
-    var h = '<div class="card"><h2>Credit cards</h2><div class="ccdeck" id="ccdeck" style="height:' + (176 + extra) + 'px">';
+    var extra = Math.min(items.length - 1, 3) * 18;
+    var h = '<div class="card"><h2>Credit cards</h2><div class="ccdeck" id="ccdeck" style="height:' + (184 + extra) + 'px">';
     items.forEach(function (m, i) {
       var b = bankOf(m.name), empty = !!m.empty && !m.value && !m.monthOut;
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
         '<div class="cc-top"><div><div class="cc-bank">' + esc(b.label) + '</div><div class="cc-kind">Credit Card' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
         '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
-        '<div class="cc-chip"></div>' +
+        '<div class="cc-mid"><div class="cc-chip"></div><div class="cc-num">•••• •••• •••• ••••</div></div>' +
         (empty
           ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">—</div></div></div>'
           : '<div class="cc-bot">' +
-            '<div><div class="cc-lbl">Balance</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div>' +
-            '<div style="text-align:right"><div class="cc-lbl">This month</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div></div>') +
+            '<div><div class="cc-lbl">This month</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div>' +
+            '<div style="text-align:right"><div class="cc-lbl">Balance</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div></div>') +
         '</div>';
     });
     h += '</div>';
     if (items.length > 1) {
       h += '<div class="cc-dots" id="cc-dots">' + items.map(function (_, i) { return '<i' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('') + '</div>';
-      h += '<div class="cc-hint">Tap a card to see the others</div>';
+      h += '<div class="cc-hint">Tap the front card to flip through</div>';
     }
     return h + '</div>';
   }
@@ -649,7 +654,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
     for (var i = 0; i < n; i++) {
       var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 3);
-      el.style.transform = 'translateY(' + (vis * 16) + 'px) scale(' + (1 - vis * 0.045).toFixed(3) + ')';
+      el.style.transform = 'translateY(' + (vis * 18) + 'px) scale(' + (1 - vis * 0.04).toFixed(3) + ')';
       el.style.zIndex = String(n - rel);
       el.style.opacity = rel > 3 ? '0' : '1';
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
@@ -1091,7 +1096,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
-    else if (act === 'card') { state.cardActive = Number(el.getAttribute('data-i')) || 0; layoutCards(); }
+    else if (act === 'card') {
+      var deck = $('ccdeck'), total = deck && deck.children ? deck.children.length : 1;
+      var idx = Number(el.getAttribute('data-i'));
+      if (isNaN(idx) || idx < 0) idx = 0;
+      // Mengetuk kartu terdepan = maju ke kartu berikutnya; mengetuk kartu di belakang = naikkan.
+      state.cardActive = (idx === (state.cardActive || 0) && total > 1) ? (idx + 1) % total : idx;
+      layoutCards();
+    }
     else if (act === 'goto-transaksi') setTab('transaksi');
     else if (act === 'hint-ok') { LS.set('ck_hint', '1'); renderAll(); }
     else if (act === 'filter') { state.filter = el.getAttribute('data-v'); renderAll(); }
