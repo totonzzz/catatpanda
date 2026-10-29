@@ -156,6 +156,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .splash .name{font-weight:700;font-size:24px;letter-spacing:-.02em;animation:splashIn .7s .12s cubic-bezier(.2,.8,.2,1) both}
 @keyframes splashIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.splash .mark,.splash .name{animation:none}.splash{transition:none}}
+/* perlu dicek */
+.banner .bc{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 0 0;font:inherit;font-weight:700;color:var(--mint);cursor:pointer}
+.revitem{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--s2)}
+.revtext{font-size:14px;font-weight:600;line-height:1.35;word-break:break-word}
+.revmeta{font-size:12px;color:var(--mut);margin-top:6px}
+.revbtns{display:flex;gap:8px;margin-top:10px}
+.revbtns .btn{margin:0;flex:1;padding:10px 12px;font-size:14px}
+.revnote{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--mut);margin:0 0 12px;word-break:break-word}
+.revnote b{color:var(--tx);display:block;font-size:12px;margin-bottom:3px}
 </style>
 </head>
 <body>
@@ -186,6 +195,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <section class="sheet" id="sheetAdd" hidden aria-label="Catat transaksi">
   <div class="grab"></div>
   <h3><span id="addTitle">Catat transaksi</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>
+  <div class="revnote" id="revNote" hidden></div>
   <div class="seg" id="segTipe"><button data-v="Keluar" class="on">Keluar</button><button data-v="Masuk">Masuk</button></div>
   <div class="amtbox"><span>Rp</span><input id="amt" class="mono" inputmode="numeric" placeholder="0" autocomplete="off"></div>
   <div class="quick" id="quick"><button data-v="15000">15.000</button><button data-v="25000">25.000</button><button data-v="50000">50.000</button><button data-v="100000">100.000</button></div>
@@ -210,7 +220,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 (function () {
   'use strict';
-  var VERSION = '1.2';
+  var VERSION = '1.3';
   function $(id) { return document.getElementById(id); }
   var LS = {
     get: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
@@ -245,7 +255,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     tab: 'ringkasan', month: '', data: null, fromCache: false, busy: false,
     push: { supported: false, on: false, denied: false, busy: false },
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
-    pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0
+    pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
+    review: null, reviewRow: ''
   };
   var flushing = false;
 
@@ -380,12 +391,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (need > 0) {
       h += '<div class="banner"><b>' + need + ' catatan otomatis perlu dicek.</b> ';
       if (d.flagged) h += d.flagged + ' ditandai "cek" di bulan ini. ';
-      if (rv.pending) h += rv.pending + ' notifikasi belum bisa dibaca (tab Log Notif di sheet).';
-      if (rv.items && rv.items.length) {
-        h += '<details><summary>Lihat notifikasi yang belum terbaca</summary><ul style="padding-left:18px;margin:6px 0 0">';
-        rv.items.forEach(function (it) { h += '<li>' + esc(it.text) + ' <em>(' + esc(it.reason) + ')</em></li>'; });
-        h += '</ul></details>';
-      }
+      if (rv.pending) h += rv.pending + ' notifikasi belum bisa dibaca.';
+      if (rv.pending) h += '<button class="bc" data-act="review">Periksa &amp; catat sekarang →</button>';
       h += '</div>';
     }
     h += '<div class="card hero"><div class="k">' + (isCur ? 'Pengeluaran bulan ini' : 'Pengeluaran ' + esc(d.label)) + '</div>' +
@@ -634,7 +641,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   function setSeg(box, v) { Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('on', b.getAttribute('data-v') === v); }); }
   function openAdd() {
     state.reqId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    state.editId = ''; state.extraCat = ''; state.tipe = 'Keluar'; state.jenis = '';
+    state.editId = ''; state.extraCat = ''; state.tipe = 'Keluar'; state.jenis = ''; state.reviewRow = '';
+    $('revNote').hidden = true;
     $('addTitle').textContent = 'Catat transaksi'; $('save').textContent = 'Simpan'; $('rememberBox').hidden = true;
     $('formErr').textContent = ''; $('amt').value = ''; $('desc').value = ''; $('nama').value = '';
     $('tgl').value = todayStr(); $('tgl').max = todayStr();
@@ -658,6 +666,64 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     closeSheets(); openBg(); $('sheetAdd').hidden = false;
   }
   function amount() { return parseInt($('amt').value.replace(/\D/g, ''), 10) || 0; }
+
+  // ================= notifikasi yang perlu dicek =================
+  function openReview() {
+    if (!connected()) return;
+    openBg(); $('sheetDetail').hidden = false;
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+      '<div class="empty" style="padding:18px 2px">Memuat notifikasi…</div>';
+    api('review_list').then(function (r) {
+      if (!r || !r.ok) {
+        $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+          '<div class="err">' + esc((r && r.error) || 'Gagal memuat notifikasi') + '</div>';
+        return;
+      }
+      state.review = r.items || [];
+      renderReview();
+    }).catch(function () {
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Perlu dicek</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+        '<div class="err">Tidak bisa menghubungi server. Periksa sinyal.</div>';
+    });
+  }
+  function renderReview() {
+    var items = state.review || [], h = '<div class="grab"></div><h3><span>Perlu dicek (' + items.length + ')</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>';
+    if (!items.length) h += '<div class="empty" style="padding:18px 2px">Tidak ada notifikasi yang menunggu. 🎉</div>';
+    else {
+      h += '<div class="empty" style="padding:0 2px 12px;font-size:12px">Notifikasi ini belum bisa dibaca otomatis. Ketuk <b>Catat</b> untuk menyimpannya sebagai transaksi, atau <b>Buang</b> kalau memang bukan transaksi.</div>';
+      items.forEach(function (it, i) {
+        h += '<div class="revitem"><div class="revtext">' + esc(it.text) + '</div><div class="revmeta">' + esc(it.reason || '') +
+          (it.amount ? ' · saran: ' + esc(it.kategori || '?') + ' ' + rp(it.amount) : '') + '</div>' +
+          '<div class="revbtns"><button class="btn" data-act="rev-add" data-i="' + i + '">Catat</button>' +
+          '<button class="btn ghost" data-act="rev-del" data-i="' + i + '">Buang</button></div></div>';
+      });
+    }
+    $('sheetDetail').innerHTML = h;
+  }
+  function openReviewAdd(i) {
+    var it = (state.review || [])[i]; if (!it) return;
+    openAdd();
+    state.reviewRow = it.row;
+    $('addTitle').textContent = 'Catat dari notifikasi';
+    $('revNote').hidden = false;
+    $('revNote').innerHTML = '<b>Dari notifikasi ' + esc(it.source || 'bank') + (it.when ? ' · ' + esc(it.when) : '') + '</b>' + esc(it.text.slice(0, 160));
+    $('desc').value = (it.merchant || it.text).slice(0, 80);
+    if (it.amount) $('amt').value = grp(it.amount);
+    if (it.when && it.when <= todayStr()) $('tgl').value = it.when;
+    if (it.tipe) { state.tipe = it.tipe; setSeg($('segTipe'), it.tipe); fillSelects(); }
+    if (it.kategori && Array.prototype.some.call($('kat').options, function (o) { return o.value === it.kategori; })) $('kat').value = it.kategori;
+    if (it.metode && Array.prototype.some.call($('met').options, function (o) { return o.value === it.metode; })) $('met').value = it.metode;
+    onKat();
+    setTimeout(function () { $('desc').focus(); }, 80);
+  }
+  function reviewDiscard(i) {
+    var it = (state.review || [])[i]; if (!it) return;
+    if (!confirm('Buang notifikasi ini tanpa dicatat?')) return;
+    api('review_discard', { row: it.row }).then(function (r) {
+      if (r && r.ok) { state.review.splice(i, 1); renderReview(); toast('🗑️ Notifikasi dibuang'); loadMonth(state.month, { silent: true }); }
+      else toast((r && r.error) || 'Gagal membuang');
+    }).catch(function () { toast('Tidak bisa menghubungi server'); });
+  }
 
   function openDetail(id, confirmDel) {
     var t = null; (state.data ? state.data.recent : []).forEach(function (x) { if (x.id === id) t = x; });
@@ -702,9 +768,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     if (!p.amount) return ($('formErr').textContent = 'Isi nominal dulu');
     if (!p.desc) return ($('formErr').textContent = 'Isi keterangan dulu');
     if (editing) { p.id = state.editId; p.remember = !$('rememberBox').hidden && $('remember').checked; }
+    var fromReview = state.reviewRow; if (fromReview) p.row = fromReview;
     btn.disabled = true; btn.textContent = 'Menyimpan…';
     function done() { btn.disabled = false; btn.textContent = label; }
-    api(editing ? 'update' : 'add', p).then(function (r) {
+    api(editing ? 'update' : (fromReview ? 'review_add' : 'add'), p).then(function (r) {
       done();
       if (r && r.ok) { closeSheets(); toast('✅ ' + (r.msg || 'Tersimpan')); state.busy = false; loadMonth(state.month, { silent: true }); }
       else if (r && r.error === 'auth') { closeSheets(); state.setupMsg = 'Kode rahasia ditolak. Periksa lagi.'; goSetup(); }
@@ -723,6 +790,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
+    else if (act === 'review') openReview();
     else if (act === 'goto-transaksi') setTab('transaksi');
     else if (act === 'hint-ok') { LS.set('ck_hint', '1'); renderAll(); }
     else if (act === 'filter') { state.filter = el.getAttribute('data-v'); renderAll(); }
@@ -741,6 +809,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
     if (act === 'edit') openEdit(id);
+    else if (act === 'rev-add') openReviewAdd(Number(el.getAttribute('data-i')));
+    else if (act === 'rev-del') reviewDiscard(Number(el.getAttribute('data-i')));
     else if (act === 'del1') openDetail(id, true);
     else if (act === 'del0') openDetail(id, false);
     else if (act === 'del2') {
