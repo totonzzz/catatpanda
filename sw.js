@@ -1,5 +1,5 @@
 /* Service worker: membuat aplikasi bisa dibuka tanpa sinyal. Data keuangan TIDAK disimpan di sini. */
-var CACHE = 'catat-panda-v9';
+var CACHE = 'bamboo-v12';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
@@ -41,7 +41,7 @@ self.addEventListener('fetch', function (e) {
 self.addEventListener('push', function (e) {
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'Catat Panda', {
+  e.waitUntil(self.registration.showNotification(d.title || 'Bamboo', {
     body: d.body || '', tag: d.tag, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', data: { url: './' }
   }));
 });
