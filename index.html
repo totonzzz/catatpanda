@@ -248,7 +248,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   background:radial-gradient(130% 90% at 100% 0%,rgba(255,255,255,.18),transparent 58%)}
 .cc.front{box-shadow:0 18px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .cc-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
-.cc-bank{font-weight:800;letter-spacing:.16em;font-size:16px;line-height:1.1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.cc-brand{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:7px;padding:5px 8px;min-height:26px;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.cc-logo{height:15px;width:auto;max-width:118px;display:block}
+.cc-bank{font-weight:800;letter-spacing:.08em;font-size:13px;line-height:1;color:#052659}
 .cc-kind{font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.82;margin-top:3px}
 .cc-wave{display:flex;gap:3px;align-items:flex-end;opacity:.85;height:20px}
 .cc-wave i{display:block;width:3px;border-radius:2px;background:currentColor}
@@ -267,6 +269,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .cc-danamon{background:linear-gradient(135deg,#7f0a10,#d92b2b 60%,#a80f18)}
 .cc-bni{background:linear-gradient(135deg,#9a3412,#f97316 55%,#c2410c)}
 .cc-dbs{background:linear-gradient(135deg,#0b0b0b,#242424 60%,#3a3a3a);box-shadow:0 12px 26px rgba(0,0,0,.5),inset 0 0 0 1px rgba(236,28,36,.55)}
+.cc-octo{background:linear-gradient(135deg,#5E0014,#B00022 62%,#7A0019)}
 .cc-mandiri{background:linear-gradient(135deg,#06305e,#14539b 60%,#0b3f77)}
 .cc-other{background:linear-gradient(135deg,#052659,#5483B3 65%,#0A3E7A)}
 .cc.cc-empty{filter:saturate(.72) brightness(.94)}
@@ -348,7 +351,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '2.3';
+  var VERSION = '2.5';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://catat-panda-push.budi.workers.dev/api/push';
@@ -650,6 +653,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     if (n.indexOf('DANAMON') >= 0) return { id: 'danamon', label: 'DANAMON', full: 'Bank Danamon' };
     if (n.indexOf('BNI') >= 0) return { id: 'bni', label: 'BNI', full: 'Bank Negara Indonesia' };
     if (n.indexOf('DBS') >= 0) return { id: 'dbs', label: 'DBS', full: 'DBS Bank' };
+    if (n.indexOf('OCTO') >= 0 || n.indexOf('CIMB') >= 0) return { id: 'octo', label: 'OCTO', full: 'CIMB Niaga' };
     if (n.indexOf('MANDIRI') >= 0) return { id: 'mandiri', label: 'MANDIRI', full: 'Bank Mandiri' };
     return { id: 'other', label: (n.replace(/^KARTU KREDIT\s*/i, '').trim() || 'KARTU').slice(0, 14), full: '' };
   }
@@ -658,15 +662,23 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var h = '<div class="card"><h2>Credit cards</h2><div class="ccdeck" id="ccdeck" style="height:' + (184 + extra) + 'px">';
     items.forEach(function (m, i) {
       var b = bankOf(m.name), empty = !!m.empty && !m.value && !m.monthOut;
+      var hasCycle = typeof m.dueAmount === 'number';
+      var billLbl = hasCycle ? (m.dueAmount > 0 && m.dueDate ? 'Bill · ' + dlabel(m.dueDate) : 'No bill due') : 'Balance';
+      var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
+      var rightLbl = hasCycle ? 'Unbilled' : 'This month';
+      var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
-        '<div class="cc-top"><div><div class="cc-bank">' + esc(b.label) + '</div><div class="cc-kind">Credit Card' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
+        '<div class="cc-top"><div><div class="cc-brand">' +
+        '<img class="cc-logo" src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+        '<span class="cc-bank" style="display:none">' + esc(b.label) + '</span>' +
+        '</div><div class="cc-kind">Credit Card' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
         '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
         '<div class="cc-mid"><div class="cc-chip"></div><div class="cc-num">•••• •••• •••• ••••</div></div>' +
         (empty
           ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">—</div></div></div>'
           : '<div class="cc-bot">' +
-            '<div><div class="cc-lbl">This month</div><div class="cc-val">' + rp(m.monthOut || 0) + '</div></div>' +
-            '<div style="text-align:right"><div class="cc-lbl">Balance</div><div class="cc-val">' + rp(Math.abs(m.value || 0)) + '</div></div></div>') +
+            '<div><div class="cc-lbl">' + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
+            '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
         '</div>';
     });
     h += '</div>';
