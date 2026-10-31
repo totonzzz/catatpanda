@@ -348,7 +348,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '2.1';
+  var VERSION = '2.2';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://catat-panda-push.budi.workers.dev/api/push';
@@ -380,7 +380,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     if (d === prevDay(today)) return 'Yesterday';
     return DOW[new Date(d + 'T00:00:00Z').getUTCDay()] + ', ' + dlabel(d);
   }
-  var COLORS = ['#C1E8FF', '#7DA0CA', '#5483B3', '#9FC4E4', '#6E93BE', '#B7DCF7', '#4A6E96', '#D7EEFF', '#8FB3D9', '#33587F'];
+  var COLORS = ['#5AA9FF', '#3DDC97', '#F2B84B', '#FF7B6F', '#B28DFF', '#4FD1D9', '#FF9AD5', '#A3E635', '#FB923C', '#94A3B8'];
   var SRC = { form: 'Tally form', app: 'This app', notif: 'Bank notification (auto)' };
 
   var state = {
