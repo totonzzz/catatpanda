@@ -348,7 +348,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '2.2';
+  var VERSION = '2.3';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://catat-panda-push.budi.workers.dev/api/push';
@@ -533,9 +533,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var rv = d.review || { pending: 0, items: [] }, need = (rv.pending || 0) + (d.flagged || 0);
     if (need > 0) {
       h += '<div class="banner"><b>' + need + ' automatic entries need review.</b> ';
-      if (d.flagged) h += d.flagged + ' flagged "check" this month. ';
+      if (d.flagged) h += d.flagged + ' flagged for review this month. ';
       if (rv.pending) h += rv.pending + ' notifications could not be read.';
       if (rv.pending) h += '<button class="bc" data-act="review">Review &amp; add now →</button>';
+      if (d.flagged) h += '<button class="bc" data-act="flagged">Review flagged entries →</button>';
       h += '</div>';
     }
     var pv = (d.trend && d.trend.length > 1) ? d.trend[d.trend.length - 2] : null;
@@ -1069,7 +1070,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       '<div class="err" id="delErr"></div>' +
       (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
         '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
-        : '<button class="btn" data-act="edit" data-id="' + esc(t.id) + '" style="margin-top:14px">Edit</button><button class="btn danger" data-act="del1" data-id="' + esc(t.id) + '" style="margin-top:8px">Delete entry</button>');
+        : (t.flag ? '<button class="btn" data-act="flag-ok" data-id="' + esc(t.id) + '" style="margin-top:14px">Mark as checked</button>' : '') +
+          '<button class="btn' + (t.flag ? ' ghost' : '') + '" data-act="edit" data-id="' + esc(t.id) + '" style="margin-top:' + (t.flag ? 8 : 14) + 'px">Edit</button>' +
+          '<button class="btn danger" data-act="del1" data-id="' + esc(t.id) + '" style="margin-top:8px">Delete entry</button>');
     openBg(); $('sheetDetail').hidden = false;
   }
 
@@ -1123,6 +1126,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
+    else if (act === 'flagged') { state.filter = 'otomatis'; setTab('transaksi'); }
     else if (act === 'card') {
       var deck = $('ccdeck'), total = deck && deck.children ? deck.children.length : 1;
       var idx = Number(el.getAttribute('data-i'));
@@ -1185,6 +1189,15 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
     if (act === 'edit') openEdit(id);
+    else if (act === 'flag-ok') {
+      el.disabled = true; el.textContent = 'Marking…';
+      api('flag_clear', { id: id }).then(function (r) {
+        if (r && r.ok) { closeSheets(); toast('✅ Marked as checked'); loadMonth(state.month, { silent: true }); }
+        else { el.disabled = false; el.textContent = 'Mark as checked'; toast((r && r.error) || 'Could not update the entry'); }
+      }).catch(function () {
+        el.disabled = false; el.textContent = 'Mark as checked'; toast('Cannot reach the server');
+      });
+    }
     else if (act === 'rev-add') openReviewAdd(Number(el.getAttribute('data-i')));
     else if (act === 'rev-del') reviewDiscard(Number(el.getAttribute('data-i')));
     else if (act === 'rev-bulk') {
