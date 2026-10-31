@@ -8,11 +8,11 @@
 <meta name="theme-color" content="#EEF2F9" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Catat Panda">
+<meta name="apple-mobile-web-app-title" content="Bamboo">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<title>Catat Panda</title>
+<title>Bamboo — Finance Tracker</title>
 <link rel="icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -290,12 +290,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <body>
 <div class="splash" id="splash" aria-hidden="true">
   <div class="mark"><img src="icons/icon-192.png" alt=""></div>
-  <div class="name">Catat Panda</div>
+  <div class="name">Bamboo</div>
 </div>
 <header class="hdr" id="hdr" hidden>
   <div class="monthbar">
     <button id="prev" aria-label="Previous month">‹</button>
-    <div class="lbl">Catat Panda<small id="monthLabel">…</small></div>
+    <div class="lbl">Bamboo<small id="monthLabel">…</small></div>
     <button id="next" aria-label="Next month">›</button>
   </div>
   <span class="chip" id="streak">🔥 –</span>
@@ -338,7 +338,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <div class="lock" id="lock" hidden>
   <div class="lockbox">
     <img class="lockico" src="icons/icon-192.png" alt="">
-    <div class="lockttl">Catat Panda</div>
+    <div class="lockttl">Bamboo</div>
     <div class="locksub">Enter your PIN to unlock</div>
     <input id="pin" class="mono" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="••••">
     <div class="err" id="pinErr"></div>
@@ -351,10 +351,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '2.6';
+  var VERSION = '2.9';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
-  //   var PUSH_ENDPOINT = 'https://catat-panda-push.budi.workers.dev/api/push';
+  //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
   // Selama kosong, kartu Notifikasi hanya menjelaskan bahwa fitur ini butuh server.
   var PUSH_ENDPOINT = '';
   function $(id) { return document.getElementById(id); }
@@ -757,7 +757,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   function viewSetelan() {
     var host = '';
     try { var u = new URL(state.url); host = u.host + u.pathname.slice(0, 22) + '…'; } catch (e) { host = state.url; }
-    return '<div style="display:flex;align-items:center;gap:14px;margin:8px 2px 18px"><img src="icons/icon-192.png" alt="" style="width:60px;height:60px;border-radius:17px;box-shadow:var(--shadow)"><div><div style="font-weight:700;font-size:20px;letter-spacing:-.01em">Catat Panda</div><div class="empty" style="padding:0;font-size:13px">Version ' + VERSION + '</div></div></div>' +
+    return '<div style="display:flex;align-items:center;gap:14px;margin:8px 2px 18px"><img src="icons/icon-192.png" alt="" style="width:60px;height:60px;border-radius:17px;box-shadow:var(--shadow)"><div><div style="font-weight:700;font-size:20px;letter-spacing:-.01em">Bamboo</div><div class="empty" style="padding:0;font-size:13px">Version ' + VERSION + '</div></div></div>' +
       '<div class="card"><h2>Connection</h2>' +
       '<div class="kv"><span>Google Sheets<small class="mono">' + esc(host) + '</small></span><span class="pos">connected</span></div>' +
       '<div class="kv"><span>Last updated</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
@@ -852,7 +852,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     $('hdr').hidden = true; $('tabbar').hidden = true;
     $('view').className = 'setup';
     $('view').innerHTML = '<img class="logo" src="icons/icon-192.png" alt="">' +
-      '<h1>Hi, I am Catat Panda</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough — it stays on this phone.</p>' +
+      '<h1>Hi, I’m Bamboo</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough — it stays on this phone.</p>' +
       '<div class="fld"><label for="sUrl">Web App URL (ends with /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(state.url) + '"></div>' +
       '<div class="fld"><label for="sTok">Secret code (TOKEN)</label><input id="sTok" type="password" autocomplete="off" placeholder="Same code as in the script"></div>' +
       '<div class="err" id="sErr">' + esc(state.setupMsg) + '</div><button class="btn" data-act="connect" id="sGo">Connect</button>';
