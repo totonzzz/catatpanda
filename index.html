@@ -351,7 +351,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '2.9';
+  var VERSION = '3.0';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -764,6 +764,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
       '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
       '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
+      '<button class="btn ghost" data-act="test-capture" style="margin-top:8px">Test notification capture</button>' +
       (state.pending.length ? '<button class="btn ghost" data-act="flush" style="margin-top:8px">Send waiting entries</button>' : '') + '</div>' +
       viewPush() +
       '<div class="card"><h2>Install on iPhone</h2><ol class="steps"><li>Open this address in <b>Safari</b></li><li>Tap the <b>Share</b> icon (box with an arrow)</li><li>Choose <b>Add to Home Screen</b></li></ol></div>' +
@@ -939,6 +940,35 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       '<div class="fld"><label for="pin2">Repeat PIN</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
       '<div class="err" id="pinErr2"></div><button class="btn" data-act="pin-save">Save PIN</button>';
     setTimeout(function () { try { $('pin1').focus(); } catch (e) {} }, 150);
+  }
+
+  // Diagnostik: uji jalur penangkap notifikasi dengan token & URL yang tersimpan (dry-run, tidak menulis).
+  function testCapture() {
+    var sample = 'Pembayaran QRIS Rp25.000 ke WARUNG BU TINI berhasil. Saldo Rp 1.200.000';
+    openBg(); $('sheetDetail').hidden = false;
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:8px 0">Sending a sample notification…</div>';
+    var tail = state.url ? state.url.slice(-14) : '(no URL)';
+    fetch(state.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: state.token, text: sample, dry: '1' }),
+      redirect: 'follow'
+    }).then(function (r) { return r.text(); }).then(function (raw) {
+      var d = null; try { d = JSON.parse(raw); } catch (e) {}
+      var verdict;
+      if (!d) verdict = '<span class="bad">The server did not answer with JSON.</span><br>The URL is probably not the current Web App, or deployment access is not “Anyone”.';
+      else if (d.error === 'auth' || /token salah/i.test(d.msg || '')) verdict = '<span class="bad">Token rejected.</span><br>The TOKEN in the script differs from this app’s token.';
+      else if (d.status === 'dry') verdict = '<span class="pos">Server works.</span><br>Parsed: ' + esc(d.msg) + '<br><br>So the problem is on the Shortcut side (URL, token, or the automation not running).';
+      else if (d.status === 'error' && /kosong/i.test(d.msg || '')) verdict = '<span class="bad">The server received an empty text.</span>';
+      else verdict = '<span class="warn">Unexpected answer.</span>';
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+        '<div class="kv"><span>URL used</span><span class="mono">…' + esc(tail) + '</span></div>' +
+        '<div class="revitem"><div class="revtext">' + verdict + '</div>' +
+        '<div class="revmeta mono" style="margin-top:8px;word-break:break-all">' + esc(raw.slice(0, 240)) + '</div></div>';
+    }).catch(function () {
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3><div class="err">Could not reach the server.</div>';
+    });
   }
 
   // ================= sheet catat & detail =================
@@ -1161,6 +1191,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       } else openDetail(jid, false);
     }
     else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Reloading…'); }
+    else if (act === 'test-capture') testCapture();
     else if (act === 'ping') {
       toast('Checking server…');
       api('ping').then(function (r) {
