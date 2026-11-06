@@ -295,6 +295,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .ico.cat-ico svg{width:21px;height:21px}
 .cidot{font-style:normal;display:inline-flex;align-items:center}
 .cidot svg{width:16px;height:16px}
+/* offline pill + install sheet */
+.offbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);z-index:45;background:#3A2A12;border:1px solid #7C5C24;color:#FFD79A;font-size:12px;font-weight:600;padding:6px 13px;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.ptr.pull90{color:var(--mint);font-weight:600}
+.installstep{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.installstep:first-of-type{border-top:none}
+.installstep .n{width:24px;height:24px;border-radius:50%;background:var(--s2);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.installstep .x{font-size:13.5px;line-height:1.4}
 /* insights */
 .hrow{display:flex;align-items:center;gap:14px}
 .hrow.big{margin:8px 2px 4px}
@@ -325,6 +332,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 </style>
 </head>
 <body>
+<div class="offbar" id="offbar" hidden>Offline · showing saved data</div>
 <div class="splash" id="splash" aria-hidden="true">
   <div class="mark"><img src="icons/icon-192.png" alt=""></div>
   <div class="name">Bamboo</div>
@@ -389,7 +397,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.8';
+  var VERSION = '3.9';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1564,6 +1572,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         else toast((r && r.error) || 'Could not remove the budget');
       }).catch(function () { toast('Cannot reach the server'); });
     }
+    else if (act === 'install-ok') { LS.set('ck_install_seen', '1'); closeSheets(); toast('You can install later from Settings'); }
     else if (act === 'budget-save') {
       var bcat = $('bcat').value, blim = String($('blim').value).replace(/\D/g, '');
       if (!blim) { $('bErr').textContent = 'Enter a monthly limit'; return; }
@@ -1634,10 +1643,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   document.addEventListener('touchstart', function (e) { ptrY = (window.scrollY <= 0 && e.touches.length === 1 && !sheetOpen() && connected()) ? e.touches[0].clientY : null; ptrDy = 0; }, { passive: true });
   document.addEventListener('touchmove', function (e) {
     if (ptrY == null) return; ptrDy = e.touches[0].clientY - ptrY;
-    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? '↑ Release to refresh' : '↓ Pull to refresh'; }
+    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? '↑ Release to refresh' : '↓ Pull to refresh'; p.classList.toggle('pull90', ptrDy > 90); }
   }, { passive: true });
   document.addEventListener('touchend', function () {
-    var p = $('ptr'); p.style.opacity = 0; p.style.transform = '';
+    var p = $('ptr'); p.style.opacity = 0; p.style.transform = ''; p.classList.remove('pull90');
     if (ptrY != null && ptrDy > 90) { toast('Reloading…'); loadMonth(state.month, { silent: true, manual: true }); }
     ptrY = null; ptrDy = 0;
   });
@@ -1656,6 +1665,61 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   refreshPush();
 
+  // ---------- indikator offline ----------
+  function updateOffline() {
+    var el = $('offbar'); if (!el) return;
+    if (navigator.onLine) { el.hidden = true; return; }
+    var n = (state.pending || []).length;
+    el.textContent = n ? 'Offline · ' + n + ' waiting to send' : 'Offline · showing saved data';
+    el.hidden = false;
+  }
+  window.addEventListener('offline', function () { updateOffline(); toast('Offline — new entries stay on this phone'); });
+  window.addEventListener('online', function () { updateOffline(); toast('Back online'); });
+  updateOffline();
+
+  // ---------- layar pasang (sekali saja) ----------
+  function installSteps() {
+    if (isIOS()) return [
+      'Open this page in <b>Safari</b> (not Chrome, not an in-app browser)',
+      'Tap the <b>Share</b> button — square with an arrow pointing up',
+      'Scroll down and choose <b>Add to Home Screen</b>, then <b>Add</b>'
+    ];
+    if (/Android/i.test(navigator.userAgent)) return [
+      'Open the browser menu (<b>⋮</b>) at the top right',
+      'Choose <b>Install app</b> or <b>Add to Home screen</b>',
+      'Confirm — Bamboo gets its own icon'
+    ];
+    return [
+      'Open the address bar menu in your browser',
+      'Choose <b>Install Bamboo</b>',
+      'Confirm — it opens in its own window'
+    ];
+  }
+  function maybeInstallSheet() {
+    if (standalone() || LS.get('ck_install_seen', '') === '1') return;
+    if (sheetOpen() || LS.get('ck_pin', '')) return;
+    setTimeout(function () {
+      if (standalone() || sheetOpen() || !state.data) return;
+      var steps = installSteps().map(function (s, i) {
+        return '<div class="installstep"><span class="n">' + (i + 1) + '</span><span class="x">' + s + '</span></div>';
+      }).join('');
+      openBg();
+      $('sheetDetail').hidden = false;
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
+        '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen — it then opens full screen, works offline, and can send notifications.</div>' +
+        steps +
+        '<button class="btn" data-act="install-ok" style="margin-top:16px">Got it</button>' +
+        '<div class="empty" style="padding:10px 0 0;font-size:11px">You will only see this once.</div>';
+    }, 1500);
+  }
+
+  // ---------- shortcut dari ikon aplikasi ----------
+  try {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('action') === 'add') setTimeout(function () { if (state.data) openAdd(); }, 600);
+    if (qs.get('tab') === 'insights') setTab('insights');
+  } catch (e) {}
+
   // layar pembuka: tampil sebentar lalu memudar
   var splashAt = Date.now();
   function hideSplash() {
@@ -1668,6 +1732,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   // mulai
   if (LS.get('ck_pin', '')) lockNow();
   if (connected()) loadMonth(''); else renderAll();
+  setTimeout(maybeInstallSheet, 2200);
 })();
 </script>
 </body>
