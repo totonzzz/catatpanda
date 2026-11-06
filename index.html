@@ -277,6 +277,25 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .cc-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
 .cc-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
 .cc-dots i.on{background:var(--mint);transform:scale(1.3)}
+/* insights */
+.hrow{display:flex;align-items:center;gap:14px}
+.hrow.big{margin:8px 2px 4px}
+.hring{width:64px;height:64px;flex:none}
+.hbig{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.hgrade{font-weight:700;font-size:15px}
+.part{margin-bottom:12px}
+.part:last-child{margin-bottom:0}
+.parttop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;gap:8px}
+.hbar{height:6px;border-radius:6px;background:var(--s2);overflow:hidden;margin-top:6px}
+.hbar span{display:block;height:100%;background:linear-gradient(90deg,var(--mint),#5483B3);border-radius:6px}
+.hbar span.over{background:var(--coral)}
+.partact{display:flex;gap:8px;margin-top:8px}
+.mini{border:1px solid var(--line);background:var(--s2);border-radius:9px;padding:5px 10px;font-size:12px;cursor:pointer}
+.mini.danger{color:var(--coral)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gcell{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-width:0}
+.gcell .k{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.gcell .v{font-size:15px;font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* kunci PIN */
 .lock{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
 .lockbox{width:100%;max-width:300px;text-align:center}
@@ -351,7 +370,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.1';
+  var VERSION = '3.3';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -565,6 +584,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         '</div></div>';
     }
 
+    if (d.health) h += healthCard(d.health);
     h += '<div class="card"><h2>Categories</h2>';
     if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
     else {
@@ -791,10 +811,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         : 'This browser does not support push notifications.') + '</div>';
     } else {
       h += '<div class="kv"><span>New automatic entries<small>Get told when a new entry arrives from a bank notification, even when the app is closed</small></span>' +
-        '<span class="' + (p.on ? 'pos' : '') + '">' + (p.on ? 'aktif' : 'mati') + '</span></div>';
+        '<span class="' + (p.on ? 'pos' : '') + '">' + (p.on ? 'on' : 'off') + '</span></div>';
       if (p.denied && !p.on) h += '<div class="empty" style="padding:0;font-size:12px">Notifications are blocked. Allow them in your browser or phone settings, then try again.</div>';
       h += '<button class="btn ' + (p.on ? 'ghost' : '') + '" data-act="push" style="margin-top:10px"' + (p.busy ? ' disabled' : '') + '>' +
-        (p.busy ? 'Sebentar…' : p.on ? 'Turn off notifications' : 'Turn on notifications') + '</button>';
+        (p.busy ? 'One moment…' : p.on ? 'Turn off notifications' : 'Turn on notifications') + '</button>';
+      if (p.on) h += '<button class="btn ghost" data-act="push-test" style="margin-top:8px">Send test push</button>';
     }
     return h + '</div>';
   }
@@ -969,6 +990,92 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     }).catch(function () {
       $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3><div class="err">Could not reach the server.</div>';
     });
+  }
+
+  // ================= insights, anggaran, AI =================
+  function scoreRing(score) {
+    var r = 26, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(100, score)) / 100);
+    var col = score >= 80 ? 'var(--mint)' : score >= 65 ? '#7DA0CA' : score >= 50 ? 'var(--amber)' : 'var(--coral)';
+    return '<svg class="hring" viewBox="0 0 64 64" role="img" aria-label="Score ' + score + '">' +
+      '<circle cx="32" cy="32" r="' + r + '" fill="none" stroke="var(--s2)" stroke-width="6"/>' +
+      '<circle cx="32" cy="32" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="6" stroke-linecap="round" ' +
+      'stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 32 32)"/>' +
+      '<text x="32" y="37" text-anchor="middle" font-size="17" font-weight="700" fill="var(--tx)">' + score + '</text></svg>';
+  }
+  function healthCard(h) {
+    return '<div class="card"><h2>Financial health</h2><div class="hrow">' + scoreRing(h.score) +
+      '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div>' +
+      '<div class="empty" style="padding:2px 0 0;font-size:12px">' + esc((h.parts && h.parts[0] ? h.parts[0].detail : '')) + '</div></div></div>' +
+      '<button class="bc" data-act="insights">See the full analysis →</button></div>';
+  }
+  function gcell(k, v) { return '<div class="gcell"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
+  function openInsights() {
+    var d = state.data; if (!d) return;
+    var h = d.health || { score: 0, grade: '—', parts: [] };
+    var b = d.behavior || {};
+    var html = '<div class="grab"></div><h3><span>Insights</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+    html += '<div class="hrow big"><div class="hbig mono">' + h.score + '</div><div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 · recalculated on every refresh</div></div></div>';
+    html += '<div class="card" style="margin-top:14px"><h2>Score breakdown</h2>';
+    (h.parts || []).forEach(function (p) {
+      html += '<div class="part"><div class="parttop"><span>' + esc(p.label) + '</span><span class="mono">' + p.score + '/' + p.max + '</span></div>' +
+        '<div class="hbar"><span style="width:' + Math.round(p.score / p.max * 100) + '%"></span></div>' +
+        '<div class="empty" style="padding:3px 0 0;font-size:11px">' + esc(p.detail) + '</div></div>';
+    });
+    html += '</div>';
+    html += '<div class="card"><h2>Spending behaviour</h2><div class="grid2">' +
+      gcell('Average per day', rp(b.avgDaily || 0)) +
+      gcell('Projected month', rp(b.projected || 0)) +
+      gcell('Weekend spending', (b.weekendShare || 0) + '%') +
+      gcell('Small purchases', (b.smallShare || 0) + '% of entries') +
+      gcell('Top category', (b.topCat || '—') + ' · ' + (b.topShare || 0) + '%') +
+      gcell('Largest entry', b.largest ? rp(b.largest.amount) : '—') +
+      '</div>';
+    if ((b.movers || []).length) {
+      html += '<div class="empty" style="padding:12px 0 0;font-size:11px">Biggest changes vs last month</div>';
+      b.movers.forEach(function (m) {
+        html += '<div class="kv"><span>' + esc(m.name) + '<small>' + rp(m.before) + ' → ' + rp(m.now) + '</small></span>' +
+          '<span class="mono ' + (m.delta > 0 ? 'neg' : 'pos') + '">' + (m.delta > 0 ? '+' : '−') + rp(Math.abs(m.delta)) + '</span></div>';
+      });
+    }
+    html += '</div>';
+    html += '<div class="card"><h2>Budgets</h2>';
+    if (!(d.budgets || []).length) html += '<div class="empty" style="padding:0 0 10px">No budgets yet. Set one to give each category a monthly ceiling.</div>';
+    (d.budgets || []).forEach(function (x) {
+      html += '<div class="part"><div class="parttop"><span>' + esc(x.name) + '</span><span class="mono ' + (x.over ? 'neg' : '') + '">' + rp(x.spent) + ' / ' + rp(x.limit) + '</span></div>' +
+        '<div class="hbar"><span class="' + (x.over ? 'over' : '') + '" style="width:' + Math.min(100, x.pct) + '%"></span></div>' +
+        '<div class="partact"><button class="mini" data-act="budget-edit" data-cat="' + esc(x.name) + '">Edit</button>' +
+        '<button class="mini danger" data-act="budget-del" data-cat="' + esc(x.name) + '">Remove</button></div></div>';
+    });
+    html += '<button class="btn ghost" data-act="budget-add" style="margin-top:10px">Add a budget</button></div>';
+    html += '<div class="card"><h2>AI advisor</h2><div class="empty" style="padding:0 0 10px;font-size:12px">A short read of your month, written from the numbers above.</div>' +
+      '<button class="btn" data-act="ai">Get AI advice</button><div id="aiOut" class="revitem" hidden style="margin-top:10px"></div></div>';
+    $('sheetDetail').innerHTML = html;
+  }
+  function openBudgetForm(cat) {
+    var d = state.data || {}, cats = (d.options && d.options.expense) || [], cur = null;
+    (d.budgets || []).forEach(function (b) { if (b.name === cat) cur = b; });
+    var opts = cats.map(function (c) { return '<option value="' + esc(c) + '"' + (c === cat ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cat ? 'Edit budget' : 'New budget') + '</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="fld"><label for="bcat">Category</label><select id="bcat">' + opts + '</select></div>' +
+      '<div class="fld"><label for="blim">Monthly limit</label><input id="blim" class="mono" inputmode="numeric" placeholder="500.000" value="' + (cur ? cur.limit : '') + '"></div>' +
+      '<div class="err" id="bErr"></div><button class="btn" data-act="budget-save">Save budget</button>';
+  }
+  function afterBudgetChange() {
+    var pr = loadMonth(state.month, { silent: true });
+    if (pr && pr.then) pr.then(function () { openInsights(); }); else setTimeout(openInsights, 600);
+  }
+  function buildDigest() {
+    var d = state.data || {};
+    return {
+      month: d.label, currency: 'IDR',
+      income: d.kpi ? d.kpi.masuk : 0, spending: d.kpi ? d.kpi.keluar : 0,
+      health: d.health ? { score: d.health.score, grade: d.health.grade, savingsRate: d.health.savingsRate } : null,
+      topCategories: (d.categories || []).slice(0, 5).map(function (c) { return { name: c.name, amount: c.amount, pct: c.pct }; }),
+      budgets: (d.budgets || []).map(function (b) { return { name: b.name, spent: b.spent, limit: b.limit, pct: b.pct }; }),
+      cardDebt: d.kkTotal || 0,
+      streak: d.streak || 0,
+      behavior: d.behavior ? { avgDaily: d.behavior.avgDaily, projected: d.behavior.projected, weekendShare: d.behavior.weekendShare, smallShare: d.behavior.smallShare, topShare: d.behavior.topShare, movers: (d.behavior.movers || []).slice(0, 3) } : null
+    };
   }
 
   // ================= sheet catat & detail =================
@@ -1168,6 +1275,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
+    else if (act === 'insights') { openBg(); $('sheetDetail').hidden = false; openInsights(); }
     else if (act === 'flagged') { state.filter = 'otomatis'; setTab('transaksi'); }
     else if (act === 'card') {
       var deck = $('ccdeck'), total = deck && deck.children ? deck.children.length : 1;
@@ -1192,6 +1300,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     }
     else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Reloading…'); }
     else if (act === 'test-capture') testCapture();
+    else if (act === 'push-test') {
+      toast('Sending test push…');
+      pushApi('test', { token: state.token }).then(function (r) {
+        if (r && r.ok) toast('✅ Test push sent (' + r.sent + ')');
+        else if (r && r.sent === 0) toast('⚠️ No subscription yet — turn notifications on first');
+        else toast((r && r.error) || 'Could not send the test push');
+      }).catch(function () { toast('Cannot reach the notification server'); });
+    }
     else if (act === 'ping') {
       toast('Checking server…');
       api('ping').then(function (r) {
@@ -1256,6 +1372,40 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'del1') openDetail(id, true);
+    else if (act === 'budget-add') openBudgetForm('');
+    else if (act === 'budget-edit') openBudgetForm(el.getAttribute('data-cat'));
+    else if (act === 'budget-del') {
+      var bcat0 = el.getAttribute('data-cat');
+      if (!confirm('Remove the budget for ' + bcat0 + '?')) return;
+      api('budget_delete', { kategori: bcat0 }).then(function (r) {
+        if (r && r.ok) { toast('Budget removed'); afterBudgetChange(); }
+        else toast((r && r.error) || 'Could not remove the budget');
+      }).catch(function () { toast('Cannot reach the server'); });
+    }
+    else if (act === 'budget-save') {
+      var bcat = $('bcat').value, blim = String($('blim').value).replace(/\D/g, '');
+      if (!blim) { $('bErr').textContent = 'Enter a monthly limit'; return; }
+      el.disabled = true; el.textContent = 'Saving…';
+      api('budget_set', { kategori: bcat, limit: Number(blim) }).then(function (r) {
+        if (r && r.ok) { toast('✅ Budget saved'); afterBudgetChange(); }
+        else { el.disabled = false; el.textContent = 'Save budget'; $('bErr').textContent = (r && r.error) || 'Could not save'; }
+      }).catch(function () { el.disabled = false; el.textContent = 'Save budget'; $('bErr').textContent = 'Cannot reach the server'; });
+    }
+    else if (act === 'ai') {
+      var out = $('aiOut'); if (!out) return;
+      out.hidden = false;
+      out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your month…</div>';
+      var aiUrl = PUSH_ENDPOINT ? PUSH_ENDPOINT.replace(/\/api\/push\/?$/, '/api/ai/insight') : '';
+      if (!aiUrl) { out.textContent = 'AI advisor is not configured.'; return; }
+      fetch(aiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ digest: buildDigest() }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          if (r && r.ok) out.innerHTML = '<div class="revtext" style="font-weight:400">' + esc(r.text).replace(/\n/g, '<br>') + '</div>';
+          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet — add an AI_API_KEY secret in the Worker.';
+          else out.textContent = (r && r.error) || 'AI could not answer right now.';
+        })
+        .catch(function () { out.textContent = 'Could not reach the AI service.'; });
+    }
     else if (act === 'pin-save') {
       var p1 = $('pin1').value.trim(), p2 = $('pin2').value.trim();
       if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN must be 4–6 digits'; return; }
