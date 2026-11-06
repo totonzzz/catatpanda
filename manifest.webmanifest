@@ -1,14 +1,23 @@
 {
-  "name": "Catat Panda",
-  "short_name": "Catat Panda",
-  "description": "Catat Panda: catatan keuangan pribadi yang tersambung ke Google Sheets",
+  "name": "Bamboo Finance Tracker",
+  "short_name": "Bamboo",
+  "description": "Personal finance tracker connected to Google Sheets",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
-  "background_color": "#0B1220",
-  "theme_color": "#0B1220",
-  "lang": "id",
+  "background_color": "#021024",
+  "theme_color": "#021024",
+  "lang": "en",
+  "categories": [
+    "finance",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -25,6 +34,30 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add expense",
+      "short_name": "Add expense",
+      "url": "./?action=add",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Insights",
+      "short_name": "Insights",
+      "url": "./?tab=insights",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
