@@ -140,7 +140,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .filters::-webkit-scrollbar{display:none}
 .filters button{flex:none;border:1px solid var(--line);background:var(--s1);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
 .filters button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:1fr 1fr 74px 1fr 1fr;align-items:end;
+.tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
   padding:6px 8px;border:1px solid var(--line);border-radius:26px;
   background:linear-gradient(180deg,rgba(193,232,255,.12),rgba(193,232,255,.05));
   backdrop-filter:blur(15px) saturate(125%);-webkit-backdrop-filter:blur(15px) saturate(125%);
@@ -148,7 +148,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--mut);padding:4px 0;cursor:pointer}
 .tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab.on{color:var(--mint);background:color-mix(in srgb,var(--mint) 14%,transparent);border-radius:16px}
-.add{justify-self:center;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:30px;font-weight:500;margin-top:-26px;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
+.fab{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:21;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:30px;font-weight:500;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
+.fab:active{transform:scale(.93)}
 .add:active{transform:scale(.93)}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;animation:fadebg .2s}
 @keyframes fadebg{from{opacity:0}}
@@ -325,10 +326,11 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <nav class="tabbar" id="tabbar" hidden aria-label="Main menu">
   <button class="tab on" data-tab="ringkasan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg><span>Overview</span></button>
   <button class="tab" data-tab="transaksi"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg><span>Transactions</span></button>
-  <button class="add" id="fab" aria-label="Add transaction">+</button>
+  <button class="tab" data-tab="insights"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span>Insights</span></button>
   <button class="tab" data-tab="dompet"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3"/><path d="M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16.5" cy="14" r="1.2"/></svg><span>Wallet</span></button>
   <button class="tab" data-tab="setelan"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Settings</span></button>
 </nav>
+<button class="fab" id="fab" aria-label="Add transaction">+</button>
 
 <div class="sheetbg" id="sheetBg" hidden></div>
 <section class="sheet" id="sheetAdd" hidden aria-label="Add transaction">
@@ -370,7 +372,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.3';
+  var VERSION = '3.4';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -896,7 +898,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       $('streak').innerHTML = '🔥 ' + d.streak + ' days';
     }
     var html = state.tab === 'setelan' ? viewSetelan() : (!d ? skeleton() :
-      state.tab === 'ringkasan' ? viewRingkasan(d) : state.tab === 'transaksi' ? viewTransaksi(d) : viewDompet(d));
+      state.tab === 'ringkasan' ? viewRingkasan(d) : state.tab === 'transaksi' ? viewTransaksi(d) :
+      state.tab === 'insights' ? viewInsights(d) : viewDompet(d));
     $('view').innerHTML = html;
     if (state.tab === 'dompet') {
       state.cardActive = 0;
@@ -1006,20 +1009,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     return '<div class="card"><h2>Financial health</h2><div class="hrow">' + scoreRing(h.score) +
       '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div>' +
       '<div class="empty" style="padding:2px 0 0;font-size:12px">' + esc((h.parts && h.parts[0] ? h.parts[0].detail : '')) + '</div></div></div>' +
-      '<button class="bc" data-act="insights">See the full analysis →</button></div>';
+      '<button class="bc" data-act="goto-insights">See the full analysis →</button></div>';
   }
   function gcell(k, v) { return '<div class="gcell"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
-  function openInsights() {
-    var d = state.data; if (!d) return;
+  function insightsBody() {
+    var d = state.data; if (!d) return skeleton();
     var h = d.health || { score: 0, grade: '—', parts: [] };
     var b = d.behavior || {};
-    var html = '<div class="grab"></div><h3><span>Insights</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
-    html += '<div class="hrow big"><div class="hbig mono">' + h.score + '</div><div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 · recalculated on every refresh</div></div></div>';
-    html += '<div class="card" style="margin-top:14px"><h2>Score breakdown</h2>';
-    (h.parts || []).forEach(function (p) {
-      html += '<div class="part"><div class="parttop"><span>' + esc(p.label) + '</span><span class="mono">' + p.score + '/' + p.max + '</span></div>' +
-        '<div class="hbar"><span style="width:' + Math.round(p.score / p.max * 100) + '%"></span></div>' +
-        '<div class="empty" style="padding:3px 0 0;font-size:11px">' + esc(p.detail) + '</div></div>';
+    var html = '<div class="card"><h2>Financial health</h2><div class="hrow big"><div class="hbig mono">' + h.score + '</div>' +
+      '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 · recalculated on every refresh</div></div></div>';
+    (h.parts || []).forEach(function (p2) {
+      html += '<div class="part" style="margin-top:12px"><div class="parttop"><span>' + esc(p2.label) + '</span><span class="mono">' + p2.score + '/' + p2.max + '</span></div>' +
+        '<div class="hbar"><span style="width:' + Math.round(p2.score / p2.max * 100) + '%"></span></div>' +
+        '<div class="empty" style="padding:3px 0 0;font-size:11px">' + esc(p2.detail) + '</div></div>';
     });
     html += '</div>';
     html += '<div class="card"><h2>Spending behaviour</h2><div class="grid2">' +
@@ -1049,9 +1051,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     html += '<button class="btn ghost" data-act="budget-add" style="margin-top:10px">Add a budget</button></div>';
     html += '<div class="card"><h2>AI advisor</h2><div class="empty" style="padding:0 0 10px;font-size:12px">A short read of your month, written from the numbers above.</div>' +
       '<button class="btn" data-act="ai">Get AI advice</button><div id="aiOut" class="revitem" hidden style="margin-top:10px"></div></div>';
-    $('sheetDetail').innerHTML = html;
+    return html;
   }
+  function viewInsights(d) { return insightsBody(); }
+
   function openBudgetForm(cat) {
+    openBg(); $('sheetDetail').hidden = false;
     var d = state.data || {}, cats = (d.options && d.options.expense) || [], cur = null;
     (d.budgets || []).forEach(function (b) { if (b.name === cat) cur = b; });
     var opts = cats.map(function (c) { return '<option value="' + esc(c) + '"' + (c === cat ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
@@ -1062,7 +1067,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   }
   function afterBudgetChange() {
     var pr = loadMonth(state.month, { silent: true });
-    if (pr && pr.then) pr.then(function () { openInsights(); }); else setTimeout(openInsights, 600);
+    if (pr && pr.then) pr.then(function () { closeSheets(); setTab('insights'); }); else setTimeout(function () { closeSheets(); setTab('insights'); }, 600);
   }
   function buildDigest() {
     var d = state.data || {};
@@ -1275,7 +1280,30 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
-    else if (act === 'insights') { openBg(); $('sheetDetail').hidden = false; openInsights(); }
+    else if (act === 'budget-add') openBudgetForm('');
+    else if (act === 'budget-edit') openBudgetForm(el.getAttribute('data-cat'));
+    else if (act === 'budget-del') {
+      var bcat0 = el.getAttribute('data-cat');
+      if (!confirm('Remove the budget for ' + bcat0 + '?')) return;
+      api('budget_delete', { kategori: bcat0 }).then(function (r) {
+        if (r && r.ok) { toast('Budget removed'); afterBudgetChange(); } else toast((r && r.error) || 'Could not remove');
+      }).catch(function () { toast('Cannot reach the server'); });
+    }
+    else if (act === 'ai') {
+      var out = $('aiOut'); if (!out) return;
+      out.hidden = false; out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your month…</div>';
+      var aiUrl = PUSH_ENDPOINT ? PUSH_ENDPOINT.replace(/\/api\/push\/?$/, '/api/ai/insight') : '';
+      if (!aiUrl) { out.textContent = 'AI advisor is not configured.'; return; }
+      fetch(aiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ digest: buildDigest() }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          if (r && r.ok) out.innerHTML = '<div class="revtext" style="font-weight:400">' + esc(r.text).replace(/\n/g, '<br>') + '</div>';
+          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet — add an AI_API_KEY secret in the Worker.';
+          else out.textContent = (r && r.error) || 'AI could not answer right now.';
+        })
+        .catch(function () { out.textContent = 'Could not reach the AI service.'; });
+    }
+    else if (act === 'goto-insights') setTab('insights');
     else if (act === 'flagged') { state.filter = 'otomatis'; setTab('transaksi'); }
     else if (act === 'card') {
       var deck = $('ccdeck'), total = deck && deck.children ? deck.children.length : 1;
