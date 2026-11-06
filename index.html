@@ -387,7 +387,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.6';
+  var VERSION = '3.7';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -497,7 +497,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       return '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat="' + esc(c) + '">' +
         catTile(c, 52) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
     }).join('');
-    if (more) html += '<button type="button" class="cat" data-cat-more="1"><span class="cattile more">⋯</span><span class="label">More</span></button>';
+    if (more) html += '<button type="button" class="cat" data-cat-more="1"><span class="cattile more" style="width:52px;height:52px">⋯</span><span class="label">More</span></button>';
     box.innerHTML = html;
   }
   function shortCat(c) {
@@ -520,7 +520,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   function openCatMore() {
     var list = Array.prototype.map.call($('kat').options, function (o) { return o.value; });
     var cur = $('kat').value;
-    var html = '<div class="grab"></div><h3><span>All categories</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3><div class="catgrid">';
+    var html = '<div class="grab"></div><h3><span>All categories</span><button class="iconbtn" data-act="cat-more-close" aria-label="Close">✕</button></h3><div class="catgrid">';
     list.forEach(function (c) {
       html += '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat-pick="' + esc(c) + '">' + catTile(c, 44) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
     });
@@ -1370,7 +1370,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   $('quick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) $('amt').value = grp(parseInt(b.getAttribute('data-v'), 10)); });
   $('sheetAdd').addEventListener('input', function () { $('formErr').textContent = ''; });
   $('sheetAdd').addEventListener('click', function (e) { if (e.target.closest('.seg button,.quick button')) $('formErr').textContent = ''; });
-  $('sheetBg').addEventListener('click', closeSheets);
+  $('sheetBg').addEventListener('click', function () {
+    if (!$('sheetDetail').hidden && !$('sheetAdd').hidden) { $('sheetDetail').hidden = true; return; }
+    closeSheets();
+  });
   document.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeSheets(); });
   $('fab').addEventListener('click', openAdd);
 
@@ -1381,9 +1384,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     if (b && $('catChips') && $('catChips').contains(b)) pickCat(b.getAttribute('data-cat'));
   });
   $('sheetDetail').addEventListener('click', function (e) {
-    var p2 = e.target.closest('[data-cat-pick]'); if (!p2) return;
-    pickCat(p2.getAttribute('data-cat-pick'));
-    closeSheets();
+    var p2 = e.target.closest('[data-cat-pick]');
+    if (p2) {
+      pickCat(p2.getAttribute('data-cat-pick'));
+      $('sheetDetail').hidden = true;
+      return;
+    }
+    if (e.target.closest('[data-act="cat-more-close"]')) $('sheetDetail').hidden = true;
   }, true);
 
   $('save').addEventListener('click', function () {
