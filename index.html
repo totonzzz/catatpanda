@@ -351,12 +351,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.0';
+  var VERSION = '3.1';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
   // Selama kosong, kartu Notifikasi hanya menjelaskan bahwa fitur ini butuh server.
-  var PUSH_ENDPOINT = '';
+  var PUSH_ENDPOINT = 'https://bamboo-push.tonnychandrak.workers.dev/api/push';
   function $(id) { return document.getElementById(id); }
   var LS = {
     get: function (k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
