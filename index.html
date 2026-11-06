@@ -278,6 +278,21 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .cc-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
 .cc-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
 .cc-dots i.on{background:var(--mint);transform:scale(1.3)}
+/* category chips */
+.catsel{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.catsel::-webkit-scrollbar{display:none}
+.catsel .cat{flex:none;width:64px;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
+.cattile{display:grid;place-items:center;border-radius:17px;background:var(--s1);border:1px solid var(--line);color:var(--c);transition:.18s}
+.cattile svg{width:23px;height:23px}
+.catsel .cat.on .cattile,.catgrid .cat.on .cattile{background:color-mix(in srgb,var(--c) 20%,transparent);border-color:var(--c);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 45%,transparent)}
+.catsel .label,.catgrid .label{font-size:10.5px;line-height:1.15;text-align:center;color:var(--mut);max-width:66px}
+.catsel .cat.on .label,.catgrid .cat.on .label{color:var(--tx)}
+.cattile.more{font-size:22px;color:var(--mut);background:var(--s2)}
+.catgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px;padding:4px 0 10px}
+.catgrid .cat{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
+.ico.cat-ico svg{width:21px;height:21px}
+.cidot{font-style:normal;display:inline-flex;align-items:center}
+.cidot svg{width:16px;height:16px}
 /* insights */
 .hrow{display:flex;align-items:center;gap:14px}
 .hrow.big{margin:8px 2px 4px}
@@ -341,7 +356,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   <div class="amtbox"><span>Rp</span><input id="amt" class="mono" inputmode="numeric" placeholder="0" autocomplete="off"></div>
   <div class="quick" id="quick"><button data-v="15000">15.000</button><button data-v="25000">25.000</button><button data-v="50000">50.000</button><button data-v="100000">100.000</button></div>
   <div class="fld"><label for="desc">What for?</label><input id="desc" maxlength="80" placeholder="e.g. Lunch" autocomplete="off"></div>
-  <div class="fld"><label for="kat">Category</label><select id="kat"></select></div>
+  <div class="fld"><label>Category</label><div class="catsel" id="catChips"></div><select id="kat" hidden></select></div>
   <div id="loanBox" hidden>
     <div class="fld"><label for="nama">Person</label><input id="nama" maxlength="40" placeholder="e.g. Budi" autocomplete="off"></div>
     <div class="seg" id="segJenis"><button data-v="Hutang">Debt (I borrowed)</button><button data-v="Piutang">Receivable (I lent)</button></div>
@@ -372,7 +387,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.4';
+  var VERSION = '3.6';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -405,6 +420,114 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     return DOW[new Date(d + 'T00:00:00Z').getUTCDay()] + ', ' + dlabel(d);
   }
   var COLORS = ['#5AA9FF', '#3DDC97', '#F2B84B', '#FF7B6F', '#B28DFF', '#4FD1D9', '#FF9AD5', '#A3E635', '#FB923C', '#94A3B8'];
+  var CAT_ICON = {
+    "makan": { i: "<svg\n  class=\"lucide lucide-utensils\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2\" />\n  <path d=\"M7 2v20\" />\n  <path d=\"M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7\" />", c: "#FF9F6E" },
+    "jajan": { i: "<svg\n  class=\"lucide lucide-coffee\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M10 2v2\" />\n  <path d=\"M14 2v2\" />\n  <path d=\"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1\" />\n  <path d=\"M6 2v2\" />", c: "#F2C46B" },
+    "transportasi": { i: "<svg\n  class=\"lucide lucide-car\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\" />\n  <circle cx=\"7\" cy=\"17\" r=\"2\" />\n  <path d=\"M9 17h6\" />\n  <circle cx=\"17\" cy=\"17\" r=\"2\" />", c: "#7DA0CA" },
+    "belanja pakaian": { i: "<svg\n  class=\"lucide lucide-shirt\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\" />", c: "#FF9AD5" },
+    "fashion": { i: "<svg\n  class=\"lucide lucide-shirt\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\" />", c: "#FF9AD5" },
+    "kebutuhan harian": { i: "<svg\n  class=\"lucide lucide-shopping-basket\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"m15 11-1 9\" />\n  <path d=\"m19 11-4-7\" />\n  <path d=\"M2 11h20\" />\n  <path d=\"m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4\" />\n  <path d=\"M4.5 15.5h15\" />\n  <path d=\"m5 11 4-7\" />\n  <path d=\"m9 11 1 9\" />", c: "#7DD3B0" },
+    "perawatan": { i: "<svg\n  class=\"lucide lucide-wrench\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />", c: "#D98E48" },
+    "belanja": { i: "<svg\n  class=\"lucide lucide-shopping-bag\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M16 10a4 4 0 0 1-8 0\" />\n  <path d=\"M3.103 6.034h17.794\" />\n  <path d=\"M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z\" />", c: "#C1A0FF" },
+    "tagihan": { i: "<svg\n  class=\"lucide lucide-zap\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", c: "#F2B84B" },
+    "utilitas": { i: "<svg\n  class=\"lucide lucide-zap\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", c: "#F2B84B" },
+    "hiburan": { i: "<svg\n  class=\"lucide lucide-film\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" />\n  <path d=\"M7 3v18\" />\n  <path d=\"M3 7.5h4\" />\n  <path d=\"M3 12h18\" />\n  <path d=\"M3 16.5h4\" />\n  <path d=\"M17 3v18\" />\n  <path d=\"M17 7.5h4\" />\n  <path d=\"M17 16.5h4\" />", c: "#B28DFF" },
+    "kesehatan": { i: "<svg\n  class=\"lucide lucide-heart-pulse\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />\n  <path d=\"M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27\" />", c: "#FF8A8A" },
+    "pendidikan": { i: "<svg\n  class=\"lucide lucide-book-open\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M12 5v16\" />\n  <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", c: "#8FB3D9" },
+    "e-money": { i: "<svg\n  class=\"lucide lucide-smartphone\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" />\n  <path d=\"M12 18h.01\" />", c: "#6FC3FF" },
+    "dompet digital": { i: "<svg\n  class=\"lucide lucide-smartphone\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" />\n  <path d=\"M12 18h.01\" />", c: "#6FC3FF" },
+    "tithe": { i: "<svg\n  class=\"lucide lucide-church\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M10 9h4\" />\n  <path d=\"M12 7v5\" />\n  <path d=\"M14 21v-3a2 2 0 0 0-4 0v3\" />\n  <path d=\"m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9\" />\n  <path d=\"M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14\" />", c: "#E8C37A" },
+    "offering": { i: "<svg\n  class=\"lucide lucide-church\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M10 9h4\" />\n  <path d=\"M12 7v5\" />\n  <path d=\"M14 21v-3a2 2 0 0 0-4 0v3\" />\n  <path d=\"m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9\" />\n  <path d=\"M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14\" />", c: "#E8C37A" },
+    "orang tua": { i: "<svg\n  class=\"lucide lucide-users\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" />\n  <path d=\"M16 3.128a4 4 0 0 1 0 7.744\" />\n  <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" />\n  <circle cx=\"9\" cy=\"7\" r=\"4\" />", c: "#9BE1C0" },
+    "keluarga": { i: "<svg\n  class=\"lucide lucide-users\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" />\n  <path d=\"M16 3.128a4 4 0 0 1 0 7.744\" />\n  <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" />\n  <circle cx=\"9\" cy=\"7\" r=\"4\" />", c: "#9BE1C0" },
+    "hutang": { i: "<svg\n  class=\"lucide lucide-handshake\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"m11 17 2 2a1 1 0 1 0 3-3\" />\n  <path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\" />\n  <path d=\"m21 3 1 11h-2\" />\n  <path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\" />\n  <path d=\"M3 4h8\" />", c: "#A0B4D6" },
+    "piutang": { i: "<svg\n  class=\"lucide lucide-handshake\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"m11 17 2 2a1 1 0 1 0 3-3\" />\n  <path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\" />\n  <path d=\"m21 3 1 11h-2\" />\n  <path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\" />\n  <path d=\"M3 4h8\" />", c: "#A0B4D6" },
+    "gaji": { i: "<svg\n  class=\"lucide lucide-banknote\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\" />\n  <circle cx=\"12\" cy=\"12\" r=\"2\" />\n  <path d=\"M6 12h.01M18 12h.01\" />", c: "#7DD3B0" },
+    "bonus": { i: "<svg\n  class=\"lucide lucide-award\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526\" />\n  <circle cx=\"12\" cy=\"8\" r=\"6\" />", c: "#F2C46B" },
+    "hadiah": { i: "<svg\n  class=\"lucide lucide-gift\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M12 7v14\" />\n  <path d=\"M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\" />\n  <path d=\"M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5\" />\n  <rect x=\"3\" y=\"7\" width=\"18\" height=\"4\" rx=\"1\" />", c: "#FF9AD5" },
+    "investasi": { i: "<svg\n  class=\"lucide lucide-trending-up\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M16 7h6v6\" />\n  <path d=\"m22 7-8.5 8.5-5-5L2 17\" />", c: "#6FC3FF" },
+    "lainnya": { i: "<svg\n  class=\"lucide lucide-sparkles\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" />\n  <path d=\"M20 2v4\" />\n  <path d=\"M22 4h-4\" />\n  <circle cx=\"4\" cy=\"20\" r=\"2\" />", c: "#C1E8FF" }
+  };
+
+  function catKey(name) {
+    var n = String(name || '').toLowerCase();
+    if (n.indexOf('pakaian') >= 0 || n.indexOf('fashion') >= 0) return 'belanja pakaian';
+    if (n.indexOf('kebutuhan') >= 0) return 'kebutuhan harian';
+    if (n.indexOf('tagihan') >= 0 || n.indexOf('utilitas') >= 0) return 'tagihan';
+    if (n.indexOf('e-money') >= 0 || n.indexOf('dompet') >= 0) return 'e-money';
+    if (n.indexOf('tithe') >= 0 || n.indexOf('offering') >= 0) return 'tithe';
+    if (n.indexOf('orang tua') >= 0 || n.indexOf('keluarga') >= 0) return 'keluarga';
+    if (n.indexOf('hutang') >= 0 || n.indexOf('piutang') >= 0) return 'hutang';
+    if (n.indexOf('investasi') >= 0) return 'investasi';
+    if (n.indexOf('hadiah') >= 0) return 'hadiah';
+    if (n.indexOf('bonus') >= 0) return 'bonus';
+    if (n.indexOf('gaji') >= 0) return 'gaji';
+    if (n.indexOf('makan') >= 0) return 'makan';
+    if (n.indexOf('jajan') >= 0) return 'jajan';
+    if (n.indexOf('perawatan') >= 0 || n.indexOf('bengkel') >= 0 || n.indexOf('servis') >= 0) return 'perawatan';
+    if (n.indexOf('transport') >= 0 || n.indexOf('bensin') >= 0) return 'transportasi';
+    if (n.indexOf('belanja') >= 0) return 'belanja';
+    if (n.indexOf('hiburan') >= 0) return 'hiburan';
+    if (n.indexOf('kesehatan') >= 0) return 'kesehatan';
+    if (n.indexOf('pendidikan') >= 0) return 'pendidikan';
+    return 'lainnya';
+  }
+  function catMeta(name) { return CAT_ICON[catKey(name)] || CAT_ICON.lainnya; }
+  function catColor(name) { return catMeta(name).c; }
+  function catIcon(name, cls) {
+    return '<svg class="' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + catMeta(name).i + '</svg>';
+  }
+  function catTile(name, size) {
+    var s = size || 42;
+    return '<span class="cattile" style="width:' + s + 'px;height:' + s + 'px;--c:' + catColor(name) + '">' + catIcon(name) + '</span>';
+  }
+  // delapan kategori teratas + More
+  function popularCats(list) {
+    var PREF = ['Makan', 'Jajan', 'Transportasi', 'Belanja', 'Belanja Kebutuhan Harian', 'Tagihan & Utilitas', 'E-Money / Dompet Digital', 'Lainnya'];
+    var out = [];
+    PREF.forEach(function (p) { if (list.indexOf(p) >= 0) out.push(p); });
+    list.forEach(function (c) { if (out.indexOf(c) < 0 && out.length < 8) out.push(c); });
+    return out;
+  }
+  function renderCatChips(list) {
+    var box = $('catChips'); if (!box) return;
+    var cur = $('kat').value;
+    var pop = popularCats(list), more = list.length > pop.length;
+    var html = pop.map(function (c) {
+      return '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat="' + esc(c) + '">' +
+        catTile(c, 52) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
+    }).join('');
+    if (more) html += '<button type="button" class="cat" data-cat-more="1"><span class="cattile more">⋯</span><span class="label">More</span></button>';
+    box.innerHTML = html;
+  }
+  function shortCat(c) {
+    var s = String(c);
+    if (s === 'Belanja Kebutuhan Harian') return 'Kebutuhan';
+    if (s === 'Belanja Pakaian / Fashion') return 'Pakaian';
+    if (s === 'E-Money / Dompet Digital') return 'E-Money';
+    if (s === 'Tagihan & Utilitas') return 'Tagihan';
+    if (s === 'Kasih ke Orang Tua / Keluarga') return 'Keluarga';
+    if (s === 'Tithe & Offering') return 'Tithe';
+    if (s === 'Hutang / Piutang') return 'Hutang';
+    if (s === 'Perawatan Kendaraan') return 'Perawatan';
+    return s;
+  }
+  function pickCat(c) {
+    $('kat').value = c;
+    renderCatChips(Array.prototype.map.call($('kat').options, function (o) { return o.value; }));
+    onKat();
+  }
+  function openCatMore() {
+    var list = Array.prototype.map.call($('kat').options, function (o) { return o.value; });
+    var cur = $('kat').value;
+    var html = '<div class="grab"></div><h3><span>All categories</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3><div class="catgrid">';
+    list.forEach(function (c) {
+      html += '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat-pick="' + esc(c) + '">' + catTile(c, 44) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
+    });
+    html += '</div>';
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').innerHTML = html;
+  }
+
   var SRC = { form: 'Tally form', app: 'This app', notif: 'Bank notification (auto)' };
 
   var state = {
@@ -538,13 +661,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
     var meta = dlabel(t.date) + (t.metode ? ' · ' + t.metode : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
-    return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico">' + esc(t.emoji) + '</div><div class="m"><div class="d">' + esc(t.desc) +
+    return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
       (t.flag ? '<span class="tag cek">check</span>' : (t.src === 'notif' ? '<span class="tag">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
       '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button>';
   }
   function pendingRow(p, i) {
     var o = (state.data && state.data.options) || { emoji: {} };
-    return '<div class="tx" style="cursor:default"><div class="ico">' + esc(o.emoji[p.kategori] || '🕓') + '</div><div class="m"><div class="d">' + esc(p.desc) +
+    return '<div class="tx" style="cursor:default"><div class="ico cat-ico" style="color:' + catColor(p.kategori) + '">' + catIcon(p.kategori) + '</div><div class="m"><div class="d">' + esc(p.desc) +
       '<span class="tag cek">waiting</span></div><div class="s">' + esc(dlabel(p.tanggal) + ' · ' + p.metode) + '</div></div><div class="a mono">' + rp(p.amount) + '</div></div>';
   }
 
@@ -597,7 +720,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       if (d.categories.length > 5) h += '<div class="lg"><span class="n" style="color:var(--mut)">+' + (d.categories.length - 5) + ' more</span></div>';
       h += '</div></div><div class="catrow">';
       d.categories.forEach(function (c, i) {
-        h += '<div><div class="cr"><span>' + esc(c.emoji) + ' ' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
+        h += '<div><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
           '<div class="bar"><span style="width:' + Math.max(c.pct, 1.5) + '%;background:' + COLORS[i % COLORS.length] + '"></span></div></div>';
       });
       h += '</div>';
@@ -1098,6 +1221,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     $('met').innerHTML = (state.editId ? '<option value="">— no method —</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
     if (curM && Array.prototype.some.call($('met').options, function (x) { return x.value === curM; })) $('met').value = curM;
     onKat();
+    renderCatChips(list);
   }
   function onKat() {
     var loan = state.data && $('kat').value === state.data.options.loan;
@@ -1132,6 +1256,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     var lm = LS.get('ck_last_met', ''), lk = LS.get('ck_last_kat', '');
     if (lm && Array.prototype.some.call($('met').options, function (o) { return o.value === lm; })) $('met').value = lm;
     if (lk && Array.prototype.some.call($('kat').options, function (o) { return o.value === lk; })) $('kat').value = lk;
+    renderCatChips(Array.prototype.map.call($('kat').options, function (o) { return o.value; }));
     closeSheets(); openBg(); $('sheetAdd').hidden = false;
     setTimeout(function () { $('amt').focus(); }, 80);
   }
@@ -1147,6 +1272,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     $('kat').innerHTML = ''; $('met').innerHTML = '';
     fillSelects();
     $('kat').value = t.cat; $('met').value = t.metode || ''; onKat();
+    renderCatChips(Array.prototype.map.call($('kat').options, function (o) { return o.value; }));
     closeSheets(); openBg(); $('sheetAdd').hidden = false;
   }
   function amount() { return parseInt($('amt').value.replace(/\D/g, ''), 10) || 0; }
@@ -1247,6 +1373,18 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   $('sheetBg').addEventListener('click', closeSheets);
   document.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeSheets(); });
   $('fab').addEventListener('click', openAdd);
+
+  $('sheetAdd').addEventListener('click', function (e) {
+    var m = e.target.closest('[data-cat-more]');
+    if (m) { openCatMore(); return; }
+    var b = e.target.closest('[data-cat]');
+    if (b && $('catChips') && $('catChips').contains(b)) pickCat(b.getAttribute('data-cat'));
+  });
+  $('sheetDetail').addEventListener('click', function (e) {
+    var p2 = e.target.closest('[data-cat-pick]'); if (!p2) return;
+    pickCat(p2.getAttribute('data-cat-pick'));
+    closeSheets();
+  }, true);
 
   $('save').addEventListener('click', function () {
     var btn = this, editing = !!state.editId, label = editing ? 'Save changes' : 'Save';
