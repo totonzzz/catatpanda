@@ -429,7 +429,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.17';
+  var VERSION = '3.18';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -974,17 +974,43 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
         '<span class="mono ' + (share > 30 ? 'neg' : '') + '">' + rp(monthly) + (income ? ' · ' + share + '%' : '') + '</span></div>';
       list.forEach(function (x) {
         var pct = x.tenor ? Math.round(x.paid / x.tenor * 100) : 0;
+        if (x.left === 0) {
+          h += '<div class="part" style="margin-top:12px;margin-bottom:0"><div class="parttop"><span>' + esc(x.name) + '</span>' +
+            '<span class="mono pos" style="font-size:11.5px">Completed</span></div>' +
+            '<div class="empty" style="font-size:11px;padding-top:4px">' + x.paid + ' of ' + x.tenor + ' paid · no longer counted monthly</div></div>';
+          return;
+        }
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
           '<div class="parttop"><span>' + esc(x.name) + '</span><span class="mono" style="font-size:11.5px">' + rp(x.per) + ' × ' + x.left + ' left</span></div>' +
           '<div class="hbar" style="margin-top:6px"><span style="width:' + pct + '%"></span></div>' +
           '<div class="kv" style="border:0;padding:6px 0 0"><span class="empty" style="font-size:11px">Paid ' + x.paid + ' of ' + x.tenor +
             (x.dueDay ? ' · due day ' + x.dueDay : '') + ' · remaining ' + rp(x.remaining) + '</span>' +
-            '<button class="mini danger" data-act="cicilan-del" data-name="' + esc(x.name) + '">Remove</button></div>' +
+            '<span style="display:inline-flex;gap:6px">' +
+              (x.left > 0 ? '<button class="mini" data-act="cicilan-pay" data-name="' + esc(x.name) + '" data-per="' + x.per + '">Pay</button>' : '') +
+              '<button class="mini danger" data-act="cicilan-del" data-name="' + esc(x.name) + '">Remove</button>' +
+            '</span></div>' +
           '</div>';
       });
     }
     h += '<button class="btn ghost" data-act="cicilan-add" style="margin-top:12px">Add instalment</button></div>';
     return h;
+  }
+
+  function openCicilanPay(name, per) {
+    var d = state.data || {};
+    var today = (d.today || '').slice(0, 10);
+    var last = LS.get('ck_last_met', '') || 'Transfer';
+    openBg();
+    $('sheetDetail').hidden = false;
+    $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay instalment</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 12px;font-size:12px">This records the payment as an expense (category Cicilan) and marks one month as paid.</div>' +
+      '<div class="fld"><label>Instalment</label><input value="' + esc(name) + '" disabled></div>' +
+      '<div class="fld"><label>Amount</label><input id="cpAmt" class="mono" inputmode="numeric" value="' + per + '"></div>' +
+      '<div class="fld"><label>Paid from</label><input id="cpMet" value="' + esc(last) + '"></div>' +
+      '<div class="fld"><label>Date</label><input id="cpDate" type="date" value="' + esc(today) + '"></div>' +
+      '<div class="err" id="cpErr"></div>' +
+      '<button class="btn" data-act="cicilan-pay-save" data-name="' + esc(name) + '">Record payment</button>';
   }
 
   function openCicilanForm() {
@@ -1780,6 +1806,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     else if (act === 'cat-view') openCategoryDetail(el.getAttribute('data-cat'));
     else if (act === 'budget-edit') openBudgetForm(el.getAttribute('data-cat'));
     else if (act === 'cicilan-add') openCicilanForm();
+    else if (act === 'cicilan-pay') openCicilanPay(el.getAttribute('data-name'), el.getAttribute('data-per'));
     else if (act === 'cicilan-del') {
       var cn = el.getAttribute('data-name');
       if (!confirm('Remove ' + cn + '?')) return;
@@ -1929,6 +1956,22 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
         if (r && r.ok) { toast('Budget removed'); afterBudgetChange(); }
         else toast((r && r.error) || 'Could not remove the budget');
       }).catch(function () { toast('Cannot reach the server'); });
+    }
+    else if (act === 'cicilan-pay-save') {
+      var pn = el.getAttribute('data-name');
+      var amt = String($('cpAmt').value).replace(/\D/g, '');
+      if (!amt || Number(amt) <= 0) { $('cpErr').textContent = 'Enter the amount paid'; return; }
+      el.disabled = true; el.textContent = 'Recording…';
+      api('cicilan_pay', { nama: pn, amount: Number(amt), metode: $('cpMet').value, tanggal: $('cpDate').value })
+        .then(function (r) {
+          if (r && r.ok) {
+            LS.set('ck_last_met', $('cpMet').value || 'Transfer');
+            closeSheets();
+            toast(r.left > 0 ? '✅ Paid — ' + r.left + ' months left' : '🎉 Instalment finished');
+            var pr4 = loadMonth(state.month, { silent: true });
+            if (pr4 && pr4.then) pr4.then(renderAll); else renderAll();
+          } else { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = (r && r.error) || 'Could not record'; }
+        }).catch(function () { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'cicilan-save') {
       var nm = String($('ciName').value || '').trim();
