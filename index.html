@@ -417,7 +417,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.13';
+  var VERSION = '3.14';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1246,6 +1246,48 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       '<button class="bc" data-act="goto-insights">See the full analysis →</button></div>';
   }
   function gcell(k, v) { return '<div class="gcell"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
+  // ================= keranjang anggaran (Needs / Wants) =================
+  var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
+  var BUCKET_WANTS = ['makan', 'jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
+  function planTargets() {
+    try {
+      var x = JSON.parse(LS.get('ck_targets', '') || '{}');
+      if (x && x.needs > 0 && x.wants > 0) return { needs: x.needs, wants: x.wants, savings: Math.max(0, x.savings || 0) };
+    } catch (e) {}
+    return { needs: 50, wants: 30, savings: 20 };
+  }
+  function bucketOf(name) {
+    var n = String(name || '').toLowerCase();
+    if (BUCKET_NEEDS.indexOf(n) >= 0) return 'needs';
+    if (BUCKET_WANTS.indexOf(n) >= 0) return 'wants';
+    for (var i = 0; i < BUCKET_NEEDS.length; i++) if (n.indexOf(BUCKET_NEEDS[i].split(' ')[0]) === 0) return 'needs';
+    return 'wants';
+  }
+  function envelopeData(d) {
+    var plan = planTargets();
+    var income = (d.kpi && d.kpi.masuk) || 0;
+    var cats = {}, limits = {};
+    (d.categories || []).forEach(function (c) { cats[c.name] = c.amount; });
+    (d.budgets || []).forEach(function (b) { limits[b.name] = b.limit; });
+    var names = {};
+    Object.keys(cats).forEach(function (n) { names[n] = true; });
+    Object.keys(limits).forEach(function (n) { names[n] = true; });
+    var out = { needs: { key: 'needs', label: 'Needs', pct: plan.needs, note: 'Bills, transport, groceries, health', cats: [] },
+                wants: { key: 'wants', label: 'Wants', pct: plan.wants, note: 'Dining out, fun, shopping', cats: [] } };
+    Object.keys(names).forEach(function (n) {
+      var b = bucketOf(n);
+      out[b].cats.push({ name: n, spent: cats[n] || 0, limit: limits[n] || 0 });
+    });
+    ['needs', 'wants'].forEach(function (k) {
+      var g = out[k];
+      g.ceiling = Math.round(income * g.pct / 100);
+      g.spent = g.cats.reduce(function (s, c) { return s + c.spent; }, 0);
+      g.catLimits = g.cats.reduce(function (s, c) { return s + c.limit; }, 0);
+      g.cats.sort(function (a, b) { return b.spent - a.spent; });
+    });
+    return { groups: out, plan: plan, income: income };
+  }
+
   function insightsBody() {
     var d = state.data; if (!d) return skeleton();
     var h = d.health || { score: 0, grade: '—', parts: [] };
@@ -1274,16 +1316,50 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       });
     }
     html += '</div>';
-    html += '<div class="card"><h2>Budgets</h2>';
-    if (!(d.budgets || []).length) html += '<div class="empty" style="padding:0 0 10px">No budgets yet. Set one to give each category a monthly ceiling.</div>';
-    (d.budgets || []).forEach(function (x) {
-      html += '<div class="part"><div class="parttop"><span>' + esc(x.name) + '</span><span class="mono ' + (x.over ? 'neg' : '') + '">' + rp(x.spent) + ' / ' + rp(x.limit) + '</span></div>' +
-        '<div class="hbar"><span class="' + (x.over ? 'over' : '') + '" style="width:' + Math.min(100, x.pct) + '%"></span></div>' +
-        '<div class="partact"><button class="mini" data-act="budget-view" data-cat="' + esc(x.name) + '">View</button>' +
-        '<button class="mini" data-act="budget-edit" data-cat="' + esc(x.name) + '">Edit</button>' +
-        '<button class="mini danger" data-act="budget-del" data-cat="' + esc(x.name) + '">Remove</button></div></div>';
+    var env = envelopeData(d);
+    var totalCeil = env.groups.needs.ceiling + env.groups.wants.ceiling;
+    var totalSpent = env.groups.needs.spent + env.groups.wants.spent;
+    html += '<div class="card"><h2>Spending plan</h2>';
+    html += '<div class="kv"><span>Needs + Wants<small>ceiling ' + env.plan.needs + '% + ' + env.plan.wants + '% of income</small></span>' +
+      '<span class="mono">' + rp(totalSpent) + ' / ' + rp(totalCeil) + '</span></div>';
+    html += '<div class="hbar" style="margin-top:8px"><span class="' + (totalSpent > totalCeil ? 'over' : '') + '" style="width:' +
+      Math.min(100, totalCeil ? Math.round(totalSpent / totalCeil * 100) : 0) + '%"></span></div>';
+    ['needs', 'wants'].forEach(function (k) {
+      var g = env.groups[k];
+      var usedPct = g.ceiling ? Math.round(g.spent / g.ceiling * 100) : 0;
+      var over = g.spent > g.ceiling;
+      var overCats = g.catLimits > g.ceiling;
+      var diff = Math.abs(g.catLimits - g.ceiling);
+      html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
+        '<div class="parttop"><span>' + g.label + ' <span class="empty" style="font-size:11px">· ' + g.pct + '% of income</span></span>' +
+        '<span class="mono ' + (over ? 'neg' : '') + '">' + (g.ceiling ? usedPct + '%' : '—') + '</span></div>' +
+        '<div class="empty" style="padding:2px 0 0;font-size:11.5px">' + rp(g.spent) + ' of ' + rp(g.ceiling) + ' ceiling · ' + g.note + '</div>' +
+        '<div class="hbar" style="margin-top:8px"><span class="' + (over ? 'over' : '') + '" style="width:' + Math.min(100, usedPct) + '%"></span></div>' +
+        '<div style="margin-top:9px;font-size:11px;font-weight:600;border-radius:10px;padding:7px 10px;' +
+          (overCats ? 'background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral)' : 'background:color-mix(in srgb,var(--mint) 14%,transparent);color:var(--mint)') + '">' +
+          (g.catLimits ? (overCats ? 'Category limits total ' + rp(g.catLimits) + ' — ' + rp(diff) + ' above the ceiling'
+                                   : 'Category limits total ' + rp(g.catLimits) + ' — ' + rp(diff) + ' under the ceiling')
+                       : 'No category limits inside this envelope yet') + '</div>';
+      if (g.cats.length) {
+        g.cats.forEach(function (c) {
+          var cp = c.limit ? Math.min(100, Math.round(c.spent / c.limit * 100)) : 0;
+          var cov = c.limit && c.spent > c.limit;
+          html += '<div class="part" style="margin-top:10px;margin-bottom:0"><div class="parttop"><span>' + esc(c.name) + '</span>' +
+            '<span class="mono ' + (cov ? 'neg' : '') + '" style="font-size:11.5px">' + rp(c.spent) + (c.limit ? ' / ' + rp(c.limit) : '') + '</span></div>' +
+            (c.limit ? '<div class="hbar" style="margin-top:5px"><span class="' + (cov ? 'over' : '') + '" style="width:' + cp + '%;background:' + (cov ? '' : catColor(c.name)) + '"></span></div>' : '') +
+            '<div class="partact" style="margin-top:6px">' +
+              '<button class="mini" data-act="budget-view" data-cat="' + esc(c.name) + '">View</button>' +
+              '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' + (c.limit ? 'Edit' : 'Set budget') + '</button>' +
+            '</div>' +
+            '</div>';
+        });
+      }
+      html += '</div>';
     });
-    html += '<button class="btn ghost" data-act="budget-add" style="margin-top:10px">Add a budget</button></div>';
+    html += '<div class="partact" style="margin-top:14px">' +
+      '<button class="mini" data-act="plan-adjust">Adjust plan</button>' +
+      '<button class="mini" data-act="budget-add">Add a budget</button></div>';
+    html += '</div>';
     html += '<div class="card"><h2>AI advisor</h2><div class="empty" style="padding:0 0 10px;font-size:12px">A short read of your month, written from the numbers above.</div>' +
       '<button class="btn" data-act="ai">Get AI advice</button><div id="aiOut" class="revitem" hidden style="margin-top:10px"></div></div>';
     return html;
@@ -1366,6 +1442,21 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     $('sheetDetail').hidden = false;
     $('sheetDetail').dataset.kind = 'list';
     $('sheetDetail').innerHTML = html;
+  }
+
+  function openPlanForm() {
+    var p = planTargets();
+    openBg();
+    $('sheetDetail').hidden = false;
+    $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Income plan</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 12px;font-size:12px">How your monthly income is split. Needs + Wants + Savings should add up to 100%.</div>' +
+      '<div class="fld"><label>Needs (%)</label><input id="pNeeds" class="mono" inputmode="numeric" value="' + p.needs + '"></div>' +
+      '<div class="fld"><label>Wants (%)</label><input id="pWants" class="mono" inputmode="numeric" value="' + p.wants + '"></div>' +
+      '<div class="fld"><label>Savings (%)</label><input id="pSav" class="mono" inputmode="numeric" value="' + p.savings + '"></div>' +
+      '<div class="err" id="pErr"></div>' +
+      '<button class="btn" data-act="plan-save">Save plan</button>' +
+      '<div class="empty" style="padding:10px 0 0;font-size:11px">Categories are grouped automatically: bills, transport, groceries and health → Needs; dining, fun and shopping → Wants.</div>';
   }
 
   function openBudgetForm(cat) {
@@ -1631,6 +1722,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
+    else if (act === 'plan-adjust') openPlanForm();
     else if (act === 'budget-add') openBudgetForm('');
     else if (act === 'budget-view') openBudgetDetail(el.getAttribute('data-cat'));
     else if (act === 'cat-view') openCategoryDetail(el.getAttribute('data-cat'));
@@ -1778,6 +1870,14 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'install-ok') { LS.set('ck_install_seen', '1'); closeSheets(); toast('You can install later from Settings'); }
+    else if (act === 'plan-save') {
+      var n1 = parseInt(String($('pNeeds').value).replace(/\D/g, ''), 10) || 0;
+      var n2 = parseInt(String($('pWants').value).replace(/\D/g, ''), 10) || 0;
+      var n3 = parseInt(String($('pSav').value).replace(/\D/g, ''), 10) || 0;
+      if (n1 + n2 + n3 !== 100) { $('pErr').textContent = 'Needs + Wants + Savings must add up to 100% (now ' + (n1 + n2 + n3) + '%)'; return; }
+      LS.set('ck_targets', JSON.stringify({ needs: n1, wants: n2, savings: n3 }));
+      closeSheets(); toast('Plan updated'); renderAll();
+    }
     else if (act === 'budget-save') {
       var bcat = $('bcat').value, blim = String($('blim').value).replace(/\D/g, '');
       if (!blim) { $('bErr').textContent = 'Enter a monthly limit'; return; }
