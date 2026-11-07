@@ -1,5 +1,5 @@
 /* Service worker: membuat aplikasi bisa dibuka tanpa sinyal. Data keuangan TIDAK disimpan di sini. */
-var CACHE = 'bamboo-v13';
+var CACHE = 'bamboo-v14';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
@@ -21,11 +21,13 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;           // permintaan ke Google tidak disentuh
   if (req.mode === 'navigate') {                              // halaman: coba jaringan dulu (supaya versi baru langsung terpakai)
+    // Hanya halaman aplikasi yang disimpan. Halaman lain (mis. folder mock) tidak boleh menimpa salinan aplikasi.
+    var isApp = /(\/|index\.html)$/.test(url.pathname);
     e.respondWith(fetch(req).then(function (res) {
-      // Hanya simpan halaman yang benar-benar berhasil. Halaman error hosting tidak boleh menimpa salinan aplikasi.
-      if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('./index.html', copy); }); return res; }
+      if (res && res.ok && isApp) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('./index.html', copy); }); return res; }
+      if (res && res.ok) return res;
       return caches.match('./index.html').then(function (hit) { return hit || res; });
-    }).catch(function () { return caches.match('./index.html'); }));
+    }).catch(function () { return isApp ? caches.match('./index.html') : Response.error(); }));
     return;
   }
   e.respondWith(caches.match(req).then(function (hit) {       // berkas lain: cache dulu, diperbarui di belakang

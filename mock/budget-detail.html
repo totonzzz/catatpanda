@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget detail</title><style>
+:root{--bg:#021024;--tx:#E9F4FF;--mut:#8FB3D9;--line:rgba(193,232,255,.13);--s1:rgba(193,232,255,.06);--s2:rgba(193,232,255,.10)}
+*{box-sizing:border-box}
+body{margin:0;padding:22px 16px 40px;background:var(--bg);color:var(--tx);font:14px/1.5 "DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;width:390px;max-width:390px;margin:0 auto}
+h1{font-size:17px;margin:0 0 4px}p.sub{color:var(--mut);font-size:12px;margin:0 0 16px}
+.sheet{background:linear-gradient(180deg,rgba(193,232,255,.10),rgba(193,232,255,.03));border:1px solid var(--line);border-radius:26px 26px 0 0;padding:14px 16px 20px}
+.grab{width:38px;height:4px;border-radius:4px;background:rgba(193,232,255,.25);margin:0 auto 12px}
+.h3{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700;margin:0 0 12px}
+.h3 .l{display:inline-flex;align-items:center;gap:9px}
+.card{background:rgba(193,232,255,.05);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.parttop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;gap:8px}
+.hbar{height:6px;border-radius:6px;background:var(--s2);overflow:hidden;margin-top:8px}
+.hbar span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C1E8FF,#5483B3)}
+.muted{color:var(--mut);font-size:12px;margin-top:8px}
+.tx{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.tx:first-of-type{border-top:none}
+.ic{width:38px;height:38px;border-radius:12px;background:var(--s2);display:grid;place-items:center;flex:none}
+.ic svg{width:19px;height:19px}
+.m{flex:1;min-width:0}.d{font-size:14px;font-weight:500}.s{font-size:11.5px;color:var(--mut);margin-top:2px}
+.a{font-size:14px;font-weight:600;white-space:nowrap}.neg{color:#FFB0A3}
+h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
+</style></head><body>
+<a href="index.html" style="position:fixed;left:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:999;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:rgba(193,232,255,.10);border:1px solid rgba(193,232,255,.18);color:#E9F4FF;font:600 12px system-ui,-apple-system,sans-serif;text-decoration:none;backdrop-filter:blur(8px)">← Mock list</a>
+<h1>Budget detail</h1>
+<p class="sub">Ketuk "View" pada sebuah anggaran.</p>
+<div class="sheet">
+  <div class="grab"></div>
+  <div class="h3"><span class="l"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span> Transportasi</span><span style="color:#8FB3D9">✕</span></div>
+  <div class="card">
+    <div class="parttop"><span>Used this month</span><span style="font-family:'DM Mono',monospace">Rp 1.240.000 / Rp 1.500.000</span></div>
+    <div class="hbar"><span style="width:83%"></span></div>
+    <div class="muted">Rp 260.000 left · 83% used · 6 transactions</div>
+  </div>
+  <div class="card">
+    <h2>Transactions</h2>
+    <div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Bensin Pertamina</div><div class="s">2026-11-06 · QRIS</div></div><div class="a mono neg">−Rp 350.000</div></div><div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Parkir mall</div><div class="s">2026-11-05 · Cash</div></div><div class="a mono neg">−Rp 5.000</div></div><div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Tol Cipularang</div><div class="s">2026-11-04 · E-Money</div></div><div class="a mono neg">−Rp 47.000</div></div><div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Gojek ke kantor</div><div class="s">2026-11-03 · GoPay</div></div><div class="a mono neg">−Rp 32.000</div></div><div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Bensin Shell</div><div class="s">2026-11-02 · Kartu Kredit</div></div><div class="a mono neg">−Rp 300.000</div></div><div class="tx"><span class="ic" style="color:#7DA0CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-car"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" /></svg></span><div class="m"><div class="d">Servis ringan</div><div class="s">2026-11-01 · Transfer</div></div><div class="a mono neg">−Rp 506.000</div></div>
+  </div>
+</div>
+</body></html>
