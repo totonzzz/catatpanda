@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="themeMeta" content="#0B1220" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#EEF2F9" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,8 +23,18 @@
   --tx:#E9F4FF; --mut:#8FB3D9;
   --mint:#C1E8FF; --mint-ink:#03172E; --coral:#FFB0A3; --amber:#F3D2A6;
   --shadow:0 18px 40px rgba(1,8,20,.55);
+  --card:linear-gradient(160deg,rgba(193,232,255,.10),rgba(193,232,255,.045));
+  --tabbg:linear-gradient(180deg,rgba(193,232,255,.12),rgba(193,232,255,.05));
   --glass:blur(11px) saturate(118%);
   font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+body.light{
+  --bg:#F4F7FB; --s1:rgba(10,24,38,.035); --s2:rgba(10,24,38,.06); --line:rgba(10,24,38,.12);
+  --tx:#0B1B2B; --mut:#5C7488;
+  --mint:#2F6FB2; --mint-ink:#FFFFFF; --coral:#C0392B; --amber:#A9761A;
+  --shadow:0 12px 30px rgba(12,32,52,.10);
+  --card:#FFFFFF; --tabbg:#FFFFFF;
+  background:radial-gradient(60% 40% at 50% -12%, rgba(84,131,179,.18), transparent 62%), #F4F7FB;
 }
 @media (prefers-color-scheme: light){
   :root{ --bg:#EAF3FC; --s1:rgba(255,255,255,.74); --s2:rgba(255,255,255,.58); --line:rgba(5,38,89,.12);
@@ -74,7 +84,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .view > *:nth-child(6){animation-delay:.15s}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.view > *{animation:none}}
-.card{background:linear-gradient(160deg,rgba(193,232,255,.10),rgba(193,232,255,.045));border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:14px;
+.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:14px;
   backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:0 12px 32px rgba(1,8,20,.35),inset 0 1px 0 rgba(193,232,255,.09)}
 .card h2{margin:0 0 14px;font-size:13.5px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--tx);display:flex;justify-content:space-between;align-items:center;position:relative;padding-left:11px}
 .card h2::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,var(--mint),#5483B3)}
@@ -142,12 +152,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .filters button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
 .tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
   padding:6px 8px;border:1px solid var(--line);border-radius:26px;
-  background:linear-gradient(180deg,rgba(193,232,255,.12),rgba(193,232,255,.05));
+  background:var(--tabbg);
   backdrop-filter:blur(15px) saturate(125%);-webkit-backdrop-filter:blur(15px) saturate(125%);
   box-shadow:0 14px 34px rgba(1,8,20,.5),inset 0 1px 0 rgba(193,232,255,.14)}
 .tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--mut);padding:4px 0;cursor:pointer}
 .tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab.on{color:var(--mint);background:color-mix(in srgb,var(--mint) 14%,transparent);border-radius:16px}
+.tab span{opacity:0;transition:opacity .16s;line-height:12px;height:12px}
+.tab.on span{opacity:1}
 .fab{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:21;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:30px;font-weight:500;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
 .fab:active{transform:scale(.93)}
 .add:active{transform:scale(.93)}
@@ -399,7 +411,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.12';
+  var VERSION = '3.13';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -675,6 +687,61 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 
   // ================= layar =================
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+  // ================= tema =================
+  var THEME = LS.get('ck_theme', 'light');
+  function applyTheme(mode) {
+    THEME = mode;
+    var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.body.classList.toggle('light', !dark);
+    var meta = document.getElementById('themeMeta');
+    if (meta) meta.setAttribute('content', dark ? '#021024' : '#F4F7FB');
+    var seg = document.querySelectorAll('[data-theme-btn]');
+    for (var i = 0; i < seg.length; i++) seg[i].classList.toggle('on', seg[i].getAttribute('data-theme-btn') === mode);
+    LS.set('ck_theme', mode);
+  }
+  function themeButtons(cur) {
+    var opts = [['light', 'Light'], ['dark', 'Dark'], ['auto', 'Auto']];
+    return '<div class="seg">' + opts.map(function (o) {
+      return '<button type="button" data-act="theme" data-theme-btn="' + o[0] + '" class="' + (o[0] === cur ? 'on' : '') + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
+  }
+
+  // ================= siklus gajian =================
+  function payday() { var n = Number(LS.get('ck_payday', '25')); return (n >= 1 && n <= 31) ? n : 25; }
+  function paydayInfo(todayIso) {
+    var pd = payday();
+    var now = new Date(todayIso + 'T00:00:00');
+    var next = new Date(now.getFullYear(), now.getMonth(), pd);
+    if (next <= now) next = new Date(now.getFullYear(), now.getMonth() + 1, pd);
+    var start = new Date(next.getFullYear(), next.getMonth() - 1, pd);
+    var day = 86400000;
+    return {
+      date: next, start: start,
+      left: Math.max(1, Math.round((next - now) / day)),
+      total: Math.max(1, Math.round((next - start) / day)),
+      elapsed: Math.max(0, Math.round((now - start) / day))
+    };
+  }
+  function paydayCard(d) {
+    if (!d || !d.today) return '';
+    var info = paydayInfo(d.today);
+    var limit = 0, spent = 0;
+    (d.budgets || []).forEach(function (b) { limit += b.limit; spent += Math.min(b.spent, b.limit); });
+    var remaining = limit > 0 ? Math.max(0, limit - spent) : Math.max(0, d.kpi.selisih);
+    var perDay = Math.round(remaining / info.left);
+    var pct = Math.round(info.elapsed / info.total * 100);
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '<div class="card"><h2>Until payday</h2>' +
+      '<div style="display:flex;align-items:baseline;gap:8px">' +
+        '<div class="mono" style="font-size:30px;font-weight:700;letter-spacing:-.02em">' + info.left + '</div>' +
+        '<div class="empty" style="padding:0;font-size:12.5px">days left · ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + '</div></div>' +
+      '<div class="empty" style="padding:4px 0 0;font-size:12px">' + rp(remaining) + ' left for ' + info.left + ' days</div>' +
+      '<div style="margin-top:12px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font-size:12px;color:var(--mut)">Safe to spend per day</span>' +
+        '<b class="mono" style="font-size:15px">' + rp(perDay) + '</b></div>' +
+      '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
+      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday every ' + payday() + 'th</div></div>';
+  }
   function standalone() { return !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)); }
 
   function txRow(t) {
@@ -728,6 +795,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         '</div></div>';
     }
 
+    h += paydayCard(d);
     if (d.health) h += healthCard(d.health);
     h += '<div class="card"><h2>Categories</h2>';
     if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
@@ -932,7 +1000,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       (state.pending.length ? '<button class="btn ghost" data-act="flush" style="margin-top:8px">Send waiting entries</button>' : '') + '</div>' +
       viewPush() +
       '<div class="card"><h2>Install on iPhone</h2><ol class="steps"><li>Open this address in <b>Safari</b></li><li>Tap the <b>Share</b> icon (box with an arrow)</li><li>Choose <b>Add to Home Screen</b></li></ol></div>' +
-      '<div class="card"><h2>App lock</h2>' +
+      '<div class="card"><h2>Appearance</h2><div class="kv"><span>Theme<small>Light, dark, or follow the phone</small></span>' + themeButtons(THEME) + '</div></div>' +
+    '<div class="card"><h2>Pay cycle</h2><div class="kv"><span>Payday<small>Budgets reset on this date each month</small></span>' +
+      '<button class="mini" data-act="set-payday">every ' + payday() + 'th</button></div></div>' +
+    '<div class="card"><h2>App lock</h2>' +
       (LS.get('ck_pin', '')
         ? '<div class="empty" style="padding:0;font-size:13px">PIN is on. The app asks for it every time it opens.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Change PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Remove PIN</button>'
         : '<div class="empty" style="padding:0;font-size:13px">Set a PIN so your finances stay private if someone borrows your phone.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Create PIN</button>') +
@@ -1316,6 +1387,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     $('sheetDetail').innerHTML = prev.html;
     $('sheetDetail').scrollTop = prev.scroll || 0;
     refreshPush();
+  applyTheme(THEME);
   }
   function openBg() { $('sheetBg').hidden = false; }
   function closeSheets() { sheetStack = []; $('sheetBg').hidden = true; $('sheetAdd').hidden = true; $('sheetDetail').hidden = true; }
@@ -1564,6 +1636,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         .catch(function () { out.textContent = 'Could not reach the AI service.'; });
     }
     else if (act === 'goto-insights') setTab('insights');
+    else if (act === 'theme') { applyTheme(el.getAttribute('data-theme-btn')); renderAll(); }
+    else if (act === 'set-payday') {
+      var v = prompt('Tanggal gajian (1-31)', String(payday()));
+      if (v === null) return;
+      var n = parseInt(v, 10);
+      if (!(n >= 1 && n <= 31)) { toast('Masukkan angka 1-31'); return; }
+      LS.set('ck_payday', String(n)); toast('Payday set to ' + n + 'th'); renderAll();
+    }
     else if (act === 'flagged') { state.filter = 'otomatis'; setTab('transaksi'); }
     else if (act === 'card') {
       var deck = $('ccdeck'), total = deck && deck.children ? deck.children.length : 1;
