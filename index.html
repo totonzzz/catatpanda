@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" id="themeMeta" content="#0B1220" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#EEF2F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" id="themeMeta" content="#F4F7FB">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bamboo">
@@ -28,6 +28,14 @@
   --glass:blur(11px) saturate(118%);
   font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
+body.dark{ --bg:#021024; --s1:rgba(193,232,255,.06); --s2:rgba(193,232,255,.10); --line:rgba(193,232,255,.13);
+  --tx:#E9F4FF; --mut:#8FB3D9; --mint:#C1E8FF; --mint-ink:#03172E; --coral:#FFB0A3; --amber:#F3D2A6;
+  --shadow:0 18px 40px rgba(1,8,20,.55);
+  --card:linear-gradient(160deg,rgba(193,232,255,.10),rgba(193,232,255,.045));
+  --tabbg:linear-gradient(180deg,rgba(193,232,255,.12),rgba(193,232,255,.05));
+  background:radial-gradient(64% 46% at 6% -12%, rgba(84,131,179,.34), transparent 62%),
+     radial-gradient(52% 38% at 104% -4%, rgba(193,232,255,.60), transparent 60%),
+     radial-gradient(78% 50% at 50% 110%, rgba(125,160,202,.22), transparent 64%), #021024; background-attachment:fixed }
 body.light{
   --bg:#F4F7FB; --s1:rgba(10,24,38,.035); --s2:rgba(10,24,38,.06); --line:rgba(10,24,38,.12);
   --tx:#0B1B2B; --mut:#5C7488;
@@ -169,9 +177,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   background:linear-gradient(180deg,rgba(5,38,89,.94),rgba(2,16,36,.97));
   backdrop-filter:blur(18px) saturate(130%);-webkit-backdrop-filter:blur(18px) saturate(130%);
   padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto;box-shadow:0 -10px 40px rgba(0,0,0,.5);animation:up .28s cubic-bezier(.2,.8,.2,1)}
-@media (prefers-color-scheme: light){
-  .sheet{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(244,248,255,.98))}
-}
+body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:0 -10px 40px rgba(12,32,52,.18)}
 @keyframes up{from{transform:translateY(40px);opacity:0}}
 .grab{width:38px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 12px}
 .sheet h3{margin:0 0 12px;font-size:18px;display:flex;justify-content:space-between;align-items:center}
@@ -693,6 +699,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     THEME = mode;
     var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.body.classList.toggle('light', !dark);
+    document.body.classList.toggle('dark', dark);
     var meta = document.getElementById('themeMeta');
     if (meta) meta.setAttribute('content', dark ? '#021024' : '#F4F7FB');
     var seg = document.querySelectorAll('[data-theme-btn]');
@@ -707,13 +714,21 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   }
 
   // ================= siklus gajian =================
+  function paydayMode() { return LS.get('ck_paymode', 'last') === 'fixed' ? 'fixed' : 'last'; }
   function payday() { var n = Number(LS.get('ck_payday', '25')); return (n >= 1 && n <= 31) ? n : 25; }
+  function lastWeekday(y, m) {
+    var d = new Date(y, m + 1, 0);
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+    return d;
+  }
+  function paydayDateFor(y, m) {
+    return paydayMode() === 'fixed' ? new Date(y, m, payday()) : lastWeekday(y, m);
+  }
   function paydayInfo(todayIso) {
-    var pd = payday();
     var now = new Date(todayIso + 'T00:00:00');
-    var next = new Date(now.getFullYear(), now.getMonth(), pd);
-    if (next <= now) next = new Date(now.getFullYear(), now.getMonth() + 1, pd);
-    var start = new Date(next.getFullYear(), next.getMonth() - 1, pd);
+    var next = paydayDateFor(now.getFullYear(), now.getMonth());
+    if (next <= now) next = paydayDateFor(now.getFullYear(), now.getMonth() + 1);
+    var start = paydayDateFor(next.getFullYear(), next.getMonth() - 1);
     var day = 86400000;
     return {
       date: next, start: start,
@@ -740,7 +755,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         '<span style="font-size:12px;color:var(--mut)">Safe to spend per day</span>' +
         '<b class="mono" style="font-size:15px">' + rp(perDay) + '</b></div>' +
       '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
-      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday every ' + payday() + 'th</div></div>';
+      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
   }
   function standalone() { return !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)); }
 
@@ -1001,8 +1016,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       viewPush() +
       '<div class="card"><h2>Install on iPhone</h2><ol class="steps"><li>Open this address in <b>Safari</b></li><li>Tap the <b>Share</b> icon (box with an arrow)</li><li>Choose <b>Add to Home Screen</b></li></ol></div>' +
       '<div class="card"><h2>Appearance</h2><div class="kv"><span>Theme<small>Light, dark, or follow the phone</small></span>' + themeButtons(THEME) + '</div></div>' +
-    '<div class="card"><h2>Pay cycle</h2><div class="kv"><span>Payday<small>Budgets reset on this date each month</small></span>' +
-      '<button class="mini" data-act="set-payday">every ' + payday() + 'th</button></div></div>' +
+    '<div class="card"><h2>Pay cycle</h2>' +
+      '<div class="kv"><span>Payday rule<small>Budgets reset on this date each month</small></span>' +
+        '<span class="seg">' +
+          '<button type="button" data-act="paymode" data-paymode="last" class="' + (paydayMode() === 'last' ? 'on' : '') + '">Last weekday</button>' +
+          '<button type="button" data-act="paymode" data-paymode="fixed" class="' + (paydayMode() === 'fixed' ? 'on' : '') + '">Fixed day</button>' +
+        '</span></div>' +
+      (paydayMode() === 'fixed' ? '<div class="kv"><span>Day of month</span><button class="mini" data-act="set-payday">every ' + payday() + 'th</button></div>' : '') +
+    '</div>' +
     '<div class="card"><h2>App lock</h2>' +
       (LS.get('ck_pin', '')
         ? '<div class="empty" style="padding:0;font-size:13px">PIN is on. The app asks for it every time it opens.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Change PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Remove PIN</button>'
@@ -1637,6 +1658,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     }
     else if (act === 'goto-insights') setTab('insights');
     else if (act === 'theme') { applyTheme(el.getAttribute('data-theme-btn')); renderAll(); }
+    else if (act === 'paymode') {
+      var pm = el.getAttribute('data-paymode');
+      LS.set('ck_paymode', pm);
+      toast(pm === 'fixed' ? 'Fixed day: ' + payday() + 'th' : 'Payday: last weekday of the month');
+      renderAll();
+    }
     else if (act === 'set-payday') {
       var v = prompt('Tanggal gajian (1-31)', String(payday()));
       if (v === null) return;
