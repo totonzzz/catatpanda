@@ -352,6 +352,18 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 </style>
 </head>
 <body>
+<script>
+/* terapkan tema sebelum layar digambar, supaya tidak berkedip gelap */
+(function () {
+  try {
+    var m = localStorage.getItem('ck_theme') || 'light';
+    var dark = m === 'dark' || (m === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.body.classList.add(dark ? 'dark' : 'light');
+    var meta = document.getElementById('themeMeta');
+    if (meta) meta.setAttribute('content', dark ? '#021024' : '#F4F7FB');
+  } catch (e) {}
+})();
+</script>
 <div class="offbar" id="offbar" hidden>Offline · showing saved data</div>
 <div class="splash" id="splash" aria-hidden="true">
   <div class="mark"><img src="icons/icon-192.png" alt=""></div>
@@ -417,7 +429,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.14';
+  var VERSION = '3.15';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1247,8 +1259,8 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   }
   function gcell(k, v) { return '<div class="gcell"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
   // ================= keranjang anggaran (Needs / Wants) =================
-  var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
-  var BUCKET_WANTS = ['makan', 'jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
+  var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'makan', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
+  var BUCKET_WANTS = ['jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
   function planTargets() {
     try {
       var x = JSON.parse(LS.get('ck_targets', '') || '{}');
@@ -1499,7 +1511,6 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     $('sheetDetail').innerHTML = prev.html;
     $('sheetDetail').scrollTop = prev.scroll || 0;
     refreshPush();
-  applyTheme(THEME);
   }
   function openBg() { $('sheetBg').hidden = false; }
   function closeSheets() { sheetStack = []; $('sheetBg').hidden = true; $('sheetAdd').hidden = true; $('sheetDetail').hidden = true; }
@@ -2037,6 +2048,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 
   // mulai
   if (LS.get('ck_pin', '')) lockNow();
+  applyTheme(THEME);
   if (connected()) loadMonth(''); else renderAll();
   setTimeout(maybeInstallSheet, 2200);
 })();
