@@ -429,7 +429,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.19';
+  var VERSION = '3.20';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -778,6 +778,12 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
       '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
   }
+  function shortDate(iso) {
+    var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var p = String(iso || '').split('-');
+    if (p.length !== 3) return iso || '';
+    return parseInt(p[2], 10) + ' ' + m[parseInt(p[1], 10) - 1];
+  }
   function standalone() { return !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)); }
 
   function txRow(t) {
@@ -794,7 +800,10 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   }
 
   function viewRingkasan(d) {
-    var h = '', k = d.kpi, sel = k.selisih, isCur = d.month === d.today.slice(0, 7);
+    var h = '', k = d.kpi, sel = k.selisih;
+    var isCur = (d.period && d.period.start && d.period.end)
+      ? (d.today >= d.period.start && d.today <= d.period.end)
+      : d.month === d.today.slice(0, 7);
     if (isIOS() && !standalone() && LS.get('ck_hint', '') !== '1') {
       h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Got it</button></div>';
     }
@@ -1111,6 +1120,8 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
           '<button type="button" data-act="paymode" data-paymode="fixed" class="' + (paydayMode() === 'fixed' ? 'on' : '') + '">Fixed day</button>' +
         '</span></div>' +
       (paydayMode() === 'fixed' ? '<div class="kv"><span>Day of month</span><button class="mini" data-act="set-payday">every ' + payday() + 'th</button></div>' : '') +
+      '<div class="kv"><span>Payday periods<small>Count each month from payday to the day before the next one</small></span>' +
+        '<button class="mini" data-act="toggle-period">' + (periodMode() === 'payday' ? 'on' : 'off') + '</button></div>' +
     '</div>' +
     '<div class="card"><h2>App lock</h2>' +
       (LS.get('ck_pin', '')
@@ -1215,7 +1226,9 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === state.tab); });
     var d = state.data;
     if (d) {
-      $('monthLabel').textContent = d.label + (state.fromCache ? ' ·' : '');
+      var pl = d.label;
+      if (d.period && d.period.mode === 'payday') pl += ' · ' + shortDate(d.period.start) + ' – ' + shortDate(d.period.end);
+      $('monthLabel').textContent = pl + (state.fromCache ? ' ·' : '');
       $('prev').disabled = !d.prev; $('next').disabled = !d.next;
       $('streak').innerHTML = '🔥 ' + d.streak + ' days';
     }
@@ -1337,6 +1350,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   // ================= keranjang anggaran (Needs / Wants) =================
   var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'makan', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
   var BUCKET_WANTS = ['jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
+  function periodMode() { var s = serverSettings(); return (s && s.periodMode) || LS.get('ck_period', 'calendar'); }
   function planTargets() {
     var s = serverSettings();
     if (s && s.needs > 0 && s.wants > 0 && (s.needs + s.wants + (s.savings || 0)) === 100) {
@@ -1857,6 +1871,15 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     }
     else if (act === 'goto-insights') setTab('insights');
     else if (act === 'theme') { applyTheme(el.getAttribute('data-theme-btn')); renderAll(); }
+    else if (act === 'toggle-period') {
+      var nextMode = periodMode() === 'payday' ? 'calendar' : 'payday';
+      LS.set('ck_period', nextMode);
+      saveSetting('period_mode', nextMode).then(function (r) {
+        if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
+        toast(nextMode === 'payday' ? 'Periods now follow payday' : 'Back to calendar months');
+        afterSettings();
+      }).catch(function () { toast('Cannot reach the server'); });
+    }
     else if (act === 'paymode') {
       var pm = el.getAttribute('data-paymode');
       LS.set('ck_paymode', pm);
