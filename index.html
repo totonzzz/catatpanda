@@ -227,7 +227,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 @keyframes splashIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.splash .mark,.splash .name{animation:none}.splash{transition:none}}
 /* perlu dicek */
-.banner .bc{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 0 0;font:inherit;font-weight:700;color:var(--mint);cursor:pointer}
+.banner .bc{display:block;width:100%;text-align:center;background:color-mix(in srgb,var(--mint) 14%,transparent);border:1px solid color-mix(in srgb,var(--mint) 38%,transparent);border-radius:14px;padding:11px 14px;margin-top:12px;font:inherit;font-weight:700;color:var(--mint);cursor:pointer}
 .revitem{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--s2)}
 .revtext{font-size:14px;font-weight:600;line-height:1.35;word-break:break-word}
 .revmeta{font-size:12px;color:var(--mut);margin-top:6px}
@@ -445,7 +445,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.21';
+  var VERSION = '3.22';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1512,6 +1512,8 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     return { needs: 50, wants: 30, savings: 20 };
   }
   function bucketOf(name) {
+    var s = serverSettings();
+    if (s && s.buckets && s.buckets[name]) return s.buckets[name];
     var n = String(name || '').toLowerCase();
     if (BUCKET_NEEDS.indexOf(n) >= 0) return 'needs';
     if (BUCKET_WANTS.indexOf(n) >= 0) return 'wants';
@@ -1534,10 +1536,11 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     Object.keys(cats).forEach(function (n) { names[n] = true; });
     Object.keys(limits).forEach(function (n) { names[n] = true; });
     var out = { needs: { key: 'needs', label: 'Needs', pct: plan.needs, note: 'Bills, transport, groceries, health', cats: [] },
-                wants: { key: 'wants', label: 'Wants', pct: plan.wants, note: 'Dining out, fun, shopping', cats: [] } };
+                wants: { key: 'wants', label: 'Wants', pct: plan.wants, note: 'Dining out, fun, shopping', cats: [] },
+                skip:  { key: 'skip', label: 'Not counted', pct: 0, note: 'Out of the 50/30/20 ceiling', cats: [] } };
     Object.keys(names).forEach(function (n) {
       var b = bucketOf(n);
-      out[b].cats.push({ name: n, spent: cats[n] || 0, limit: limits[n] || 0 });
+      (out[b] || out.skip).cats.push({ name: n, spent: cats[n] || 0, limit: limits[n] || 0 });
     });
     ['needs', 'wants'].forEach(function (k) {
       var g = out[k];
@@ -1609,6 +1612,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
             '<span class="mono ' + (cov ? 'neg' : '') + '" style="font-size:11.5px">' + rp(c.spent) + (c.limit ? ' / ' + rp(c.limit) : '') + '</span></div>' +
             (c.limit ? '<div class="hbar" style="margin-top:5px"><span class="' + (cov ? 'over' : '') + '" style="width:' + cp + '%;background:' + (cov ? '' : catColor(c.name)) + '"></span></div>' : '') +
             '<div class="partact" style="margin-top:6px">' +
+              '<button class="mini" data-act="bucket" data-cat="' + esc(c.name) + '">' + bucketLabel(c.name) + '</button>' +
               '<button class="mini" data-act="budget-view" data-cat="' + esc(c.name) + '">View</button>' +
               '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' + (c.limit ? 'Edit' : 'Set budget') + '</button>' +
             '</div>' +
@@ -1617,6 +1621,23 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       }
       html += '</div>';
     });
+    var sk = env.groups.skip;
+    if (sk && sk.cats.length) {
+      html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
+        '<div class="parttop"><span>' + sk.label + ' <span class="empty" style="font-size:11px">· out of ceiling</span></span>' +
+        '<span class="mono">' + rp(sk.spent) + '</span></div>' +
+        '<div class="empty" style="padding:2px 0 0;font-size:11.5px">' + sk.note + '</div>';
+      sk.cats.forEach(function (c) {
+        html += '<div class="part" style="margin-top:10px;margin-bottom:0"><div class="parttop"><span>' + esc(c.name) + '</span>' +
+          '<span class="mono" style="font-size:11.5px">' + rp(c.spent) + '</span></div>' +
+          '<div class="partact" style="margin-top:6px">' +
+            '<button class="mini" data-act="bucket" data-cat="' + esc(c.name) + '">' + bucketLabel(c.name) + '</button>' +
+            '<button class="mini" data-act="budget-view" data-cat="' + esc(c.name) + '">View</button>' +
+            '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' + (c.limit ? 'Edit' : 'Set budget') + '</button>' +
+          '</div></div>';
+      });
+      html += '</div>';
+    }
     html += '<div class="partact" style="margin-top:14px">' +
       '<button class="mini" data-act="plan-adjust">Adjust plan</button>' +
       '<button class="mini" data-act="budget-add">Add a budget</button></div>';
@@ -1705,6 +1726,10 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     $('sheetDetail').innerHTML = html;
   }
 
+  function bucketLabel(name) {
+    var b = bucketOf(name);
+    return b === 'needs' ? 'Needs' : b === 'wants' ? 'Wants' : 'Not counted';
+  }
   function openPlanForm() {
     var p = planTargets();
     openBg();
@@ -1986,6 +2011,16 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
+    else if (act === 'bucket') {
+      var bc = el.getAttribute('data-cat');
+      var cur = bucketOf(bc);
+      var next = cur === 'needs' ? 'wants' : cur === 'wants' ? 'off' : 'needs';
+      saveSetting('bucket:' + bc, next).then(function (r) {
+        if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
+        toast(bc + ' → ' + (next === 'needs' ? 'Needs' : next === 'wants' ? 'Wants' : 'Not counted'));
+        afterSettings();
+      }).catch(function () { toast('Cannot reach the server'); });
+    }
     else if (act === 'plan-adjust') openPlanForm();
     else if (act === 'budget-add') openBudgetForm('');
     else if (act === 'budget-view') openBudgetDetail(el.getAttribute('data-cat'));
