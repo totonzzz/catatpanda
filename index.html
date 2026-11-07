@@ -429,7 +429,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.16';
+  var VERSION = '3.17';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1788,16 +1788,6 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
         else toast((r && r.error) || 'Could not remove');
       }).catch(function () { toast('Cannot reach the server'); });
     }
-    else if (act === 'cicilan-save') {
-      var nm = String($('ciName').value || '').trim();
-      if (!nm) { $('ciErr').textContent = 'Give the instalment a name'; return; }
-      el.disabled = true; el.textContent = 'Saving…';
-      api('cicilan_add', { nama: nm, per: $('ciPer').value, tenor: $('ciTenor').value, paid: $('ciPaid').value, due: $('ciDue').value })
-        .then(function (r) {
-          if (r && r.ok) { closeSheets(); toast('✅ Instalment saved'); var pr3 = loadMonth(state.month, { silent: true }); if (pr3 && pr3.then) pr3.then(renderAll); }
-          else { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = (r && r.error) || 'Could not save'; }
-        }).catch(function () { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = 'Cannot reach the server'; });
-    }
     else if (act === 'budget-del') {
       var bcat0 = el.getAttribute('data-cat');
       if (!confirm('Remove the budget for ' + bcat0 + '?')) return;
@@ -1939,6 +1929,16 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
         if (r && r.ok) { toast('Budget removed'); afterBudgetChange(); }
         else toast((r && r.error) || 'Could not remove the budget');
       }).catch(function () { toast('Cannot reach the server'); });
+    }
+    else if (act === 'cicilan-save') {
+      var nm = String($('ciName').value || '').trim();
+      if (!nm) { $('ciErr').textContent = 'Give the instalment a name'; return; }
+      el.disabled = true; el.textContent = 'Saving…';
+      api('cicilan_add', { nama: nm, per: $('ciPer').value, tenor: $('ciTenor').value, paid: $('ciPaid').value, due: $('ciDue').value })
+        .then(function (r) {
+          if (r && r.ok) { closeSheets(); toast('✅ Instalment saved'); var pr3 = loadMonth(state.month, { silent: true }); if (pr3 && pr3.then) pr3.then(renderAll); }
+          else { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = (r && r.error) || 'Could not save'; }
+        }).catch(function () { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'install-ok') { LS.set('ck_install_seen', '1'); closeSheets(); toast('You can install later from Settings'); }
     else if (act === 'plan-save') {
