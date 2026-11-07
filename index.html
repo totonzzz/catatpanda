@@ -429,7 +429,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.18';
+  var VERSION = '3.19';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -726,8 +726,17 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   }
 
   // ================= siklus gajian =================
-  function paydayMode() { return LS.get('ck_paymode', 'last') === 'fixed' ? 'fixed' : 'last'; }
-  function payday() { var n = Number(LS.get('ck_payday', '25')); return (n >= 1 && n <= 31) ? n : 25; }
+  function serverSettings() { return (state.data && state.data.settings) || null; }
+  function paydayMode() {
+    var s = serverSettings();
+    if (s && s.paydayMode) return s.paydayMode === 'fixed' ? 'fixed' : 'last';
+    return LS.get('ck_paymode', 'last') === 'fixed' ? 'fixed' : 'last';
+  }
+  function payday() {
+    var s = serverSettings();
+    var n = (s && s.paydayDay) ? Number(s.paydayDay) : Number(LS.get('ck_payday', '25'));
+    return (n >= 1 && n <= 31) ? n : 25;
+  }
   function lastWeekday(y, m) {
     var d = new Date(y, m + 1, 0);
     while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
@@ -1329,6 +1338,10 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'makan', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
   var BUCKET_WANTS = ['jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
   function planTargets() {
+    var s = serverSettings();
+    if (s && s.needs > 0 && s.wants > 0 && (s.needs + s.wants + (s.savings || 0)) === 100) {
+      return { needs: s.needs, wants: s.wants, savings: s.savings || 0 };
+    }
     try {
       var x = JSON.parse(LS.get('ck_targets', '') || '{}');
       if (x && x.needs > 0 && x.wants > 0) return { needs: x.needs, wants: x.wants, savings: Math.max(0, x.savings || 0) };
@@ -1342,6 +1355,12 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     for (var i = 0; i < BUCKET_NEEDS.length; i++) if (n.indexOf(BUCKET_NEEDS[i].split(' ')[0]) === 0) return 'needs';
     return 'wants';
   }
+  function saveSetting(key, value) { return api('settings_set', { key: key, value: String(value) }); }
+  function afterSettings() {
+    var pr = loadMonth(state.month, { silent: true });
+    if (pr && pr.then) pr.then(renderAll); else renderAll();
+  }
+
   function envelopeData(d) {
     var plan = planTargets();
     var income = (d.kpi && d.kpi.masuk) || 0;
@@ -1841,15 +1860,23 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     else if (act === 'paymode') {
       var pm = el.getAttribute('data-paymode');
       LS.set('ck_paymode', pm);
-      toast(pm === 'fixed' ? 'Fixed day: ' + payday() + 'th' : 'Payday: last weekday of the month');
-      renderAll();
+      saveSetting('payday_mode', pm).then(function (r) {
+        if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
+        toast(pm === 'fixed' ? 'Fixed day: ' + payday() + 'th' : 'Payday: last weekday of the month');
+        afterSettings();
+      }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'set-payday') {
       var v = prompt('Tanggal gajian (1-31)', String(payday()));
       if (v === null) return;
       var n = parseInt(v, 10);
       if (!(n >= 1 && n <= 31)) { toast('Masukkan angka 1-31'); return; }
-      LS.set('ck_payday', String(n)); toast('Payday set to ' + n + 'th'); renderAll();
+      LS.set('ck_payday', String(n));
+      saveSetting('payday_day', n).then(function (r) {
+        if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
+        toast('Payday set to ' + n + 'th');
+        afterSettings();
+      }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'flagged') { state.filter = 'otomatis'; setTab('transaksi'); }
     else if (act === 'card') {
@@ -1990,7 +2017,16 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       var n3 = parseInt(String($('pSav').value).replace(/\D/g, ''), 10) || 0;
       if (n1 + n2 + n3 !== 100) { $('pErr').textContent = 'Needs + Wants + Savings must add up to 100% (now ' + (n1 + n2 + n3) + '%)'; return; }
       LS.set('ck_targets', JSON.stringify({ needs: n1, wants: n2, savings: n3 }));
-      closeSheets(); toast('Plan updated'); renderAll();
+      Promise.all([
+        saveSetting('target_needs', n1),
+        saveSetting('target_wants', n2),
+        saveSetting('target_savings', n3)
+      ]).then(function (res) {
+        var bad = res.filter(function (r) { return !r || !r.ok; })[0];
+        closeSheets();
+        toast(bad ? ((bad && bad.error) || 'Saved on this phone only') : 'Plan updated');
+        afterSettings();
+      }).catch(function () { closeSheets(); toast('Saved on this phone only'); renderAll(); });
     }
     else if (act === 'budget-save') {
       var bcat = $('bcat').value, blim = String($('blim').value).replace(/\D/g, '');
