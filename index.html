@@ -278,6 +278,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .cc-dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
 .cc-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
 .cc-dots i.on{background:var(--mint);transform:scale(1.3)}
+.catrowitem{border-radius:12px;cursor:pointer;transition:background .15s;padding:2px 4px;margin:0 -4px}
+.catrowitem:active{background:rgba(193,232,255,.06)}
 /* category chips */
 .catsel{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
 .catsel::-webkit-scrollbar{display:none}
@@ -397,7 +399,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.9';
+  var VERSION = '3.12';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -542,7 +544,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       html += '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat-pick="' + esc(c) + '">' + catTile(c, 44) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
     });
     html += '</div>';
-    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').innerHTML = html;
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list'; $('sheetDetail').innerHTML = html;
   }
 
   var SRC = { form: 'Tally form', app: 'This app', notif: 'Bank notification (auto)' };
@@ -737,7 +739,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
       if (d.categories.length > 5) h += '<div class="lg"><span class="n" style="color:var(--mut)">+' + (d.categories.length - 5) + ' more</span></div>';
       h += '</div></div><div class="catrow">';
       d.categories.forEach(function (c, i) {
-        h += '<div><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
+        h += '<div class="catrowitem" data-act="cat-view" data-cat="' + esc(c.name) + '"><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
           '<div class="bar"><span style="width:' + Math.max(c.pct, 1.5) + '%;background:' + COLORS[i % COLORS.length] + '"></span></div></div>';
       });
       h += '</div>';
@@ -1185,7 +1187,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     (d.budgets || []).forEach(function (x) {
       html += '<div class="part"><div class="parttop"><span>' + esc(x.name) + '</span><span class="mono ' + (x.over ? 'neg' : '') + '">' + rp(x.spent) + ' / ' + rp(x.limit) + '</span></div>' +
         '<div class="hbar"><span class="' + (x.over ? 'over' : '') + '" style="width:' + Math.min(100, x.pct) + '%"></span></div>' +
-        '<div class="partact"><button class="mini" data-act="budget-edit" data-cat="' + esc(x.name) + '">Edit</button>' +
+        '<div class="partact"><button class="mini" data-act="budget-view" data-cat="' + esc(x.name) + '">View</button>' +
+        '<button class="mini" data-act="budget-edit" data-cat="' + esc(x.name) + '">Edit</button>' +
         '<button class="mini danger" data-act="budget-del" data-cat="' + esc(x.name) + '">Remove</button></div></div>';
     });
     html += '<button class="btn ghost" data-act="budget-add" style="margin-top:10px">Add a budget</button></div>';
@@ -1194,6 +1197,84 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     return html;
   }
   function viewInsights(d) { return insightsBody(); }
+
+  function catTransactions(name) {
+    var d = state.data || {};
+    return (d.recent || []).filter(function (t) { return t.cat === name && t.tipe === 'Keluar'; })
+      .sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  }
+  function txRowsHtml(rows) {
+    return rows.map(function (t) {
+      return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
+        '<div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div>' +
+        '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(t.date) + ' · ' + esc(t.metode || '') + '</div></div>' +
+        '<div class="a mono neg">' + rp(t.amount) + '</div></button>';
+    }).join('');
+  }
+  function openCategoryDetail(name) {
+    var rows = catTransactions(name);
+    var total = rows.reduce(function (s, t) { return s + t.amount; }, 0);
+    var d = state.data || {};
+    var share = d.kpi && d.kpi.keluar ? Math.round(total / d.kpi.keluar * 100) : 0;
+
+    var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
+      '<i class="cidot" style="color:' + catColor(name) + '">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
+      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+
+    html += '<div class="card" style="margin-top:6px">' +
+      '<div class="empty" style="padding:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase">Spent this month</div>' +
+      '<div class="mono" style="font-size:22px;font-weight:700;margin-top:2px">' + rp(total) + '</div>' +
+      '<div class="empty" style="padding:2px 0 0;font-size:12px">' + share + '% of all spending · ' +
+        rows.length + (rows.length === 1 ? ' transaction' : ' transactions') + '</div></div>';
+
+    html += rows.length
+      ? '<div class="card"><h2>Transactions</h2>' + txRowsHtml(rows) + '</div>'
+      : '<div class="card"><div class="empty" style="padding:0">No spending in this category this month.</div></div>';
+
+    openBg();
+    $('sheetDetail').hidden = false;
+    $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = html;
+  }
+
+  function openBudgetDetail(name) {
+    var d = state.data; if (!d) return;
+    var info = null;
+    (d.budgets || []).forEach(function (b) { if (b.name === name) info = b; });
+    if (!info) return;
+
+    var rows = catTransactions(name);
+    var total = rows.reduce(function (s, t) { return s + t.amount; }, 0);
+    var left = info.limit - total;
+    var pct = info.limit ? Math.round(total / info.limit * 100) : 0;
+
+    var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
+      '<i class="cidot" style="color:' + catColor(name) + '">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
+      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+
+    html += '<div class="card" style="margin-top:6px">' +
+      '<div class="empty" style="padding:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase">Used this month</div>' +
+      '<div class="mono ' + (total > info.limit ? 'neg' : '') + '" style="font-size:22px;font-weight:700;margin-top:2px">' + rp(total) + '</div>' +
+      '<div class="empty" style="padding:2px 0 0;font-size:12px">of ' + rp(info.limit) + ' budget</div>' +
+      '<div class="hbar" style="margin-top:10px"><span class="' + (total > info.limit ? 'over' : '') + '" style="width:' + Math.min(100, pct) + '%"></span></div>' +
+      '<div class="empty" style="padding:8px 0 0;font-size:12px">' +
+        (left >= 0 ? rp(left) + ' left · ' + pct + '% used' : rp(-left) + ' over the limit · ' + pct + '% used') +
+        ' · ' + rows.length + (rows.length === 1 ? ' transaction' : ' transactions') +
+      '</div></div>';
+
+    if (!rows.length) {
+      html += '<div class="card"><div class="empty" style="padding:0">No spending in this category this month.</div></div>';
+    } else {
+      html += '<div class="card"><h2>Transactions</h2>';
+      html += txRowsHtml(rows);
+      html += '</div>';
+    }
+
+    openBg();
+    $('sheetDetail').hidden = false;
+    $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = html;
+  }
 
   function openBudgetForm(cat) {
     openBg(); $('sheetDetail').hidden = false;
@@ -1224,8 +1305,20 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   }
 
   // ================= sheet catat & detail =================
+  var sheetStack = [];
+  function sheetPush() {
+    var el = $('sheetDetail');
+    if (!el || el.hidden || !el.innerHTML.trim() || el.dataset.kind === 'detail') return;
+    sheetStack.push({ html: el.innerHTML, scroll: el.scrollTop });
+  }
+  function sheetBack() {
+    var prev = sheetStack.pop(); if (!prev) return;
+    $('sheetDetail').innerHTML = prev.html;
+    $('sheetDetail').scrollTop = prev.scroll || 0;
+    refreshPush();
+  }
   function openBg() { $('sheetBg').hidden = false; }
-  function closeSheets() { $('sheetBg').hidden = true; $('sheetAdd').hidden = true; $('sheetDetail').hidden = true; }
+  function closeSheets() { sheetStack = []; $('sheetBg').hidden = true; $('sheetAdd').hidden = true; $('sheetDetail').hidden = true; }
   function sheetOpen() { return !$('sheetAdd').hidden || !$('sheetDetail').hidden; }
 
   function fillSelects() {
@@ -1355,11 +1448,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
   }
 
   function openDetail(id, confirmDel) {
+    if (!confirmDel) sheetPush();
     var t = null; (state.data ? state.data.recent : []).forEach(function (x) { if (x.id === id) t = x; });
     if (!t) return;
     var inc = t.tipe === 'Masuk' && !t.loan;
     function row(k, v) { return '<div class="kv"><span style="color:var(--mut)">' + k + '</span><span style="text-align:right">' + esc(v) + '</span></div>'; }
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    var backBtn = sheetStack.length ? '<button class="iconbtn" data-act="sheet-back" aria-label="Back">←</button>' : '';
+    $('sheetDetail').dataset.kind = 'detail';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><span style="display:inline-flex;gap:6px">' + backBtn + '<button class="iconbtn" data-close aria-label="Close">✕</button></span></h3>' +
       '<div style="text-align:center;margin:4px 0 14px"><div class="ico" style="margin:0 auto 8px;width:52px;height:52px;font-size:26px">' + esc(t.emoji) + '</div>' +
       '<div style="font-weight:700;font-size:17px">' + esc(t.desc) + '</div><div class="mono ' + (t.loan ? 'warn' : (inc ? 'pos' : '')) + '" style="font-size:28px;margin-top:4px">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>' +
       row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) + row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
@@ -1443,6 +1539,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
     if (act === 'retry') loadMonth(state.month, { manual: true });
     else if (act === 'review') openReview();
     else if (act === 'budget-add') openBudgetForm('');
+    else if (act === 'budget-view') openBudgetDetail(el.getAttribute('data-cat'));
+    else if (act === 'cat-view') openCategoryDetail(el.getAttribute('data-cat'));
     else if (act === 'budget-edit') openBudgetForm(el.getAttribute('data-cat'));
     else if (act === 'budget-del') {
       var bcat0 = el.getAttribute('data-cat');
@@ -1597,6 +1695,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
         })
         .catch(function () { out.textContent = 'Could not reach the AI service.'; });
     }
+    else if (act === 'sheet-back') { sheetBack(); }
     else if (act === 'pin-save') {
       var p1 = $('pin1').value.trim(), p2 = $('pin2').value.trim();
       if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN must be 4–6 digits'; return; }
