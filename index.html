@@ -365,6 +365,40 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .locksub{font-size:13px;color:var(--mut);margin:6px 0 18px}
 .lockbox input{width:100%;text-align:center;font-size:26px;letter-spacing:.35em;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--tx)}
 .lockbox input:focus{outline:2px solid var(--mint);outline-offset:1px}
+
+/* ===== bar bawah gaya pil (tab aktif jadi pil putih) ===== */
+.tabbar{display:flex !important;grid-template-columns:none !important;justify-content:space-between;gap:4px;
+  padding:8px 10px;border-radius:999px;background:#0F1419;border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 18px 40px rgba(0,0,0,.38)}
+.tab{flex:1 1 auto;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:0;
+  padding:10px 0;border-radius:999px;background:none;color:#8A94A6;transition:background .18s,color .18s}
+.tab svg{width:21px;height:21px;stroke-width:1.9}
+.tab span{display:none;opacity:1;height:auto;line-height:1}
+.tab.on{flex:0 0 auto;gap:8px;padding:10px 18px;background:#FFFFFF;color:#0B1B2B;
+  border-radius:999px;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+.tab.on span{display:inline;font-size:13.5px;font-weight:600;color:#0B1B2B}
+.tab.on svg{stroke-width:2}
+
+/* ===== bar bawah: kaca + pil bergeser ===== */
+.tabbar{display:flex !important;grid-template-columns:none !important;align-items:center;justify-content:space-between;
+  padding:7px 8px;border-radius:999px;position:relative;overflow:hidden;
+  background:rgba(255,255,255,.10);
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 20px 44px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.30)}
+.navpill{position:absolute;top:7px;bottom:7px;left:0;border-radius:999px;
+  background:rgba(255,255,255,.92);
+  box-shadow:0 6px 18px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.9);
+  transition:transform .34s cubic-bezier(.22,.8,.2,1), width .34s cubic-bezier(.22,.8,.2,1);z-index:0}
+.tab{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:7px 0;border-radius:999px;background:none;color:rgba(255,255,255,.62);position:relative;z-index:1;
+  transition:color .25s ease}
+.tab svg{width:20px;height:20px;stroke-width:1.9;transition:transform .25s ease}
+.tab .nlabel{display:block;font-size:9.5px;font-weight:600;line-height:1;opacity:0;transform:translateY(2px);
+  transition:opacity .25s ease,transform .25s ease;white-space:nowrap}
+.tab.on{color:#0B1B2B}
+.tab.on svg{transform:scale(.94)}
+.tab.on .nlabel{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -397,11 +431,81 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <main id="view" class="view"></main>
 
 <nav class="tabbar" id="tabbar" hidden aria-label="Main menu">
-  <button class="tab on" data-tab="ringkasan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg><span>Overview</span></button>
-  <button class="tab" data-tab="transaksi"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></svg><span>Transactions</span></button>
-  <button class="tab" data-tab="insights"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span>Insights</span></button>
-  <button class="tab" data-tab="dompet"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3"/><path d="M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16.5" cy="14" r="1.2"/></svg><span>Wallet</span></button>
-  <button class="tab" data-tab="setelan"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Settings</span></button>
+  <span class="navpill" id="navPill" aria-hidden="true"></span>
+  <button class="tab on" data-tab="ringkasan" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-house"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+  <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg><span class="nlabel">Home</span></button>
+  <button class="tab" data-tab="transaksi" aria-label="Transactions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-receipt-text"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M13 16H8" />
+  <path d="M14 8H8" />
+  <path d="M16 12H8" />
+  <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></svg><span class="nlabel">Transactions</span></button>
+  <button class="tab" data-tab="insights" aria-label="Insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-chart-pie"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />
+  <path d="M21.21 15.89A10 10 0 1 1 8 2.83" /></svg><span class="nlabel">Insights</span></button>
+  <button class="tab" data-tab="dompet" aria-label="Wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-wallet"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></svg><span class="nlabel">Wallet</span></button>
+  <button class="tab" data-tab="setelan" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><svg
+  class="lucide lucide-settings-2"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M14 17H5" />
+  <path d="M19 7h-9" />
+  <circle cx="17" cy="17" r="3" />
+  <circle cx="7" cy="7" r="3" /></svg><span class="nlabel">Settings</span></button>
 </nav>
 <button class="fab" id="fab" aria-label="Add transaction">+</button>
 
@@ -445,7 +549,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.22';
+  var VERSION = '3.24';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -794,6 +898,20 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
       '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
       '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
   }
+
+  function syncNav() {
+    var bar = document.getElementById('tabbar');
+    var pill = document.getElementById('navPill');
+    if (!bar || !pill || bar.hidden) return;
+    var on = bar.querySelector('.tab.on');
+    if (!on) return;
+    var w = on.offsetWidth, x = on.offsetLeft;
+    var pad = 8;
+    pill.style.width = Math.max(0, w - 0) + 'px';
+    pill.style.transform = 'translateX(' + (x) + 'px)';
+  }
+  window.addEventListener('resize', function () { setTimeout(syncNav, 60); });
+
   function shortDate(iso) {
     var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var p = String(iso || '').split('-');
@@ -1240,6 +1358,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     $('hdr').hidden = state.tab === 'setelan';
     $('tabbar').hidden = false;
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === state.tab); });
+    requestAnimationFrame(syncNav);
     var d = state.data;
     if (d) {
       var pl = d.label;
