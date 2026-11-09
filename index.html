@@ -158,16 +158,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .filters::-webkit-scrollbar{display:none}
 .filters button{flex:none;border:1px solid var(--line);background:var(--s1);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
 .filters button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
-  padding:6px 8px;border:1px solid var(--line);border-radius:26px;
-  background:var(--tabbg);
-  backdrop-filter:blur(15px) saturate(125%);-webkit-backdrop-filter:blur(15px) saturate(125%);
-  box-shadow:0 14px 34px rgba(1,8,20,.5),inset 0 1px 0 rgba(193,232,255,.14)}
-.tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--mut);padding:4px 0;cursor:pointer}
-.tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tab.on{color:var(--mint);background:color-mix(in srgb,var(--mint) 14%,transparent);border-radius:16px}
-.tab span{opacity:0;transition:opacity .16s;line-height:12px;height:12px}
-.tab.on span{opacity:1}
 .fab{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:21;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:30px;font-weight:500;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
 .fab:active{transform:scale(.93)}
 .add:active{transform:scale(.93)}
@@ -367,49 +357,31 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .lockbox input:focus{outline:2px solid var(--mint);outline-offset:1px}
 
 /* ===== bar bawah gaya pil (tab aktif jadi pil putih) ===== */
-.tab{flex:1 1 auto;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:0;
-  padding:10px 0;border-radius:999px;background:none;color:#8A94A6;transition:background .18s,color .18s}
-.tab svg{width:21px;height:21px;stroke-width:1.9}
-.tab span{display:none;opacity:1;height:auto;line-height:1}
-.tab.on{flex:0 0 auto;gap:8px;padding:10px 18px;background:#FFFFFF;color:#0B1B2B;
-  border-radius:999px;box-shadow:0 8px 18px rgba(0,0,0,.28)}
-.tab.on span{display:inline;font-size:13.5px;font-weight:600;color:#0B1B2B}
-.tab.on svg{stroke-width:2}
 
-.navpill{position:absolute;top:7px;bottom:7px;left:0;border-radius:999px;
-  background:rgba(255,255,255,.92);
-  box-shadow:0 6px 18px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.9);
-  transition:transform .34s cubic-bezier(.22,.8,.2,1), width .34s cubic-bezier(.22,.8,.2,1);z-index:0}
-.tab{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  padding:7px 0;border-radius:999px;background:none;color:rgba(255,255,255,.62);position:relative;z-index:1;
-  transition:color .25s ease}
-.tab svg{width:20px;height:20px;stroke-width:1.9;transition:transform .25s ease}
-.tab .nlabel{display:block;font-size:9.5px;font-weight:600;line-height:1;opacity:0;transform:translateY(2px);
-  transition:opacity .25s ease,transform .25s ease;white-space:nowrap}
-.tab.on{color:#0B1B2B}
-.tab.on svg{transform:scale(.94)}
-.tab.on .nlabel{opacity:1;transform:none}
 
-/* ===== bar bawah: kaca gelap + pil bergeser ===== */
+/* ===== bar bawah: kaca + pil bergeser ===== */
+
+/* ===== bar bawah (satu sumber kebenaran) ===== */
 .tabbar[hidden]{display:none !important}
 .tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;
-  display:flex;align-items:center;justify-content:space-between;gap:2px;
-  padding:7px 8px;border-radius:999px;overflow:hidden;
-  background:rgba(12,18,26,.74);
-  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 20px 44px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.22)}
-.navpill{position:absolute;top:7px;bottom:7px;left:0;border-radius:999px;background:rgba(255,255,255,.94);
-  box-shadow:0 6px 18px rgba(0,0,0,.22);z-index:0;
-  transition:transform .34s cubic-bezier(.22,.8,.2,1), width .34s cubic-bezier(.22,.8,.2,1)}
-.tab{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  padding:7px 0;border-radius:999px;background:none;border:0;position:relative;z-index:1;
-  color:rgba(255,255,255,.66);transition:color .25s ease}
-.tab svg{width:20px;height:20px;stroke-width:1.9}
-.tab .nlabel{font-size:9.5px;font-weight:600;line-height:1;opacity:0;transform:translateY(2px);
-  transition:opacity .25s ease,transform .25s ease;white-space:nowrap}
+  display:flex;align-items:center;justify-content:space-between;gap:0;
+  height:56px;box-sizing:border-box;padding:6px;overflow:hidden;border-radius:999px;
+  background:rgba(10,14,20,.42);
+  -webkit-backdrop-filter:blur(28px) saturate(200%);backdrop-filter:blur(28px) saturate(200%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 18px 40px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.28)}
+.navpill{position:absolute;top:6px;bottom:6px;left:6px;width:64px;border-radius:999px;
+  background:rgba(255,255,255,.95);box-shadow:0 4px 14px rgba(0,0,0,.20);z-index:0;will-change:transform;
+  transition:transform .38s cubic-bezier(.22,.9,.25,1)}
+.tabbar:not(.navready) .navpill{transition:none}
+.tab{flex:1 1 0;min-width:0;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:0;border-radius:999px;background:none;border:0;position:relative;z-index:1;
+  color:rgba(255,255,255,.60);transition:color .28s ease;cursor:pointer}
+.tab svg{width:19px;height:19px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tab .nlabel{font-size:8.5px;font-weight:600;line-height:1;opacity:0;transition:opacity .28s ease;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab.on{color:#0B1B2B}
-.tab.on .nlabel{opacity:1;transform:none}
+.tab.on .nlabel{opacity:1}
 </style>
 </head>
 <body>
@@ -491,7 +463,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.25';
+  var VERSION = '3.27';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -845,12 +817,16 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     var bar = document.getElementById('tabbar');
     var pill = document.getElementById('navPill');
     if (!bar || !pill || bar.hidden) return;
-    var on = bar.querySelector('.tab.on');
+    var tabs = bar.querySelectorAll('.tab');
+    if (!tabs.length) return;
+    var on = null;
+    for (var i = 0; i < tabs.length; i++) if (tabs[i].classList.contains('on')) { on = tabs[i]; break; }
     if (!on) return;
-    var w = on.offsetWidth, x = on.offsetLeft;
-    var pad = 8;
-    pill.style.width = Math.max(0, w - 0) + 'px';
-    pill.style.transform = 'translateX(' + (x) + 'px)';
+    var w = on.offsetWidth;
+    var x = on.offsetLeft;
+    pill.style.width = w + 'px';
+    pill.style.transform = 'translateX(' + (x - 6) + 'px)';
+    if (!bar.classList.contains('navready')) setTimeout(function () { bar.classList.add('navready'); }, 60);
   }
   window.addEventListener('resize', function () { setTimeout(syncNav, 60); });
 
@@ -1300,7 +1276,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     $('hdr').hidden = state.tab === 'setelan';
     $('tabbar').hidden = false;
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) { b.classList.toggle('on', b.getAttribute('data-tab') === state.tab); });
-    requestAnimationFrame(syncNav);
+    requestAnimationFrame(function () { syncNav(); requestAnimationFrame(syncNav); });
     var d = state.data;
     if (d) {
       var pl = d.label;
