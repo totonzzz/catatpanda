@@ -304,6 +304,18 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .praise .pbar{height:3px;border-radius:3px;background:var(--s2);margin-top:10px;overflow:hidden}
 .praise .pbar i{display:block;height:100%;background:var(--mint);width:100%;transform-origin:left;animation:pdrain 4.6s linear forwards}
 @keyframes pdrain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+/* geser transaksi: kiri hapus, kanan edit */
+:root{--row:#FFFFFF}
+body.dark{--row:#0C1726}
+.txwrap{position:relative;overflow:hidden;border-radius:14px}
+.txact{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:7px;padding:0 16px;
+  font-size:12px;font-weight:700;color:#fff;letter-spacing:.01em;opacity:0;transition:opacity .15s ease}
+.txwrap.dragging .txact{opacity:1}
+.txact.edit{left:0;background:linear-gradient(90deg,#2F6FB2 55%,rgba(47,111,178,.15))}
+.txact.del{right:0;background:linear-gradient(270deg,#E0534A 55%,rgba(224,83,74,.15))}
+.txwrap .tx{position:relative;z-index:1;background:transparent;transform:translateX(0);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
+.txwrap .tx.dragging{transition:none;background:var(--row)}
 /* category chips */
 .catsel{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
 .catsel::-webkit-scrollbar{display:none}
@@ -466,7 +478,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.29';
+  var VERSION = '3.30';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -844,9 +856,9 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
     var meta = dlabel(t.date) + (t.metode ? ' · ' + t.metode : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
-    return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
+    return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
       (t.flag ? '<span class="tag cek">check</span>' : (t.src === 'notif' ? '<span class="tag">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
-      '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button>';
+      '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button></div>';
   }
   function pendingRow(p, i) {
     var o = (state.data && state.data.options) || { emoji: {} };
@@ -1695,10 +1707,10 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   }
   function txRowsHtml(rows) {
     return rows.map(function (t) {
-      return '<button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
+      return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
         '<div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div>' +
         '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(t.date) + ' · ' + esc(t.metode || '') + '</div></div>' +
-        '<div class="a mono neg">' + rp(t.amount) + '</div></button>';
+        '<div class="a mono neg">' + rp(t.amount) + '</div></button></div>';
     }).join('');
   }
   function openCategoryDetail(name) {
@@ -2054,6 +2066,44 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
   });
 
   // ================= interaksi di layar =================
+  // geser baris transaksi: kanan = edit, kiri = hapus
+  var swipe = { row: null, x0: 0, dx: 0, on: false };
+  function swipeEnd() {
+    if (!swipe.on) return;
+    var row = swipe.row, dx = swipe.dx, id = row && row.getAttribute('data-id');
+    swipe.on = false;
+    if (row) { row.classList.remove('dragging'); row.style.transform = '';
+      if (row.parentNode) row.parentNode.classList.remove('dragging'); }
+    if (row && Math.abs(dx) > 70) {
+      state.swipeBlock = true;
+      if (dx > 0) openEdit(id);
+      else if (confirm('Delete this transaction?')) {
+        api('delete', { id: id }).then(function (r) {
+          if (r && r.ok) { toast('🗑️ ' + (r.msg || 'Deleted')); loadMonth(state.month, { silent: true }); }
+          else toast((r && r.error) || 'Could not delete');
+        }).catch(function () { toast('Cannot reach the server'); });
+      }
+    }
+    swipe.row = null; swipe.dx = 0;
+  }
+  $('view').addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    var row = e.target.closest('.tx');
+    if (!row || e.target !== row) return;
+    swipe.row = row; swipe.x0 = e.clientX; swipe.dx = 0; swipe.on = true;
+    row.classList.add('dragging');
+    if (row.parentNode) row.parentNode.classList.add('dragging');
+  });
+  $('view').addEventListener('pointermove', function (e) {
+    if (!swipe.on) return;
+    swipe.dx = e.clientX - swipe.x0;
+    if (Math.abs(swipe.dx) < 4) return;
+    var lim = Math.max(-110, Math.min(110, swipe.dx));
+    swipe.row.style.transform = 'translateX(' + lim + 'px)';
+  });
+  $('view').addEventListener('pointerup', swipeEnd);
+  $('view').addEventListener('pointercancel', swipeEnd);
+  $('view').addEventListener('pointerleave', swipeEnd);
   $('view').addEventListener('change', function (e) {
     var s = e.target.closest('[data-bucket]');
     if (!s) return;
@@ -2065,6 +2115,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
     }).catch(function () { toast('Cannot reach the server'); });
   });
   $('view').addEventListener('click', function (e) {
+    if (state.swipeBlock) { state.swipeBlock = false; return; }
     var el = e.target.closest('[data-act]'); if (!el) return;
     var act = el.getAttribute('data-act');
     if (act === 'retry') loadMonth(state.month, { manual: true });
