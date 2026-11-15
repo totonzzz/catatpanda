@@ -478,7 +478,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.30';
+  var VERSION = '3.31';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2067,43 +2067,68 @@ body.dark{--row:#0C1726}
 
   // ================= interaksi di layar =================
   // geser baris transaksi: kanan = edit, kiri = hapus
-  var swipe = { row: null, x0: 0, dx: 0, on: false };
-  function swipeEnd() {
-    if (!swipe.on) return;
-    var row = swipe.row, dx = swipe.dx, id = row && row.getAttribute('data-id');
-    swipe.on = false;
-    if (row) { row.classList.remove('dragging'); row.style.transform = '';
-      if (row.parentNode) row.parentNode.classList.remove('dragging'); }
-    if (row && Math.abs(dx) > 70) {
-      state.swipeBlock = true;
-      if (dx > 0) openEdit(id);
-      else if (confirm('Delete this transaction?')) {
-        api('delete', { id: id }).then(function (r) {
-          if (r && r.ok) { toast('🗑️ ' + (r.msg || 'Deleted')); loadMonth(state.month, { silent: true }); }
-          else toast((r && r.error) || 'Could not delete');
-        }).catch(function () { toast('Cannot reach the server'); });
-      }
+  var swipe = { row: null, x0: 0, y0: 0, dx: 0, on: false, axis: null, pid: null };
+
+  function swipeReset() {
+    if (swipe.row) {
+      swipe.row.classList.remove('dragging');
+      swipe.row.style.transform = '';
+      if (swipe.row.parentNode) swipe.row.parentNode.classList.remove('dragging');
     }
-    swipe.row = null; swipe.dx = 0;
+    swipe.row = null; swipe.dx = 0; swipe.on = false; swipe.axis = null; swipe.pid = null;
   }
+
+  function swipeEnd() {
+    if (!swipe.on) { swipeReset(); return; }
+    var row = swipe.row, dx = swipe.dx, id = row && row.getAttribute('data-id');
+    var horizontal = swipe.axis === 'x' && Math.abs(dx) > 55;
+    var moved = swipe.axis === 'x' && Math.abs(dx) > 8;
+    swipeReset();
+    if (moved) state.swipeBlock = true;   // geser sedikit pun jangan sampai malah membuka detail
+    if (!row || !horizontal) return;
+    if (dx > 0) openEdit(id);
+    else if (confirm('Delete this transaction?')) {
+      api('delete', { id: id }).then(function (r) {
+        if (r && r.ok) { toast('🗑️ ' + (r.msg || 'Deleted')); loadMonth(state.month, { silent: true }); }
+        else toast((r && r.error) || 'Could not delete');
+      }).catch(function () { toast('Cannot reach the server'); });
+    }
+  }
+
   $('view').addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var row = e.target.closest('.tx');
-    if (!row || e.target !== row) return;
-    swipe.row = row; swipe.x0 = e.clientX; swipe.dx = 0; swipe.on = true;
+    if (!row) return;
+    swipe.row = row; swipe.x0 = e.clientX; swipe.y0 = e.clientY;
+    swipe.dx = 0; swipe.on = true; swipe.axis = null; swipe.pid = e.pointerId;
     row.classList.add('dragging');
     if (row.parentNode) row.parentNode.classList.add('dragging');
+    try { row.setPointerCapture(e.pointerId); } catch (err) {}
   });
+
   $('view').addEventListener('pointermove', function (e) {
     if (!swipe.on) return;
-    swipe.dx = e.clientX - swipe.x0;
-    if (Math.abs(swipe.dx) < 4) return;
-    var lim = Math.max(-110, Math.min(110, swipe.dx));
-    swipe.row.style.transform = 'translateX(' + lim + 'px)';
-  });
+    if (swipe.pid !== null && e.pointerId !== swipe.pid) return;
+    var dx = e.clientX - swipe.x0, dy = e.clientY - swipe.y0;
+
+    if (!swipe.axis) {
+      if (Math.abs(dx) < 7 && Math.abs(dy) < 7) return;
+      swipe.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (swipe.axis === 'y') {          // niatnya menggulir: batalkan geser
+        swipeReset();
+        return;
+      }
+    }
+    if (swipe.axis !== 'x') return;
+    if (e.cancelable) e.preventDefault();
+    swipe.dx = dx;
+    swipe.row.style.transform = 'translateX(' + Math.max(-120, Math.min(120, dx)) + 'px)';
+  }, { passive: false });
+
   $('view').addEventListener('pointerup', swipeEnd);
   $('view').addEventListener('pointercancel', swipeEnd);
-  $('view').addEventListener('pointerleave', swipeEnd);
+  document.addEventListener('pointerup', function () { if (swipe.on) swipeEnd(); });
+
   $('view').addEventListener('change', function (e) {
     var s = e.target.closest('[data-bucket]');
     if (!s) return;
