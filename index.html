@@ -105,7 +105,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .hero2::before{content:'';position:absolute;inset:-30% -20%;pointer-events:none;
   background:radial-gradient(55% 55% at 82% 8%,rgba(193,232,255,.30),transparent 62%),radial-gradient(45% 45% at 6% 92%,rgba(84,131,179,.55),transparent 62%)}
 .hero2 .k,.hero2 .sub{color:rgba(255,255,255,.65)}
-.hero2 .big{color:#fff;font-size:42px}
+.hero2 .big{color:#fff;font-size:clamp(26px,8vw,34px);line-height:1.08;white-space:nowrap;letter-spacing:-.02em}
 .hero2 .stat{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12);backdrop-filter:blur(6px)}
 .hero2 .stat .k{color:rgba(255,255,255,.6)}
 .hero2 .pos{color:#C1E8FF}.hero2 .neg{color:#FFC8BC}
@@ -115,7 +115,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
 .stat{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 .stat .k{font-size:11px;color:var(--mut);font-weight:500}
-.stat .v{font-size:16px;font-weight:500;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .v{font-size:13.5px;font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .pos{color:var(--mint)} .neg{color:var(--coral)} .warn{color:var(--amber)}
 .banner{background:color-mix(in srgb,var(--amber) 14%,var(--s1));border:1px solid color-mix(in srgb,var(--amber) 45%,var(--line));border-radius:16px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.45}
 .banner b{color:var(--amber)} .banner details{margin-top:6px;color:var(--mut)} .banner li{margin:4px 0}
@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.35';
+  var VERSION = '3.36';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -653,7 +653,7 @@ body.dark{--row:#0C1726}
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
-    privacy: LS.get('ck_privacy', '') === '1'
+    privacy: LS.get('ck_privacy', '') === '1', catsAll: false
   };
   var flushing = false;
 
@@ -918,6 +918,7 @@ body.dark{--row:#0C1726}
           '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
           '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button>' +
       '</div>' +
+      (isCur && !d.todayFilled ? '<button class="bc" data-act="no-spend" style="margin-top:8px">No spending today</button>' : '') +
       '<div class="sub">' + k.count + (k.count === 1 ? ' transaction' : ' transactions') + (isCur ? ' · ' + (d.todayFilled ? '✅ logged today' : '⏳ nothing logged today') : '') + '</div>' +
       '<div class="stats"><div class="stat"><div class="k">Income</div><div class="v mono pos">' + rp(k.masuk) + '</div></div>' +
       '<div class="stat"><div class="k">Difference</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + rp(sel) + '</div></div></div>' +
@@ -943,10 +944,14 @@ body.dark{--row:#0C1726}
     if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
     else {
       h += '<div class="donutwrap">' + donut(d.categories, k.keluar) + '<div class="legend">';
-      d.categories.slice(0, 5).forEach(function (c, i) {
+      var shown = state.catsAll ? d.categories.length : Math.min(3, d.categories.length);
+      d.categories.slice(0, shown).forEach(function (c, i) {
         h += '<div class="lg"><span class="dot" style="background:' + COLORS[i % COLORS.length] + '"></span><span class="n">' + esc(c.name) + '</span><span class="p mono">' + c.pct + '%</span></div>';
       });
-      if (d.categories.length > 5) h += '<div class="lg"><span class="n" style="color:var(--mut)">+' + (d.categories.length - 5) + ' more</span></div>';
+      if (d.categories.length > 3) {
+        h += '<button class="mini" data-act="cats-toggle" style="margin-top:8px">' +
+          (state.catsAll ? 'Show less' : 'More (' + (d.categories.length - 3) + ')') + '</button>';
+      }
       h += '</div></div><div class="catrow">';
       d.categories.forEach(function (c, i) {
         h += '<div class="catrowitem" data-act="cat-view" data-cat="' + esc(c.name) + '"><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
@@ -2368,6 +2373,14 @@ body.dark{--row:#0C1726}
     }
     else if (act === 'goto-insights') setTab('insights');
     else if (act === 'privacy') togglePrivacy();
+    else if (act === 'cats-toggle') { state.catsAll = !state.catsAll; renderAll(); }
+    else if (act === 'no-spend') {
+      el.disabled = true; el.textContent = 'Saving…';
+      api('no_spend', {}).then(function (r) {
+        if (r && r.ok) { toast('✅ Marked: no spending today'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
+        else { el.disabled = false; el.textContent = 'No spending today'; toast((r && r.error) || 'Could not save'); }
+      }).catch(function () { el.disabled = false; el.textContent = 'No spending today'; toast('Cannot reach the server'); });
+    }
     else if (act === 'theme') { applyTheme(el.getAttribute('data-theme-btn')); renderAll(); }
     else if (act === 'toggle-period') {
       var nextMode = periodMode() === 'payday' ? 'calendar' : 'payday';
