@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.36';
+  var VERSION = '3.37';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -657,6 +657,13 @@ body.dark{--row:#0C1726}
   };
   var flushing = false;
 
+  function eyeBtnHtml() {
+    return '<button class="iconbtn" data-act="privacy" aria-label="Hide amounts" ' +
+      'style="flex:none;margin-left:auto;color:' + (state.privacy ? 'var(--mint)' : 'var(--mut)') + '">' +
+      '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/>' +
+      '<circle cx="12" cy="12" r="2.6"/></svg></button>';
+  }
   function togglePrivacy() {
     state.privacy = !state.privacy;
     LS.set('ck_privacy', state.privacy ? '1' : '0');
@@ -1095,7 +1102,8 @@ body.dark{--row:#0C1726}
     var list = (d.accounts || []).filter(function (a) { return a.kind === 'emoney'; });
     if (!list.length) return '';
     var act = state.walletActive || 0;
-    var h = '<div class="card"><h2>E-money</h2><div class="ccdeck" id="walletdeck">';
+    var h = '<div class="card"><div style="display:flex;align-items:center;gap:8px"><h2 style="margin:0">E-money</h2>' + eyeBtnHtml() + '</div>' +
+      '<div class="ccdeck" id="walletdeck" style="margin-top:12px">';
     list.forEach(function (a, i) {
       h += '<div class="cc wallet" data-act="wallet-flip" data-i="' + i + '" style="background:' + emoneyColor(a.name) + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
@@ -1141,7 +1149,10 @@ body.dark{--row:#0C1726}
           '</div>';
       });
     }
-    h += '<button class="btn ghost" data-act="wallet-add" style="margin-top:12px">Add wallet</button></div>';
+    h += '<div class="partact" style="margin-top:12px">' +
+      '<button class="mini" data-act="wallet-add">Add wallet</button>' +
+      (list.length > 1 ? '<button class="mini" data-act="transfer-add">Move money</button>' : '') +
+      '</div></div>';
     return h;
   }
 
@@ -1164,6 +1175,20 @@ body.dark{--row:#0C1726}
     }
     h += '<button class="btn ghost" data-act="asset-add" style="margin-top:12px">Add asset</button></div>';
     return h;
+  }
+
+  function openTransferForm() {
+    var d = state.data || {}, list = d.accounts || [];
+    if (list.length < 2) { toast('Add at least two wallets first'); return; }
+    var opts = list.map(function (a) { return '<option value="' + esc(a.name) + '">' + esc(a.name) + ' (' + rp(a.balance) + ')</option>'; }).join('');
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Move money</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 12px;font-size:12px">Moving money between your own wallets is not spending — totals stay unchanged.</div>' +
+      '<div class="fld"><label>From</label><select id="tFrom">' + opts + '</select></div>' +
+      '<div class="fld"><label>To</label><select id="tTo">' + opts + '</select></div>' +
+      '<div class="fld"><label>Amount</label><input id="tAmt" class="mono" inputmode="numeric" placeholder="200000"></div>' +
+      '<div class="fld"><label>Date</label><input id="tDate" type="date" value="' + esc((d.today || '').slice(0, 10)) + '"></div>' +
+      '<div class="err" id="tErr"></div><button class="btn" data-act="transfer-save">Move money</button>';
   }
 
   function openWalletForm(name) {
@@ -2329,6 +2354,7 @@ body.dark{--row:#0C1726}
       layoutDeck('walletdeck', state.walletActive);
     }
     else if (act === 'wallet-add') openWalletForm('');
+    else if (act === 'transfer-add') openTransferForm();
     else if (act === 'wallet-edit') openWalletForm(el.getAttribute('data-name'));
     else if (act === 'asset-add') openAssetForm('');
     else if (act === 'asset-edit') openAssetForm(el.getAttribute('data-code'));
@@ -2533,6 +2559,16 @@ body.dark{--row:#0C1726}
             if (pr4 && pr4.then) pr4.then(renderAll); else renderAll();
           } else { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = (r && r.error) || 'Could not record'; }
         }).catch(function () { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = 'Cannot reach the server'; });
+    }
+    else if (act === 'transfer-save') {
+      var from = $('tFrom').value, to = $('tTo').value, amt = String($('tAmt').value).replace(/\D/g, '');
+      if (from === to) { $('tErr').textContent = 'Pick two different wallets'; return; }
+      if (!amt || Number(amt) <= 0) { $('tErr').textContent = 'Enter the amount'; return; }
+      el.disabled = true; el.textContent = 'Moving…';
+      api('transfer_add', { dari: from, ke: to, jumlah: Number(amt), tanggal: $('tDate').value }).then(function (r) {
+        if (r && r.ok) { closeSheets(); toast('✅ ' + rp(amt) + ' moved'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
+        else { el.disabled = false; el.textContent = 'Move money'; $('tErr').textContent = (r && r.error) || 'Could not move'; }
+      }).catch(function () { el.disabled = false; el.textContent = 'Move money'; $('tErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'wallet-save') {
       var wn = $('wName').value.trim();
