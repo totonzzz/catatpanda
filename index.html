@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.38';
+  var VERSION = '3.39';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1366,6 +1366,7 @@ body.dark{--row:#0C1726}
       '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
       '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
       '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
+      '<button class="btn ghost" data-act="purge" style="margin-top:8px">Tidy sheet (remove deleted rows)</button>' +
       '<button class="btn ghost" data-act="test-capture" style="margin-top:8px">Test notification capture</button>' +
       (state.pending.length ? '<button class="btn ghost" data-act="flush" style="margin-top:8px">Send waiting entries</button>' : '') + '</div>' +
       viewPush() +
@@ -2486,6 +2487,15 @@ body.dark{--row:#0C1726}
         else if (r && r.sent === 0) toast('⚠️ No subscription yet — turn notifications on first');
         else toast((r && r.error) || 'Could not send the test push');
       }).catch(function () { toast('Cannot reach the notification server'); });
+    }
+    else if (act === 'purge') {
+      if (!confirm('Remove leftover deleted rows from the sheet? Copies already sit in the Trash tab.')) return;
+      el.disabled = true; el.textContent = 'Tidying…';
+      api('purge_deleted', {}).then(function (r) {
+        el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)';
+        if (r && r.ok) { toast('🧹 ' + (r.removed || 0) + ' row(s) removed'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
+        else toast((r && r.error) || 'Could not tidy');
+      }).catch(function () { el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)'; toast('Cannot reach the server'); });
     }
     else if (act === 'ping') {
       toast('Checking server…');
