@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.40';
+  var VERSION = '3.43';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1179,27 +1179,65 @@ body.dark{--row:#0C1726}
   function loadPrices() {
     var d = state.data || {};
     var codes = assetsNeedPrices(d);
-    var key = codes.join(',');
     if (!codes.length) return;
+    var key = codes.join(',');
+    var fromData = d.prices || {};
+    if (fromData && Object.keys(fromData).length) state.prices = Object.assign({}, fromData, state.prices || {});
     if (key === state.pricesAsked && Date.now() - state.pricesAt < 10 * 60 * 1000) return;
-    var base = priceBase();
-    if (!base) return;
     state.pricesAsked = key;
-    fetch(base + '/api/prices?codes=' + encodeURIComponent(key))
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        if (!j || !j.ok || !j.prices) return;
-        var add = {};
-        Object.keys(j.prices).forEach(function (k) {
-          var v = j.prices[k];
-          if (v && typeof v.price === 'number') add[k.toUpperCase()] = v;
-        });
-        state.prices = Object.assign({}, state.prices, add);
-        state.pricesAt = Date.now();
-        if (state.tab === 'dompet') renderAll();
-      })
-      .catch(function () {});
+
+    function merge(prices) {
+      var add = {};
+      Object.keys(prices || {}).forEach(function (k) {
+        var v = prices[k];
+        if (v && typeof v.price === 'number' && v.price > 0) add[k.toUpperCase()] = v;
+      });
+      if (!Object.keys(add).length) return;
+      state.prices = Object.assign({}, state.prices, add);
+      state.pricesAt = Date.now();
+      if (state.tab === 'dompet') renderAll();
+    }
+
+    // 1) lewat server sendiri (skrip 3.13 ke atas)
+    api('prices_refresh', { codes: key }).then(function (r) {
+      if (r && r.ok && r.prices) { merge(r.prices); return; }
+      proxyPrices(codes, merge);
+    }).catch(function () { proxyPrices(codes, merge); });
   }
+
+  function proxyPrices(codes, done) {
+    var out = {}, left = codes.length;
+    if (!left) { done(out); return; }
+    codes.forEach(function (code) {
+      var yahoo = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(code + '.JK') + '?range=5d&interval=1d';
+      var url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(yahoo);
+      var finished = false;
+      function finish() { if (finished) return; finished = true; left--; if (left <= 0) done(out); }
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.timeout = 8000;
+        xhr.onload = function () {
+          try {
+            if (xhr.status === 200) {
+              var d = JSON.parse(xhr.responseText);
+              var r0 = d && d.chart && d.chart.result && d.chart.result[0];
+              var meta = (r0 && r0.meta) || {};
+              if (typeof meta.regularMarketPrice === 'number') {
+                out[code] = { code: code, price: meta.regularMarketPrice, prev: meta.chartPreviousClose || 0, asOf: Date.now() };
+              }
+            }
+          } catch (e) {}
+          finish();
+        };
+        xhr.onerror = finish;
+        xhr.ontimeout = finish;
+        xhr.send(null);
+      } catch (e) { finish(); }
+    });
+    setTimeout(function () { if (left > 0) done(out); }, 9000);
+  }
+
   function assetPrice(a) {
     if (a.kind === 'reksadana') return a.priceManual > 0 ? a.priceManual : 0;
     var q = state.prices[String(a.code || '').toUpperCase()];
