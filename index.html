@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.39';
+  var VERSION = '3.40';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -658,7 +658,8 @@ body.dark{--row:#0C1726}
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
-    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false }), catsAll: false
+    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false }), catsAll: false,
+    prices: {}, pricesAt: 0, pricesAsked: ''
   };
   var flushing = false;
 
@@ -1164,27 +1165,88 @@ body.dark{--row:#0C1726}
     return h;
   }
 
+  function priceBase() {
+    var u = String(PUSH_ENDPOINT || '');
+    if (!u) return '';
+    return u.replace(/\/api\/push\/?$/, '');
+  }
+  function assetsNeedPrices(d) {
+    var codes = (d.assets || []).filter(function (a) {
+      return a.kind !== 'reksadana' && a.code && /^[A-Z]{4}$/.test(String(a.code).toUpperCase());
+    }).map(function (a) { return String(a.code).toUpperCase(); });
+    return codes;
+  }
+  function loadPrices() {
+    var d = state.data || {};
+    var codes = assetsNeedPrices(d);
+    var key = codes.join(',');
+    if (!codes.length) return;
+    if (key === state.pricesAsked && Date.now() - state.pricesAt < 10 * 60 * 1000) return;
+    var base = priceBase();
+    if (!base) return;
+    state.pricesAsked = key;
+    fetch(base + '/api/prices?codes=' + encodeURIComponent(key))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok || !j.prices) return;
+        var add = {};
+        Object.keys(j.prices).forEach(function (k) {
+          var v = j.prices[k];
+          if (v && typeof v.price === 'number') add[k.toUpperCase()] = v;
+        });
+        state.prices = Object.assign({}, state.prices, add);
+        state.pricesAt = Date.now();
+        if (state.tab === 'dompet') renderAll();
+      })
+      .catch(function () {});
+  }
+  function assetPrice(a) {
+    if (a.kind === 'reksadana') return a.priceManual > 0 ? a.priceManual : 0;
+    var q = state.prices[String(a.code || '').toUpperCase()];
+    return (q && typeof q.price === 'number') ? q.price : 0;
+  }
+
   function assetsCard(d) {
     var rp = function (n) { return mrp(n, 'wallet'); };
     var list = d.assets || [];
-    var buyTotal = list.reduce(function (s, a) { return s + (a.units * a.buyPrice); }, 0);
+    var cost = 0, value = 0, priced = 0;
+    list.forEach(function (a) {
+      var px = assetPrice(a);
+      cost += a.units * a.buyPrice;
+      if (px > 0) { value += a.units * px; priced++; }
+    });
     var h = '<div class="card"><h2>Assets</h2>';
     if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Track stocks and mutual funds here. Prices arrive from the server.</div>';
+      h += '<div class="empty" style="padding:0 0 10px">Track stocks and mutual funds here. Stock prices come from the server (delayed 15-20 minutes); mutual funds use the NAV you enter.</div>';
     } else {
       list.forEach(function (a) {
+        var px = assetPrice(a);
+        var val = px > 0 ? a.units * px : 0;
+        var base0 = a.units * a.buyPrice;
+        var pl = px > 0 ? val - base0 : 0;
+        var plPct = (px > 0 && base0 > 0) ? Math.round((pl / base0) * 100) : 0;
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
           '<div class="parttop"><span>' + esc(a.code) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
-          '<span class="mono">' + (a.units || 0) + ' × ' + rp(a.buyPrice) + '</span></div>' +
-          '<div class="empty" style="padding:2px 0 0;font-size:11px">' + esc(a.name) + ' · cost ' + rp(a.units * a.buyPrice) + '</div>' +
+          '<span class="mono">' + (px > 0 ? rp(val) : '—') + '</span></div>' +
+          '<div class="empty" style="padding:2px 0 0;font-size:11px">' + esc(a.name) + ' · ' + (a.units || 0) + ' x ' +
+            (px > 0 ? rp(px) : rp(a.buyPrice) + ' (beli)') + '</div>' +
+          (px > 0 ? '<div class="empty" style="padding:2px 0 0;font-size:11px;color:' + (pl >= 0 ? 'var(--mint)' : 'var(--coral)') + '">' +
+            (pl >= 0 ? '+' : '-') + rp(Math.abs(pl)) + ' (' + (plPct >= 0 ? '+' : '') + plPct + '%)</div>' : '') +
           '<div class="partact" style="margin-top:6px"><button class="mini" data-act="asset-edit" data-code="' + esc(a.code) + '">Edit</button>' +
           '<button class="mini danger" data-act="asset-del" data-code="' + esc(a.code) + '">Remove</button></div></div>';
       });
-      h += '<div class="kv" style="margin-top:12px"><span>Total cost</span><span class="mono">' + rp(buyTotal) + '</span></div>';
+      h += '<div class="kv" style="margin-top:14px"><span>Cost</span><span class="mono">' + rp(cost) + '</span></div>';
+      if (priced) {
+        var gain = value - cost;
+        h += '<div class="kv"><span>Market value</span><span class="mono">' + rp(value) + '</span></div>';
+        h += '<div class="kv"><span>Unrealised P/L</span><span class="mono ' + (gain >= 0 ? 'pos' : 'neg') + '">' +
+          (gain >= 0 ? '+' : '-') + rp(Math.abs(gain)) + '</span></div>';
+      }
     }
     h += '<button class="btn ghost" data-act="asset-add" style="margin-top:12px">Add asset</button></div>';
     return h;
   }
+
 
   function openTransferForm() {
     var d = state.data || {}, list = d.accounts || [];
@@ -1229,6 +1291,8 @@ body.dark{--row:#0C1726}
       '<div class="fld"><label>Name</label><input id="aName" value="' + esc(cur ? cur.name : '') + '" placeholder="Bank Central Asia"></div>' +
       '<div class="fld"><label>Units / lots</label><input id="aUnits" class="mono" inputmode="numeric" value="' + (cur ? cur.units : '') + '"></div>' +
       '<div class="fld"><label>Buy price (per unit)</label><input id="aBuy" class="mono" inputmode="numeric" value="' + (cur ? cur.buyPrice : '') + '"></div>' +
+      '<div class="fld"><label>Harga kini / NAV <span style="color:var(--mut)">— untuk reksadana</span></label>' +
+        '<input id="aNow" class="mono" inputmode="numeric" value="' + (cur && cur.priceManual ? cur.priceManual : '') + '" placeholder="opsional"></div>' +
       '<div class="err" id="aErr"></div><button class="btn" data-act="asset-save" data-code="' + esc(cur ? cur.code : '') + '">Save asset</button>';
   }
 
@@ -1505,6 +1569,7 @@ body.dark{--row:#0C1726}
       state.cardActive = 0;
       if (window.requestAnimationFrame) requestAnimationFrame(layoutCards); else setTimeout(layoutCards, 30);
       state.walletActive = 0;
+      loadPrices();
       if (window.requestAnimationFrame) requestAnimationFrame(function () { layoutDeck('walletdeck', 0); });
       else setTimeout(function () { layoutDeck('walletdeck', 0); }, 30);
     }
@@ -2610,7 +2675,7 @@ body.dark{--row:#0C1726}
       var ak = $('aCode').value.trim();
       if (!ak) { $('aErr').textContent = 'Give the asset a code'; return; }
       el.disabled = true; el.textContent = 'Saving…';
-      api('aset_set', { jenis: $('aKind').value, kode: ak, nama: $('aName').value, jumlah: $('aUnits').value, hargaBeli: $('aBuy').value })
+      api('aset_set', { jenis: $('aKind').value, kode: ak, nama: $('aName').value, jumlah: $('aUnits').value, hargaBeli: $('aBuy').value, hargaKini: $('aNow').value })
         .then(function (r) {
           if (r && r.ok) { closeSheets(); toast('✅ Asset saved'); var p2b = loadMonth(state.month, { silent: true }); if (p2b && p2b.then) p2b.then(renderAll); }
           else { el.disabled = false; el.textContent = 'Save asset'; $('aErr').textContent = (r && r.error) || 'Could not save'; }
