@@ -21,7 +21,7 @@ var SHEET_ASSETS = 'Aset';       // Jenis | Kode | Nama | Jumlah | Harga Beli
 var SHEET_TRANSFERS = 'Transfer';  // Tanggal | Dari | Ke | Jumlah       // Jenis | Kode | Nama | Jumlah | Harga Beli   // Kunci | Nilai   // paylater & cicilan: Nama | Per Bulan | Tenor | Sudah Bayar | Jatuh Tempo
 var DEDUPE_SECONDS = 600;     // notifikasi yang sama dalam 10 menit dianggap duplikat
 var TIMEZONE = 'Asia/Jakarta';
-var APP_VERSION = '3.11';      // 2.2 = update + review notifikasi + pencarian lintas bulan + statistik mingguan
+var APP_VERSION = '3.12';      // 2.2 = update + review notifikasi + pencarian lintas bulan + statistik mingguan
 
 var CATEGORY_EMOJI = {
   'Makan': '🍚', 'Jajan': '🍟', 'Transportasi': '🚗', 'Perawatan Kendaraan': '🔧', 'Cicilan': '💳', 'Kos / Sewa Tempat': '🏠', 'Sumbangan / Kondangan': '🎁', 'BBM': '⛽', 'Belanja': '🛍️',
@@ -1057,7 +1057,7 @@ function appTransferAdd(p, token) {
 function readAssetDefs_(ss) {
   var sh = ss.getSheetByName(SHEET_ASSETS);
   if (!sh || sh.getLastRow() < 2) return [];
-  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues();
+  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues();
   var out = [];
   vals.forEach(function (r) {
     var code = String(r[1] == null ? '' : r[1]).trim();
@@ -1067,7 +1067,8 @@ function readAssetDefs_(ss) {
       code: code,
       name: String(r[2] == null ? '' : r[2]).trim() || code,
       units: numOf_(r[3]),
-      buyPrice: numOf_(r[4])
+      buyPrice: numOf_(r[4]),
+      priceManual: numOf_(r[5])
     });
   });
   return out;
@@ -1110,14 +1111,15 @@ function appAsetSet(p, token) {
   var units = numOf_(p.jumlah);
   var buy = numOf_(p.hargaBeli);
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = getOrCreateSheet_(ss, SHEET_ASSETS, ['Jenis', 'Kode', 'Nama', 'Jumlah', 'Harga Beli'], []);
+  var priceNow = numOf_(p.hargaKini);
+  var sh = getOrCreateSheet_(ss, SHEET_ASSETS, ['Jenis', 'Kode', 'Nama', 'Jumlah', 'Harga Beli', 'Harga Kini / NAV'], []);
   var last = sh.getLastRow(), row = -1;
   if (last >= 2) {
     var vals = sh.getRange(2, 2, last - 1, 1).getValues();
     for (var i = 0; i < vals.length; i++) if (String(vals[i][0]).trim().toUpperCase() === code) { row = i + 2; break; }
   }
-  if (row > 0) sh.getRange(row, 1, 1, 5).setValues([[kind, code, name, units, buy]]);
-  else sh.appendRow([kind, code, name, units, buy]);
+  if (row > 0) sh.getRange(row, 1, 1, 6).setValues([[kind, code, name, units, buy, priceNow]]);
+  else sh.appendRow([kind, code, name, units, buy, priceNow]);
   return { ok: true, msg: 'Asset saved' };
 }
 
