@@ -316,6 +316,32 @@ body.dark{--row:#0C1726}
 .txwrap .tx{position:relative;z-index:1;background:transparent;transform:translateX(0);
   transition:transform .2s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
 .txwrap .tx.dragging{transition:none;background:var(--row)}
+/* kartu portofolio aset */
+.pf{position:relative;overflow:hidden;border-radius:24px;padding:16px 16px 12px;color:#fff;
+  background:linear-gradient(150deg,#0B3C7A,#1B62BE 55%,#3E86E0);
+  box-shadow:0 16px 34px rgba(9,30,60,.26),inset 0 1px 0 rgba(255,255,255,.25)}
+.pf .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
+.pf .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;opacity:.75}
+.pf .tot{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px;white-space:nowrap;line-height:1.05}
+.pf .chip2{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 9px;white-space:nowrap}
+.pf .spark{display:block;width:100%;margin-top:8px;position:relative;z-index:1}
+.pf .empty-bar{height:44px;display:flex;align-items:center;font-size:11.5px;opacity:.8;margin-top:6px}
+.alloc{display:flex;height:11px;border-radius:8px;overflow:hidden;margin:2px 0 10px}
+.alloc i{display:block;height:100%}
+.legend3{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--mut)}
+.legend3 span b{color:var(--tx);font-weight:700}
+.legend3 .dot{width:8px;height:8px;border-radius:3px;display:inline-block;margin-right:5px}
+.arow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.arow:last-child{border-bottom:0;padding-bottom:2px}
+.abadge{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.amid{flex:1;min-width:0}
+.acode{font-weight:700;font-size:13.5px}
+.asub{font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aright{text-align:right;flex:none}
+.aval{font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.apl{font-size:10px;font-weight:700;margin-top:2px}
+.apl.up{color:var(--mint)} .apl.down{color:var(--coral)}
 /* isi kartu e-money (khusus, tidak menimpa kartu kredit) */
 .cc.wallet .em-brand{font-size:15px;font-weight:700;letter-spacing:-.01em}
 .cc.wallet .em-type{font-size:10.5px;opacity:.8;margin-top:2px}
@@ -485,7 +511,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.44';
+  var VERSION = '3.45';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1195,6 +1221,7 @@ body.dark{--row:#0C1726}
       if (!Object.keys(add).length) return;
       state.prices = Object.assign({}, state.prices, add);
       state.pricesAt = Date.now();
+      recordSnapshot(state.data || {});
       if (state.tab === 'dompet') renderAll();
     }
 
@@ -1238,53 +1265,128 @@ body.dark{--row:#0C1726}
     setTimeout(function () { if (left > 0) done(out); }, 9000);
   }
 
+  function recordSnapshot(d) {
+    var pt = portfolioTotals(d);
+    if (!(pt.value > 0)) return;
+    var now = new Date();
+    var today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    var hist = d.assetHistory || [];
+    var last = hist.length ? hist[hist.length - 1] : null;
+    if (last && last.date === today) return;
+    if (LS.get('ck_snap') === today) return;
+    LS.set('ck_snap', today);
+    api('snapshot_set', { tanggal: today, nilai: Math.round(pt.value) })
+      .then(function (r) { if (r && r.ok) { d.assetHistory = (d.assetHistory || []).concat([{ date: today, value: r.value }]); } })
+      .catch(function () {});
+  }
   function assetPrice(a) {
     if (a.kind === 'reksadana') return a.priceManual > 0 ? a.priceManual : 0;
     var q = state.prices[String(a.code || '').toUpperCase()];
     return (q && typeof q.price === 'number') ? q.price : 0;
   }
 
-  function assetsCard(d) {
-    var rp = function (n) { return mrp(n, 'wallet'); };
-    var list = d.assets || [];
-    var cost = 0, value = 0, priced = 0;
+  var ASSET_COLORS = ['#2F6FB2', '#E0534A', '#F2B84B', '#8FB3D9', '#0F9D6B', '#7C5CBF'];
+  function assetTint(i) { return ASSET_COLORS[i % ASSET_COLORS.length]; }
+  function assetInitials(a) {
+    var c = String(a.code || a.name || '?').replace(/[^A-Za-z ]/g, ' ').trim();
+    var parts = c.split(/\s+/);
+    if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return c.slice(0, 2).toUpperCase();
+  }
+  function portfolioTotals(d) {
+    var cost = 0, value = 0, priced = 0, list = d.assets || [];
     list.forEach(function (a) {
       var px = assetPrice(a);
       cost += a.units * a.buyPrice;
       if (px > 0) { value += a.units * px; priced++; }
     });
-    var h = '<div class="card"><h2>Assets</h2>';
-    if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Track stocks and mutual funds here. Stock prices come from the server (delayed 15-20 minutes); mutual funds use the NAV you enter.</div>';
+    return { list: list, cost: cost, value: value, priced: priced };
+  }
+  function portfolioCard(d) {
+    var pt = portfolioTotals(d);
+    if (!pt.list.length) return '';
+    var hist = (d.assetHistory || []).slice(-30);
+    var prevVal = hist.length >= 2 ? hist[hist.length - 2].value : 0;
+    var lastVal = hist.length ? hist[hist.length - 1].value : 0;
+    var dayDelta = pt.value && lastVal ? pt.value - lastVal : 0;
+    var gain = pt.value - pt.cost;
+    var gainPct = pt.cost > 0 ? (gain / pt.cost) * 100 : 0;
+    var h = '<div class="pf"><div class="top"><div><div class="k">Total portfolio</div>' +
+      '<div class="tot mono">' + (pt.value > 0 ? rp(pt.value) : rp(pt.cost)) + '</div></div>' +
+      '<div style="text-align:right"><div class="k">' + (dayDelta ? 'Hari ini' : 'All-time') + '</div>' +
+      '<div class="chip2">' + (gain >= 0 ? '▲' : '▼') + ' ' + rp(Math.abs(dayDelta || gain)) + '</div></div></div>' +
+      '<div class="chip2" style="margin-top:4px">' + (gain >= 0 ? '+' : '−') + rp(Math.abs(gain)) +
+        ' · ' + (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1).replace('.', ',') + '% all-time</div>';
+    if (hist.length >= 3) {
+      var mn = Math.min.apply(null, hist.map(function (x) { return x.value; }));
+      var mx = Math.max.apply(null, hist.map(function (x) { return x.value; }));
+      var span = (mx - mn) || 1, W = 300, H = 54, step = W / (hist.length - 1);
+      var line = hist.map(function (x, i) {
+        return (i ? 'L' : 'M') + (i * step).toFixed(1) + ',' + (H - ((x.value - mn) / span) * H).toFixed(1);
+      }).join(' ');
+      h += '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" height="54" preserveAspectRatio="none">' +
+        '<path d="' + line + ' L' + W + ',' + H + ' L0,' + H + ' Z" fill="rgba(255,255,255,.18)"/>' +
+        '<path d="' + line + '" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
     } else {
-      list.forEach(function (a) {
-        var px = assetPrice(a);
-        var val = px > 0 ? a.units * px : 0;
-        var base0 = a.units * a.buyPrice;
-        var pl = px > 0 ? val - base0 : 0;
-        var plPct = (px > 0 && base0 > 0) ? Math.round((pl / base0) * 100) : 0;
-        h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
-          '<div class="parttop"><span>' + esc(a.code) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
-          '<span class="mono">' + (px > 0 ? rp(val) : '—') + '</span></div>' +
-          '<div class="empty" style="padding:2px 0 0;font-size:11px">' + esc(a.name) + ' · ' + (a.units || 0) + ' x ' +
-            (px > 0 ? rp(px) : rp(a.buyPrice) + ' (beli)') + '</div>' +
-          (px > 0 ? '<div class="empty" style="padding:2px 0 0;font-size:11px;color:' + (pl >= 0 ? 'var(--mint)' : 'var(--coral)') + '">' +
-            (pl >= 0 ? '+' : '-') + rp(Math.abs(pl)) + ' (' + (plPct >= 0 ? '+' : '') + plPct + '%)</div>' : '') +
-          '<div class="partact" style="margin-top:6px"><button class="mini" data-act="asset-edit" data-code="' + esc(a.code) + '">Edit</button>' +
-          '<button class="mini danger" data-act="asset-del" data-code="' + esc(a.code) + '">Remove</button></div></div>';
-      });
-      h += '<div class="kv" style="margin-top:14px"><span>Cost</span><span class="mono">' + rp(cost) + '</span></div>';
-      if (priced) {
-        var gain = value - cost;
-        h += '<div class="kv"><span>Market value</span><span class="mono">' + rp(value) + '</span></div>';
-        h += '<div class="kv"><span>Unrealised P/L</span><span class="mono ' + (gain >= 0 ? 'pos' : 'neg') + '">' +
-          (gain >= 0 ? '+' : '-') + rp(Math.abs(gain)) + '</span></div>';
-      }
+      h += '<div class="empty-bar">Grafik muncul setelah 3 hari pencatatan otomatis.</div>';
     }
-    h += '<button class="btn ghost" data-act="asset-add" style="margin-top:12px">Add asset</button></div>';
+    h += '</div>';
     return h;
   }
+  function allocCard(d) {
+    var pt = portfolioTotals(d);
+    if (!pt.list.length || !(pt.value > 0)) return '';
+    var byKind = {};
+    pt.list.forEach(function (a) {
+      var px = assetPrice(a);
+      if (!(px > 0)) return;
+      var k = a.kind || 'lainnya';
+      byKind[k] = (byKind[k] || 0) + a.units * px;
+    });
+    var kinds = Object.keys(byKind);
+    if (!kinds.length) return '';
+    var order = ['saham', 'reksadana', 'crypto', 'emas', 'lainnya'];
+    kinds.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
+    var colors = { saham: '#2F6FB2', reksadana: '#F2B84B', crypto: '#7C5CBF', emas: '#C9A227', lainnya: '#8FB3D9' };
+    var bar = '', leg = '';
+    kinds.forEach(function (k) {
+      var pct = byKind[k] / pt.value * 100;
+      bar += '<i style="width:' + pct.toFixed(1) + '%;background:' + (colors[k] || '#8FB3D9') + '"></i>';
+      leg += '<span><span class="dot" style="background:' + (colors[k] || '#8FB3D9') + '"></span>' +
+        (k.charAt(0).toUpperCase() + k.slice(1)) + ' <b>' + Math.round(pct) + '%</b></span>';
+    });
+    return '<div class="card"><h2>Alokasi</h2><div class="alloc">' + bar + '</div><div class="legend3">' + leg + '</div></div>';
+  }
 
+  function assetsCard(d) {
+    var rp = function (n) { return mrp(n, 'wallet'); };
+    var pt = portfolioTotals(d);
+    var list = pt.list;
+    var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
+    if (!list.length) {
+      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana — harganya bisa diisi manual di kolom "Harga kini / NAV".</div>';
+    } else {
+      list.forEach(function (a, idx) {
+        var px = assetPrice(a);
+        var val = px > 0 ? a.units * px : a.units * a.buyPrice;
+        var base0 = a.units * a.buyPrice;
+        var pl = px > 0 ? val - base0 : 0;
+        var pct = (px > 0 && base0 > 0) ? (pl / base0 * 100) : 0;
+        var color = assetTint(idx);
+        h += '<div class="arow">' +
+          '<div class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</div>' +
+          '<div class="amid"><div class="acode">' + esc(a.code) + '</div>' +
+            '<div class="asub">' + esc(a.name) + ' · ' + (a.units || 0) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
+          '<div class="aright"><div class="aval">' + rp(val) + '</div>' +
+            (px > 0 ? '<div class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '▲' : '▼') + ' ' +
+              rp(Math.abs(pl)) + ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</div>' : '<div class="apl">harga belum diisi</div>') +
+          '</div></div>';
+      });
+      h += '<div class="partact" style="margin-top:12px"><button class="mini" data-act="asset-add">Tambah aset</button></div>';
+    }
+    h += '</div>';
+    return h;
+  }
 
   function openTransferForm() {
     var d = state.data || {}, list = d.accounts || [];
@@ -1412,6 +1514,8 @@ body.dark{--row:#0C1726}
       '<div><div class="k">Credit card debt</div><div class="v mono ' + (kk > 0 ? 'neg' : '') + '">' + rp(Math.abs(kk)) + '</div></div>' +
       '</div></div>';
 
+    h += portfolioCard(d);
+    h += allocCard(d);
     h += emoneyDeck(d);
     h += walletsCard(d);
     h += assetsCard(d);
