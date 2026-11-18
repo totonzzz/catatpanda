@@ -485,7 +485,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.43';
+  var VERSION = '3.44';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1200,8 +1200,8 @@ body.dark{--row:#0C1726}
 
     // 1) lewat server sendiri (skrip 3.13 ke atas)
     api('prices_refresh', { codes: key }).then(function (r) {
-      if (r && r.ok && r.prices) { merge(r.prices); return; }
-      proxyPrices(codes, merge);
+      if (r && r.ok && r.prices && Object.keys(r.prices).length) { merge(r.prices); return; }
+      proxyPrices(codes, merge);   // server belum bisa mengambil: coba dari browser
     }).catch(function () { proxyPrices(codes, merge); });
   }
 
