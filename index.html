@@ -317,12 +317,18 @@ body.dark{--row:#0C1726}
   transition:transform .2s cubic-bezier(.2,.8,.2,1);touch-action:pan-y}
 .txwrap .tx.dragging{transition:none;background:var(--row)}
 /* kartu portofolio aset */
-.pf{position:relative;overflow:hidden;border-radius:24px;padding:16px 16px 12px;color:#fff;
+.pf{position:relative;overflow:hidden;border-radius:24px;margin:0 0 14px;padding:16px 16px 12px;color:#fff;
   background:linear-gradient(150deg,#0B3C7A,#1B62BE 55%,#3E86E0);
   box-shadow:0 16px 34px rgba(9,30,60,.26),inset 0 1px 0 rgba(255,255,255,.25)}
-.pf .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
+.pf .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;position:relative;z-index:1;min-width:0}
+.pf .top > div{min-width:0}
+.pf .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;position:relative;z-index:1}
+/* pilihan Dompet / Aset */
+.seg{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
+.seg button.on{background:var(--card);color:var(--tx);box-shadow:0 2px 8px rgba(1,8,20,.10)}
 .pf .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;opacity:.75}
-.pf .tot{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px;white-space:nowrap;line-height:1.05}
+.pf .tot{font-size:clamp(21px,6.4vw,27px);font-weight:700;letter-spacing:-.02em;margin:2px 0 7px;white-space:nowrap;line-height:1.1;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .pf .chip2{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
   background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 9px;white-space:nowrap}
 .pf .spark{display:block;width:100%;margin-top:8px;position:relative;z-index:1}
@@ -511,7 +517,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.46';
+  var VERSION = '3.47';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -685,7 +691,7 @@ body.dark{--row:#0C1726}
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
     hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false }), catsAll: false,
-    prices: {}, pricesAt: 0, pricesAsked: ''
+    prices: {}, pricesAt: 0, pricesAsked: '', walletSeg: 'dompet'
   };
   var flushing = false;
 
@@ -1311,34 +1317,42 @@ body.dark{--row:#0C1726}
   function portfolioCard(d) {
     var pt = portfolioTotals(d);
     if (!pt.list.length) return '';
+    var hide = state.hide && state.hide.portfolio;
+    var rpv = function (n) { return mrp(n, 'portfolio'); };
     var hist = (d.assetHistory || []).slice(-30);
-    var prevVal = hist.length >= 2 ? hist[hist.length - 2].value : 0;
     var lastVal = hist.length ? hist[hist.length - 1].value : 0;
     var dayDelta = pt.value && lastVal ? pt.value - lastVal : 0;
     var gain = pt.value - pt.cost;
     var gainPct = pt.cost > 0 ? (gain / pt.cost) * 100 : 0;
-    var h = '<div class="pf"><div class="top"><div><div class="k">Total portfolio</div>' +
-      '<div class="tot mono">' + (pt.value > 0 ? rp(pt.value) : rp(pt.cost)) + '</div></div>' +
-      '<div style="text-align:right"><div class="k">' + (dayDelta ? 'Hari ini' : 'All-time') + '</div>' +
-      '<div class="chip2">' + (gain >= 0 ? '▲' : '▼') + ' ' + rp(Math.abs(dayDelta || gain)) + '</div></div></div>' +
-      '<div class="chip2" style="margin-top:4px">' + (gain >= 0 ? '+' : '−') + rp(Math.abs(gain)) +
-        ' · ' + (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1).replace('.', ',') + '% all-time</div>';
-    if (hist.length >= 3) {
+    var h = '<div class="pf"><div class="top">' +
+      '<div style="min-width:0"><div class="k" style="display:flex;align-items:center;gap:6px">Total portfolio' +
+        '<button class="iconbtn" data-act="hide" data-hide="portfolio" aria-label="Hide portfolio" style="flex:none;margin-left:auto;background:transparent;border:0;color:' +
+          (hide ? '#8BE0C0' : 'rgba(255,255,255,.75)') + ';padding:2px">' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div>' +
+      '<div class="tot mono">' + (pt.value > 0 ? rpv(pt.value) : rpv(pt.cost)) + '</div></div></div>' +
+      '<div class="chips">' +
+        (dayDelta ? '<span class="chip2">' + (dayDelta >= 0 ? '▲' : '▼') + ' ' + rpv(Math.abs(dayDelta)) + ' hari ini</span>' : '') +
+        '<span class="chip2">' + (gain >= 0 ? '+' : '−') + ' ' + rpv(Math.abs(gain)) + ' · ' +
+          (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1).replace('.', ',') + '%</span>' +
+      '</div>';
+    if (hist.length >= 3 && !hide) {
       var mn = Math.min.apply(null, hist.map(function (x) { return x.value; }));
       var mx = Math.max.apply(null, hist.map(function (x) { return x.value; }));
-      var span = (mx - mn) || 1, W = 300, H = 54, step = W / (hist.length - 1);
-      var line = hist.map(function (x, i) {
-        return (i ? 'L' : 'M') + (i * step).toFixed(1) + ',' + (H - ((x.value - mn) / span) * H).toFixed(1);
+      var span = (mx - mn) || 1, W = 300, H = 52, step = W / (hist.length - 1);
+      var line = hist.map(function (x, i2) {
+        return (i2 ? 'L' : 'M') + (i2 * step).toFixed(1) + ',' + (H - ((x.value - mn) / span) * H).toFixed(1);
       }).join(' ');
-      h += '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" height="54" preserveAspectRatio="none">' +
+      h += '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" height="52" preserveAspectRatio="none">' +
         '<path d="' + line + ' L' + W + ',' + H + ' L0,' + H + ' Z" fill="rgba(255,255,255,.18)"/>' +
         '<path d="' + line + '" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
-    } else {
+    } else if (!hide) {
       h += '<div class="empty-bar">Grafik muncul setelah 3 hari pencatatan otomatis.</div>';
     }
     h += '</div>';
     return h;
   }
+
   function allocCard(d) {
     var pt = portfolioTotals(d);
     if (!pt.list.length || !(pt.value > 0)) return '';
@@ -1365,7 +1379,7 @@ body.dark{--row:#0C1726}
   }
 
   function assetsCard(d) {
-    var rp = function (n) { return mrp(n, 'wallet'); };
+    var rp = function (n) { return mrp(n, 'portfolio'); };
     var pt = portfolioTotals(d);
     var list = pt.list;
     var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
@@ -1520,16 +1534,24 @@ body.dark{--row:#0C1726}
     var kk = d.kkTotal || 0, saldo = 0;
     methods.forEach(function (m) { if (m.kind !== 'utang') saldo += m.value; });
 
+    var seg = state.walletSeg === 'aset' ? 'aset' : 'dompet';
+    h += '<div class="seg"><button data-act="seg" data-seg="dompet" class="' + (seg === 'dompet' ? 'on' : '') + '">Dompet</button>' +
+      '<button data-act="seg" data-seg="aset" class="' + (seg === 'aset' ? 'on' : '') + '">Aset</button></div>';
+
+    if (seg === 'aset') {
+      h += portfolioCard(d);
+      h += allocCard(d);
+      h += assetsCard(d);
+      return h;
+    }
+
     h += '<div class="card"><h2>Wallet</h2><div class="wkrow">' +
       '<div><div class="k">Available balance</div><div class="v mono ' + (saldo < 0 ? 'neg' : 'pos') + '">' + rp(saldo) + '</div></div>' +
       '<div><div class="k">Credit card debt</div><div class="v mono ' + (kk > 0 ? 'neg' : '') + '">' + rp(Math.abs(kk)) + '</div></div>' +
       '</div></div>';
 
-    h += portfolioCard(d);
-    h += allocCard(d);
     h += emoneyDeck(d);
     h += walletsCard(d);
-    h += assetsCard(d);
     h += instalmentsCard(d);
     if (!methods.length) {
       h += '<div class="card"><h2>Payment methods</h2><div class="empty">No transactions with a payment method yet.</div></div>';
@@ -2583,6 +2605,7 @@ body.dark{--row:#0C1726}
       state.walletActive = ((state.walletActive || 0) + 1) % Math.max(n0, 1);
       layoutDeck('walletdeck', state.walletActive);
     }
+    else if (act === 'seg') { state.walletSeg = (el.getAttribute('data-seg') === 'aset') ? 'aset' : 'dompet'; renderAll(); }
     else if (act === 'wallet-add') openWalletForm('');
     else if (act === 'transfer-add') openTransferForm();
     else if (act === 'wallet-edit') openWalletForm(el.getAttribute('data-name'));
