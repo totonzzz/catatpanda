@@ -392,6 +392,17 @@ body.dark{--row:#0C1726}
 .s2s .hbar2{height:8px;border-radius:6px;background:rgba(255,255,255,.22);margin-top:11px;overflow:hidden;position:relative;z-index:1}
 .s2s .hbar2 span{display:block;height:100%;border-radius:6px;background:#fff}
 .s2s .foot{font-size:10.5px;opacity:.85;margin-top:7px;position:relative;z-index:1}
+.nw{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.nw > div{min-width:0}
+.nw .k{font-size:10px;color:var(--mut);font-weight:600}
+.nw .v{font-size:13.5px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nwbig{font-size:clamp(24px,7.4vw,30px);font-weight:700;letter-spacing:-.02em;margin:2px 0 8px}
+.goal{margin-top:12px}
+.goal .gt{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:600}
+.goal .gt span:last-child{color:var(--mut);font-weight:500;font-size:11px}
+.goal .gb{height:8px;border-radius:6px;background:var(--s2);margin-top:6px;overflow:hidden}
+.goal .gb i{display:block;height:100%;border-radius:6px;background:var(--mint)}
+.goal .gm{font-size:10.5px;color:var(--mut);margin-top:4px}
 /* pilihan Dompet / Aset */
 .seg{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
@@ -616,7 +627,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.56';
+  var VERSION = '3.57';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1015,6 +1026,18 @@ body.dark{--row:#0C1726}
       elapsed: Math.max(0, Math.round((now - start) / day))
     };
   }
+  function budgetAlertCard(d) {
+    var over = (d.budgets || []).filter(function (b) { return b.limit > 0 && b.pct >= 80; });
+    if (!over.length) return '';
+    var worst = over.slice().sort(function (x, y) { return y.pct - x.pct; })[0];
+    var lvl = worst.pct >= 100 ? 'bad' : 'warn';
+    return '<div class="ins ' + lvl + '"><div class="ic">' + (worst.pct >= 100 ? '⚠️' : '🔔') + '</div><div class="ibody">' +
+      (worst.pct >= 100 ? '<b>Anggaran ' + esc(worst.name) + ' terlampaui</b>' : '<b>Anggaran ' + esc(worst.name) + ' ' + worst.pct + '%</b>') +
+      ' — ' + rp(worst.spent) + ' dari ' + rp(worst.limit) + '.' +
+      (over.length > 1 ? ' ' + over.length + ' kategori perlu perhatian.' : '') +
+      '<span class="tagline">Ketuk Insights untuk merinci anggaran</span></div></div>';
+  }
+
   function insightCard(d) {
     var k = d.kpi || {};
     if (!k.count) return '';
@@ -1195,6 +1218,7 @@ function paydayCard(d) {
       '<div class="herostats"><div class="stat"><div class="k">Pemasukan</div><div class="v mono pos">' + mrp(k.masuk, 'hero') + '</div></div>' +
       '<div class="stat"><div class="k">Selisih</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + mrp(sel, 'hero') + '</div></div></div></div>';
 
+    h += budgetAlertCard(d);
     h += insightCard(d);
     var w = d.week;
     if (w) {
@@ -1622,6 +1646,82 @@ function paydayCard(d) {
     return h;
   }
 
+  function netWorthCard(d) {
+    var aset = 0, dompet = 0, utang = 0;
+    (d.assets || []).forEach(function (x) { var px = assetPrice(x); aset += (px > 0 ? x.units * px : x.units * x.buyPrice); });
+    (d.accounts || []).forEach(function (x) { dompet += x.balance; });
+    (d.instalments || []).forEach(function (x) { utang += Math.max(0, x.remaining || 0); });
+    utang += Math.max(0, d.kkTotal || 0);
+    var net = aset + dompet - utang;
+    return '<div class="card"><h2>Kekayaan bersih</h2>' +
+      '<div class="nwbig mono ' + (net < 0 ? 'neg' : '') + '">' + rp(net) + '</div>' +
+      '<div class="nw">' +
+        '<div><div class="k">Aset</div><div class="v mono">' + rp(aset) + '</div></div>' +
+        '<div><div class="k">Dompet</div><div class="v mono">' + rp(dompet) + '</div></div>' +
+        '<div><div class="k">Kewajiban</div><div class="v mono neg">' + rp(utang) + '</div></div>' +
+      '</div></div>';
+  }
+  function goalsCard(d) {
+    var list = d.goals || [];
+    var total = 0, saved = 0;
+    list.forEach(function (x) { total += x.target; saved += x.saved; });
+    var h = '<div class="card"><h2>Tujuan</h2>';
+    if (!list.length) {
+      h += '<div class="es" style="padding:8px 0 4px"><div class="emo">🎯</div><div class="ttl">Belum ada tujuan</div>' +
+        '<div class="hint">Contoh: liburan Jepang Rp 20 juta, dana darurat Rp 30 juta.</div></div>';
+    } else {
+      h += '<div class="nw" style="margin-bottom:4px"><div><div class="k">Terkumpul</div><div class="v mono">' + rp(saved) + '</div></div>' +
+        '<div><div class="k">Target</div><div class="v mono">' + rp(total) + '</div></div>' +
+        '<div><div class="k">Progres</div><div class="v mono">' + (total > 0 ? Math.round(saved / total * 100) : 0) + '%</div></div></div>';
+      list.forEach(function (x) {
+        var pct = x.target > 0 ? Math.min(100, Math.round(x.saved / x.target * 100)) : 0;
+        var sisa = Math.max(0, x.target - x.saved);
+        h += '<div class="goal" data-act="goal-edit" data-name="' + esc(x.name) + '" style="cursor:pointer">' +
+          '<div class="gt"><span>' + esc(x.name) + '</span><span>' + pct + '%</span></div>' +
+          '<div class="gb"><i style="width:' + pct + '%"></i></div>' +
+          '<div class="gm">' + rp(x.saved) + ' dari ' + rp(x.target) +
+            (sisa > 0 ? ' · sisa ' + rp(sisa) : ' · tercapai 🎉') + (x.due ? ' · ' + x.due : '') + '</div></div>';
+      });
+    }
+    h += '<button class="btn ghost" data-act="goal-add" style="margin-top:12px">Tambah tujuan</button></div>';
+    return h;
+  }
+  function subsCard(d) {
+    var list = (d.subs || []).filter(function (x) { return x.active; });
+    if (!list.length) return '';
+    var monthly = 0;
+    list.forEach(function (x) { monthly += x.cycle === 'tahunan' ? x.cost / 12 : x.cost; });
+    var h = '<div class="card"><h2>Langganan</h2><div class="nw"><div><div class="k">Per bulan</div><div class="v mono">' + rp(Math.round(monthly)) + '</div></div>' +
+      '<div><div class="k">Jumlah</div><div class="v mono">' + list.length + '</div></div><div></div></div>';
+    list.forEach(function (x) {
+      h += '<div class="kv" style="margin-top:8px"><span>' + esc(x.name) + '<small>' + x.cycle + (x.day ? ' · tgl ' + x.day : '') + '</small></span>' +
+        '<span class="mono">' + rp(x.cost) + '</span></div>';
+    });
+    h += '<button class="btn ghost" data-act="sub-add" style="margin-top:10px">Tambah langganan</button></div>';
+    return h;
+  }
+  function openGoalForm(name) {
+    var d0 = state.data || {}, cur = null;
+    (d0.goals || []).forEach(function (x) { if (x.name === name) cur = x; });
+    sheetOpen('Tujuan', '<div class="fld"><label>Nama</label><input id="gName" value="' + esc(cur ? cur.name : '') + '" placeholder="Liburan Jepang"></div>' +
+      '<div class="fld"><label>Target</label><input id="gTarget" class="mono" inputmode="numeric" value="' + (cur ? cur.target : '') + '"></div>' +
+      '<div class="fld"><label>Terkumpul</label><input id="gSaved" class="mono" inputmode="numeric" value="' + (cur ? cur.saved : '') + '"></div>' +
+      '<div class="fld"><label>Tenggat (opsional)</label><input id="gDue" type="date" value="' + esc(cur ? cur.due : '') + '"></div>' +
+      '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan tujuan</button>' +
+      (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tujuan</button>' : ''));
+  }
+  function openSubForm(name) {
+    var d0 = state.data || {}, cur = null;
+    (d0.subs || []).forEach(function (x) { if (x.name === name) cur = x; });
+    sheetOpen('Langganan', '<div class="fld"><label>Nama</label><input id="sName" value="' + esc(cur ? cur.name : '') + '" placeholder="Netflix"></div>' +
+      '<div class="fld"><label>Biaya</label><input id="sCost" class="mono" inputmode="numeric" value="' + (cur ? cur.cost : '') + '"></div>' +
+      '<div class="fld"><label>Siklus</label><select id="sCycle"><option value="bulanan"' + (cur && cur.cycle === 'bulanan' ? ' selected' : '') + '>Bulanan</option>' +
+      '<option value="tahunan"' + (cur && cur.cycle === 'tahunan' ? ' selected' : '') + '>Tahunan</option></select></div>' +
+      '<div class="fld"><label>Tanggal tagih</label><input id="sDay" class="mono" inputmode="numeric" value="' + (cur ? cur.day : '') + '"></div>' +
+      '<div class="err" id="sErr"></div><button class="btn" data-act="sub-save">Simpan</button>' +
+      (cur ? '<button class="btn ghost" data-act="sub-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus</button>' : ''));
+  }
+
   function allocCard(d) {
     var pt = portfolioTotals(d);
     if (!pt.list.length || !(pt.value > 0)) return '';
@@ -1810,6 +1910,8 @@ function paydayCard(d) {
       '<button data-act="seg" data-seg="aset" class="' + (seg === 'aset' ? 'on' : '') + '">Aset</button></div>';
 
     if (seg === 'aset') {
+      h += netWorthCard(d);
+      h += goalsCard(d);
       h += portfolioCard(d);
       h += allocCard(d);
       h += assetsCard(d);
@@ -1823,6 +1925,7 @@ function paydayCard(d) {
 
     h += emoneyDeck(d);
     h += walletsCard(d);
+    h += subsCard(d);
     h += instalmentsCard(d);
     if (!methods.length) {
       h += '<div class="card"><h2>Payment methods</h2><div class="empty">No transactions with a payment method yet.</div></div>';
@@ -2893,6 +2996,41 @@ function paydayCard(d) {
       var n0 = ((state.data && state.data.accounts) || []).filter(function (a) { return a.kind === 'emoney'; }).length;
       state.walletActive = ((state.walletActive || 0) + 1) % Math.max(n0, 1);
       layoutDeck('walletdeck', state.walletActive);
+    }
+    else if (act === 'goal-add') openGoalForm('');
+    else if (act === 'goal-edit') openGoalForm(el.getAttribute('data-name'));
+    else if (act === 'goal-save') {
+      var gn = $('gName').value.trim();
+      if (!gn) { $('gErr').textContent = 'Nama wajib diisi'; return; }
+      el.disabled = true;
+      api('goal_set', { nama: gn, target: $('gTarget').value, terkumpul: $('gSaved').value, tenggat: $('gDue').value }).then(function (r) {
+        el.disabled = false;
+        if (r && r.ok) { closeSheets(); toast('🎯 Tujuan disimpan'); var pz0 = loadMonth(state.month, { silent: true }); if (pz0 && pz0.then) pz0.then(renderAll); }
+        else $('gErr').textContent = (r && r.error) || 'Gagal';
+      }).catch(function () { el.disabled = false; $('gErr').textContent = 'Tidak bisa terhubung'; });
+    }
+    else if (act === 'goal-del') {
+      if (!confirm('Hapus tujuan ini?')) return;
+      api('goal_delete', { nama: el.getAttribute('data-name') }).then(function () {
+        closeSheets(); toast('Tujuan dihapus'); var pz1 = loadMonth(state.month, { silent: true }); if (pz1 && pz1.then) pz1.then(renderAll);
+      });
+    }
+    else if (act === 'sub-add') openSubForm('');
+    else if (act === 'sub-save') {
+      var sn = $('sName').value.trim();
+      if (!sn) { $('sErr').textContent = 'Nama wajib diisi'; return; }
+      el.disabled = true;
+      api('sub_set', { nama: sn, biaya: $('sCost').value, siklus: $('sCycle').value, tanggal: $('sDay').value }).then(function (r) {
+        el.disabled = false;
+        if (r && r.ok) { closeSheets(); toast('Langganan disimpan'); var pz2 = loadMonth(state.month, { silent: true }); if (pz2 && pz2.then) pz2.then(renderAll); }
+        else $('sErr').textContent = (r && r.error) || 'Gagal';
+      }).catch(function () { el.disabled = false; $('sErr').textContent = 'Tidak bisa terhubung'; });
+    }
+    else if (act === 'sub-del') {
+      if (!confirm('Hapus langganan ini?')) return;
+      api('sub_delete', { nama: el.getAttribute('data-name') }).then(function () {
+        closeSheets(); toast('Langganan dihapus'); var pz3 = loadMonth(state.month, { silent: true }); if (pz3 && pz3.then) pz3.then(renderAll);
+      });
     }
     else if (act === 'seg') { state.walletSeg = (el.getAttribute('data-seg') === 'aset') ? 'aset' : 'dompet'; renderAll(); }
     else if (act === 'wallet-add') openWalletForm('');
