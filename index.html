@@ -1381,7 +1381,7 @@ function paydayCard(d) {
       var b = bankOf(m.name), empty = !!m.empty && !m.value && !m.monthOut;
       var hasCycle = typeof m.dueAmount === 'number';
       var billLbl = hasCycle ? (m.dueAmount > 0 && m.dueDate ? 'Bill · ' + dlabel(m.dueDate) : 'No bill due') : 'Balance';
-      var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0);
+      var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
       var rightLbl = hasCycle ? 'Unbilled' : 'This month';
       var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
@@ -1723,7 +1723,7 @@ function paydayCard(d) {
       '<option value="tahunan"' + (cur && cur.cycle === 'tahunan' ? ' selected' : '') + '>Tahunan</option></select></div>' +
       '<div class="fld"><label>Tanggal tagih</label><input id="sDay" class="mono" inputmode="numeric" value="' + (cur ? cur.day : '') + '"></div>' +
       '<div class="err" id="sErr"></div><button class="btn" data-act="sub-save">Simpan</button>' +
-      (cur ? '<button class="btn ghost" data-act="sub-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus</button>' : ''));
+      (cur ? '<button class="btn ghost" data-act="sub-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus</button>' : '');
   }
 
   function allocCard(d) {
