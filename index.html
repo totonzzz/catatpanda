@@ -627,7 +627,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.60';
+  var VERSION = '3.61';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1702,7 +1702,8 @@ function paydayCard(d) {
   }
   function sheetFormActs() {
     var sd = $('sheetDetail');
-    if (!sd) return;
+    if (!sd || sd.__goalBound) return;
+    sd.__goalBound = true;
     sd.addEventListener('click', function (e) {
       var el = e.target.closest('[data-act]');
       if (!el) return;
@@ -1764,6 +1765,7 @@ function paydayCard(d) {
       '<div class="fld"><label>Tenggat (opsional)</label><input id="gDue" type="date" value="' + esc(cur ? cur.due : '') + '"></div>' +
       '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan goal</button>' +
       (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus goal</button>' : '');
+    sheetFormActs();
   }
   function openSubForm(name) {
     var d0 = state.data || {}, cur = null;
@@ -1777,6 +1779,7 @@ function paydayCard(d) {
       '<div class="fld"><label>Tanggal tagih</label><input id="sDay" class="mono" inputmode="numeric" value="' + (cur ? cur.day : '') + '"></div>' +
       '<div class="err" id="sErr"></div><button class="btn" data-act="sub-save">Simpan</button>' +
       (cur ? '<button class="btn ghost" data-act="sub-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus</button>' : '');
+    sheetFormActs();
   }
 
   function allocCard(d) {
