@@ -505,6 +505,36 @@ body.dark{--row:#0C1726}
 .tab.on{color:#0B1B2B}
 .tab.on svg{stroke-width:2.2}
 .tab.on .nlabel{opacity:1}
+
+/* ===== design system: radius, shadow, tipografi, skeleton ===== */
+:root{--r-sm:12px;--r-md:16px;--r-lg:22px;--r-xl:26px;
+  --sh-1:0 1px 2px rgba(1,8,20,.04),0 3px 10px rgba(1,8,20,.05);
+  --sh-2:0 5px 16px rgba(1,8,20,.06);
+  --sh-3:0 12px 28px rgba(1,8,20,.09)}
+.card{border-radius:var(--r-xl);box-shadow:var(--sh-2)}
+.sheet{border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:0 -10px 30px rgba(1,8,20,.16)}
+.mini,.bc,.fchip,.seg,.seg2,.stat,.tag{border-radius:var(--r-sm)}
+.pf,.s2s,.ins{border-radius:var(--r-lg)}
+.card h2{font-size:13px;letter-spacing:-.005em}
+.k{letter-spacing:.02em}
+.card,.ins,.pf,.s2s{transition:box-shadow .25s ease}
+/* skeleton */
+.sk{border-radius:14px;background:linear-gradient(90deg,var(--s2) 25%,var(--s1) 37%,var(--s2) 63%);
+  background-size:400% 100%;animation:skm 1.3s ease-in-out infinite}
+@keyframes skm{0%{background-position:100% 0}100%{background-position:0 0}}
+.skcard{border:1px solid var(--line);border-radius:var(--r-xl);padding:16px;margin-bottom:14px;background:var(--card)}
+.sk-line{height:12px;margin-bottom:9px}
+.sk-line.w60{width:60%}.sk-line.w40{width:40%}.sk-line.big{height:26px;width:55%;margin-bottom:12px}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+/* tombol di dalam toast */
+#toast{display:flex;align-items:center;gap:10px}
+.toastbtn{border:0;background:rgba(255,255,255,.22);color:inherit;font:inherit;font-weight:700;
+  font-size:12.5px;padding:6px 10px;border-radius:10px;cursor:pointer;white-space:nowrap}
+/* empty state */
+.es{text-align:center;padding:22px 10px}
+.es .emo{font-size:26px;line-height:1}
+.es .ttl{font-size:13.5px;font-weight:700;margin-top:9px}
+.es .hint{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -586,7 +616,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.55';
+  var VERSION = '3.56';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -778,7 +808,31 @@ body.dark{--row:#0C1726}
     toast(state.privacy ? 'Amounts hidden' : 'Amounts visible');
     renderAll();
   }
-  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+  function toast(msg, actionLabel, actionFn) {
+    var el = $('toast');
+    el.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = msg;
+    el.appendChild(span);
+    if (actionLabel && actionFn) {
+      var b = document.createElement('button');
+      b.className = 'toastbtn';
+      b.textContent = actionLabel;
+      b.addEventListener('click', function () { try { actionFn(); } catch (e) {} el.classList.remove('show'); });
+      el.appendChild(b);
+    }
+    el.classList.add('show');
+    clearTimeout(toast.h);
+    toast.h = setTimeout(function () { el.classList.remove('show'); }, actionLabel ? 6000 : 2600);
+  }
+  function undoDelete(rec) {
+    if (!rec) return;
+    api('add', { desc: rec.desc, amount: rec.amount, tipe: rec.tipe, kategori: rec.cat, metode: rec.metode, tanggal: rec.date, nama: rec.nama || '' })
+      .then(function (r) {
+        if (r && r.ok) { toast('↩️ Dikembalikan'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
+        else toast((r && r.error) || 'Gagal mengembalikan');
+      }).catch(function () { toast('Tidak bisa terhubung'); });
+  }
   function persistPending() { LS.set('ck_pending', JSON.stringify(state.pending)); }
   function connected() { return !!(state.url && state.token); }
   function todayStr() { return (state.data && state.data.today) || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()); }
@@ -813,6 +867,15 @@ body.dark{--row:#0C1726}
   }
 
   function resetRange() { state.rangeFrom = ''; state.rangeTo = ''; }
+  function skeletonHtml() {
+    var h = '';
+    for (var i = 0; i < 3; i++) {
+      h += '<div class="skcard"><div class="sk sk-line w40"></div><div class="sk sk-line big"></div>' +
+        '<div class="sk sk-line w60"></div><div class="sk sk-line" style="margin-bottom:0"></div></div>';
+    }
+    return h;
+  }
+
   function loadMonth(month, opts) {
     opts = opts || {};
     if (!connected()) return renderAll();
@@ -822,6 +885,10 @@ body.dark{--row:#0C1726}
       if (c) { state.data = c; state.month = c.month; state.fromCache = true; }
       else if (month) state.data = null;
       renderAll();
+      if (!c && !state.data && state.tab !== 'setelan') {
+        var vv = $('view');
+        if (vv) vv.innerHTML = skeletonHtml();
+      }
     }
     if (state.busy) return;
     state.busy = true; setSpin(true);
@@ -1206,7 +1273,13 @@ function paydayCard(d) {
     if (state.pending.length && (state.filter === 'semua') && !state.q) {
       h += '<div class="day"><span>Waiting for signal</span></div>' + state.pending.map(pendingRow).join('');
     }
-    if (!list.length) return h + '<div class="empty" style="padding:18px 2px">No matching transactions.</div>';
+    if (!list.length) {
+      var filtered0 = state.filter !== 'semua' || state.q || state.rangeFrom || state.rangeTo;
+      return h + '<div class="es"><div class="emo">🧾</div><div class="ttl">' +
+        (filtered0 ? 'Tidak ada yang cocok' : 'Belum ada transaksi') + '</div><div class="hint">' +
+        (filtered0 ? 'Coba ubah filter atau hapus rentang tanggal.' : 'Tekan tombol + untuk mencatat pengeluaran pertamamu.') +
+        '</div></div>';
+    }
     var i = 0;
     while (i < list.length) {
       var date = list[i].date, group = [], sum = 0;
@@ -2739,9 +2812,11 @@ function paydayCard(d) {
     if (moved) state.swipeBlock = true;   // geser sedikit pun jangan sampai malah membuka detail
     if (!row || !horizontal) return;
     if (dx > 0) openEdit(id);
-    else if (confirm('Delete this transaction?')) {
+    else if (confirm('Hapus transaksi ini?')) {
+      var recSwipe = null;
+      ((state.data && state.data.recent) || []).forEach(function (x) { if (x.id === id) recSwipe = x; });
       api('delete', { id: id }).then(function (r) {
-        if (r && r.ok) { toast('🗑️ ' + (r.msg || 'Deleted')); loadMonth(state.month, { silent: true }); }
+        if (r && r.ok) { toast('🗑️ Dihapus', 'Urungkan', function () { undoDelete(recSwipe); }); loadMonth(state.month, { silent: true }); }
         else toast((r && r.error) || 'Could not delete');
       }).catch(function () { toast('Cannot reach the server'); });
     }
@@ -3154,8 +3229,10 @@ function paydayCard(d) {
     else if (act === 'del0') openDetail(id, false);
     else if (act === 'del2') {
       el.disabled = true; el.textContent = 'Menghapus…';
+      var recDel = null;
+      ((state.data && state.data.recent) || []).forEach(function (x) { if (x.id === id) recDel = x; });
       api('delete', { id: id }).then(function (r) {
-        if (r && r.ok) { closeSheets(); toast('🗑️ ' + (r.msg || 'Dihapus')); loadMonth(state.month, { silent: true }); }
+        if (r && r.ok) { closeSheets(); toast('🗑️ Dihapus', 'Urungkan', function () { undoDelete(recDel); }); loadMonth(state.month, { silent: true }); }
         else { $('delErr').textContent = (r && r.error) || 'Could not delete'; el.disabled = false; el.textContent = 'Yes, delete this entry'; }
       }).catch(function (e2) { $('delErr').textContent = e2.code === 'NET' ? 'You need internet to delete.' : 'Delete failed.'; el.disabled = false; el.textContent = 'Yes, delete this entry'; });
     }
