@@ -517,7 +517,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.47';
+  var VERSION = '3.48';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1286,9 +1286,10 @@ body.dark{--row:#0C1726}
       .catch(function () {});
   }
   function assetPrice(a) {
-    if (a.kind === 'reksadana') return a.priceManual > 0 ? a.priceManual : 0;
+    if (a.priceManual > 0) return a.priceManual;             // harga yang kamu isi menang
+    if (a.kind === 'reksadana') return 0;                    // reksadana hanya manual
     var q = state.prices[String(a.code || '').toUpperCase()];
-    return (q && typeof q.price === 'number') ? q.price : 0;
+    return (q && typeof q.price === 'number') ? q.price : 0; // kalau ada harga otomatis
   }
 
   var ASSET_COLORS = ['#2F6FB2', '#E0534A', '#F2B84B', '#8FB3D9', '#0F9D6B', '#7C5CBF'];
@@ -1384,7 +1385,7 @@ body.dark{--row:#0C1726}
     var list = pt.list;
     var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
     if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana — harganya bisa diisi manual di kolom "Harga kini / NAV".</div>';
+      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana — isi "Harga kini" agar untung/rugi muncul.</div>';
     } else {
       list.forEach(function (a, idx) {
         var px = assetPrice(a);
@@ -1393,7 +1394,7 @@ body.dark{--row:#0C1726}
         var pl = px > 0 ? val - base0 : 0;
         var pct = (px > 0 && base0 > 0) ? (pl / base0 * 100) : 0;
         var color = assetTint(idx);
-        h += '<div class="arow">' +
+        h += '<div class="arow" data-act="asset-edit" data-code="' + esc(a.code) + '" style="cursor:pointer">' +
           '<div class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</div>' +
           '<div class="amid"><div class="acode">' + esc(a.code) + '</div>' +
             '<div class="asub">' + esc(a.name) + ' · ' + assetQtyText(a) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
@@ -1402,7 +1403,8 @@ body.dark{--row:#0C1726}
               rp(Math.abs(pl)) + ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</div>' : '<div class="apl">harga belum diisi</div>') +
           '</div></div>';
       });
-      h += '<div class="partact" style="margin-top:12px"><button class="mini" data-act="asset-add">Tambah aset</button></div>';
+      h += '<div class="partact" style="margin-top:12px"><button class="mini" data-act="asset-add">Tambah aset</button></div>' +
+        '<div class="empty" style="padding:8px 0 0;font-size:10.5px;text-align:center">Ketuk salah satu aset untuk mengubah atau menghapus</div>';
     }
     h += '</div>';
     return h;
@@ -1458,7 +1460,8 @@ body.dark{--row:#0C1726}
       '<div class="fld"><label>Harga rata-rata / lembar</label><input id="aBuy" class="mono" inputmode="numeric" value="' + (cur ? cur.buyPrice : '') + '" placeholder="8246"></div>' +
       '<div class="fld"><label>Harga kini / NAV <span style="color:var(--mut)">— untuk reksadana</span></label>' +
         '<input id="aNow" class="mono" inputmode="numeric" value="' + (cur && cur.priceManual ? cur.priceManual : '') + '" placeholder="opsional"></div>' +
-      '<div class="err" id="aErr"></div><button class="btn" data-act="asset-save" data-code="' + esc(cur ? cur.code : '') + '">Save asset</button>';
+      '<div class="err" id="aErr"></div><button class="btn" data-act="asset-save" data-code="' + esc(cur ? cur.code : '') + '">Save asset</button>' +
+      (cur ? '<button class="btn ghost" data-act="asset-del" data-code="' + esc(cur.code) + '" style="margin-top:8px;color:var(--coral)">Hapus aset ini</button>' : '');
   }
 
   function instalmentsCard(d) {
