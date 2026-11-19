@@ -105,7 +105,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .hero2::before{content:'';position:absolute;inset:-30% -20%;pointer-events:none;
   background:radial-gradient(55% 55% at 82% 8%,rgba(193,232,255,.30),transparent 62%),radial-gradient(45% 45% at 6% 92%,rgba(84,131,179,.55),transparent 62%)}
 .hero2 .k,.hero2 .sub{color:rgba(255,255,255,.65)}
-.hero2 .big{color:#fff;font-size:clamp(26px,8vw,34px);line-height:1.08;white-space:nowrap;letter-spacing:-.02em}
+.hero2 .big{color:#fff;font-size:clamp(22px,6.4vw,28px);line-height:1.1;white-space:nowrap;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis}
+.hero2{padding:14px 15px 12px}
+.herochips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.herostats{display:flex;gap:8px;margin-top:11px}
+.herostats .stat{flex:1;padding:8px 10px;border-radius:13px;min-width:0}
+.herostats .stat .k{font-size:10px}
+.herostats .stat .v{font-size:12.5px}
 .hero2 .stat{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12);backdrop-filter:blur(6px)}
 .hero2 .stat .k{color:rgba(255,255,255,.6)}
 .hero2 .pos{color:#C1E8FF}.hero2 .neg{color:#FFC8BC}
@@ -323,6 +329,22 @@ body.dark{--row:#0C1726}
 .pf .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;position:relative;z-index:1;min-width:0}
 .pf .top > div{min-width:0}
 .pf .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;position:relative;z-index:1}
+/* kartu Safe to Spend (info utama) */
+.s2s{position:relative;overflow:hidden;border-radius:22px;padding:15px 16px 13px;margin-bottom:14px;
+  background:linear-gradient(150deg,#0F9D6B,#0C7D55 60%,#0A6344);color:#fff;
+  box-shadow:0 14px 30px rgba(6,60,40,.30),inset 0 1px 0 rgba(255,255,255,.22)}
+.s2s::after{content:'';position:absolute;inset:-40% -20%;pointer-events:none;
+  background:radial-gradient(55% 55% at 85% 0%,rgba(255,255,255,.22),transparent 60%)}
+.s2s .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;position:relative;z-index:1;
+  display:flex;align-items:center;gap:6px}
+.s2s .amt{font-size:clamp(26px,8vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.05;margin:3px 0 2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1}
+.s2s .rows{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;position:relative;z-index:1}
+.s2s .pill2{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;
+  padding:4px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+.s2s .hbar2{height:8px;border-radius:6px;background:rgba(255,255,255,.22);margin-top:11px;overflow:hidden;position:relative;z-index:1}
+.s2s .hbar2 span{display:block;height:100%;border-radius:6px;background:#fff}
+.s2s .foot{font-size:10.5px;opacity:.85;margin-top:7px;position:relative;z-index:1}
 /* pilihan Dompet / Aset */
 .seg{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
@@ -418,20 +440,20 @@ body.dark{--row:#0C1726}
 .tabbar[hidden]{display:none !important}
 .tabbar{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:20;
   display:flex;align-items:center;justify-content:space-between;gap:0;
-  height:56px;box-sizing:border-box;padding:6px;overflow:hidden;border-radius:999px;
+  height:52px;box-sizing:border-box;padding:5px;overflow:hidden;border-radius:999px;
   background:rgba(10,14,20,.42);
   -webkit-backdrop-filter:blur(28px) saturate(200%);backdrop-filter:blur(28px) saturate(200%);
   border:1px solid rgba(255,255,255,.22);
   box-shadow:0 18px 40px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.28)}
-.navpill{position:absolute;top:6px;bottom:6px;left:6px;width:64px;border-radius:999px;
+.navpill{position:absolute;top:5px;bottom:5px;left:5px;width:64px;border-radius:999px;
   background:rgba(255,255,255,.95);box-shadow:0 4px 14px rgba(0,0,0,.20);z-index:0;will-change:transform;
   transition:transform .38s cubic-bezier(.22,.9,.25,1)}
 .tabbar:not(.navready) .navpill{transition:none}
 .tab{flex:1 1 0;min-width:0;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   padding:0;border-radius:999px;background:none;border:0;position:relative;z-index:1;
   color:rgba(255,255,255,.60);transition:color .28s ease;cursor:pointer}
-.tab svg{width:19px;height:19px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.tab .nlabel{font-size:8.5px;font-weight:600;line-height:1;opacity:0;transition:opacity .28s ease;
+.tab svg{width:18px;height:18px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tab .nlabel{font-size:8.5px;font-weight:600;line-height:1;opacity:.72;transition:opacity .28s ease;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab.on{color:#0B1B2B}
 .tab.on svg{stroke-width:2.2}
@@ -517,7 +539,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.49';
+  var VERSION = '3.50';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -690,7 +712,7 @@ body.dark{--row:#0C1726}
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
-    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false }), catsAll: false,
+    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false, portfolio: false, s2s: false }), catsAll: false,
     prices: {}, pricesAt: 0, pricesAsked: '', walletSeg: 'dompet'
   };
   var flushing = false;
@@ -877,7 +899,38 @@ body.dark{--row:#0C1726}
       elapsed: Math.max(0, Math.round((now - start) / day))
     };
   }
-  function paydayCard(d) {
+  function safeToSpendCard(d) {
+  if (!d || !d.today) return '';
+  var info = paydayInfo(d.today);
+  var limit = 0, spent = 0;
+  (d.budgets || []).forEach(function (b) { limit += b.limit; spent += Math.min(b.spent, b.limit); });
+  var remaining = limit > 0 ? Math.max(0, limit - spent) : Math.max(0, d.kpi.selisih);
+  var perDay = Math.round(remaining / Math.max(info.left, 1));
+  var pct = limit > 0 ? Math.min(100, Math.round(spent / limit * 100)) : Math.round(info.elapsed / info.total * 100);
+  var bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  var tglGaji = info.date.getDate() + ' ' + bulan[info.date.getMonth()];
+  var hide = state.hide && state.hide.s2s;
+  var rps = function (n) { return hide ? 'Rp ••••' : rp(n); };
+  return '<div class="s2s">' +
+    '<div class="k">Aman dibelanjakan / hari' +
+      '<button class="iconbtn" data-act="hide" data-hide="s2s" aria-label="Sembunyikan" style="margin-left:auto;background:transparent;border:0;padding:2px;color:' +
+        (hide ? '#BDEFD8' : 'rgba(255,255,255,.8)') + '">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div>' +
+    '<div class="amt mono">' + rps(perDay) + '</div>' +
+    '<div class="rows">' +
+      '<span class="pill2">Sisa ' + rps(remaining) + '</span>' +
+      '<span class="pill2">' + info.left + ' hari lagi</span>' +
+      '<span class="pill2">Gajian ' + tglGaji + '</span>' +
+    '</div>' +
+    '<div class="hbar2"><span style="width:' + pct + '%"></span></div>' +
+    '<div class="foot">' + (limit > 0
+      ? 'Anggaran terpakai ' + pct + '% · ' + rps(spent) + ' dari ' + rps(limit)
+      : 'Belum ada anggaran — angka dari selisih pemasukan dan pengeluaran') + '</div>' +
+    '</div>';
+}
+
+function paydayCard(d) {
     if (!d || !d.today) return '';
     var info = paydayInfo(d.today);
     var limit = 0, spent = 0;
@@ -954,20 +1007,26 @@ body.dark{--row:#0C1726}
       if (d.flagged) h += '<button class="bc" data-act="flagged">Review flagged entries →</button>';
       h += '</div>';
     }
+    h += safeToSpendCard(d);
     var pv = (d.trend && d.trend.length > 1) ? d.trend[d.trend.length - 2] : null;
     var moDelta = (pv && pv.keluar) ? Math.round((k.keluar - pv.keluar) / pv.keluar * 100) : 0;
-    h += '<div class="card hero2"><div class="k">' + (isCur ? 'Spending this month' : 'Spending ' + esc(d.label)) + '</div>' +
-      '<div style="display:flex;align-items:center;gap:10px">' +
+    var deltaRp = (pv && pv.keluar) ? k.keluar - pv.keluar : 0;
+    h += '<div class="card hero2"><div class="k">' + (isCur ? 'Pengeluaran bulan ini' : 'Pengeluaran ' + esc(d.label)) + '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
         '<div class="big mono" id="heroNum" data-to="' + k.keluar + '">' + mrp(k.keluar, 'hero') + '</div>' +
-        '<button class="iconbtn" data-act="hide" data-hide="hero" aria-label="Hide this amount" style="flex:none;margin-top:2px;color:' + (state.hide.hero ? 'var(--mint)' : 'var(--mut)') + '">' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+        '<button class="iconbtn" data-act="hide" data-hide="hero" aria-label="Sembunyikan" style="flex:none;margin-top:2px;color:' + (state.hide.hero ? 'var(--mint)' : 'rgba(255,255,255,.7)') + '">' +
+          '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
           '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button>' +
       '</div>' +
-      (isCur && !d.todayFilled ? '<button class="bc" data-act="no-spend" style="margin-top:8px">No spending today</button>' : '') +
-      '<div class="sub">' + k.count + (k.count === 1 ? ' transaction' : ' transactions') + (isCur ? ' · ' + (d.todayFilled ? '✅ logged today' : '⏳ nothing logged today') : '') + '</div>' +
-      '<div class="stats"><div class="stat"><div class="k">Income</div><div class="v mono pos">' + mrp(k.masuk, 'hero') + '</div></div>' +
-      '<div class="stat"><div class="k">Difference</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + mrp(sel, 'hero') + '</div></div></div>' +
-      ((pv && pv.keluar) ? '<div class="herochip">' + (moDelta <= 0 ? '↓' : '↑') + ' ' + Math.abs(moDelta) + '% vs last month</div>' : '') + '</div>';
+      '<div class="sub" style="font-size:11.5px">' + k.count + ' transaksi' + (isCur ? ' · ' + (d.todayFilled ? 'sudah catat hari ini' : 'belum catat hari ini') : '') + '</div>' +
+      ((pv && pv.keluar) ?
+        '<div class="herochips">' +
+          '<span class="herochip" style="margin:0">' + (moDelta <= 0 ? '↓' : '↑') + ' ' + Math.abs(moDelta) + '% vs bulan lalu</span>' +
+          '<span class="herochip" style="margin:0">' + (deltaRp <= 0 ? '−' : '+') + ' ' + mrp(Math.abs(deltaRp), 'hero') + '</span>' +
+        '</div>' : '') +
+      (isCur && !d.todayFilled ? '<button class="bc" data-act="no-spend" style="margin-top:9px">Belum ada pengeluaran hari ini</button>' : '') +
+      '<div class="herostats"><div class="stat"><div class="k">Pemasukan</div><div class="v mono pos">' + mrp(k.masuk, 'hero') + '</div></div>' +
+      '<div class="stat"><div class="k">Selisih</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + mrp(sel, 'hero') + '</div></div></div></div>';
 
     var w = d.week;
     if (w) {
@@ -983,7 +1042,7 @@ body.dark{--row:#0C1726}
         '</div></div>';
     }
 
-    h += paydayCard(d);
+    /* kartu payday lama digantikan safeToSpendCard */
     if (d.health) h += healthCard(d.health);
     h += '<div class="card"><h2>Categories</h2>';
     if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
