@@ -348,6 +348,32 @@ body.dark{--row:#0C1726}
 .pf .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;position:relative;z-index:1;min-width:0}
 .pf .top > div{min-width:0}
 .pf .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;position:relative;z-index:1}
+/* kartu insight */
+.ins{display:flex;gap:11px;align-items:flex-start;border-radius:20px;padding:14px 15px;margin-bottom:14px;
+  background:var(--card);border:1px solid var(--line);box-shadow:0 10px 26px rgba(12,32,60,.06)}
+.ins .ic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;flex:none;font-size:17px}
+.ins .tx{font-size:13px;line-height:1.5;min-width:0}
+.ins .tx b{font-weight:700}
+.ins .tx .tagline{display:block;font-size:11px;color:var(--mut);margin-top:3px}
+.ins.good .ic{background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
+.ins.warn .ic{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
+.ins.bad .ic{background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral)}
+/* tren mingguan */
+.wkbar{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:12px}
+.wkbar i{flex:1;border-radius:5px;background:color-mix(in srgb,var(--mint) 35%,transparent);min-height:4px}
+.wkbar i.hi{background:var(--mint)}
+.wklbl{display:flex;gap:5px;margin-top:5px}
+.wklbl span{flex:1;text-align:center;font-size:8.5px;color:var(--mut)}
+.wkchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;margin-top:9px}
+.wkchip.down{background:color-mix(in srgb,var(--mint) 16%,transparent);color:var(--mint)}
+.wkchip.up{background:color-mix(in srgb,var(--coral) 14%,transparent);color:var(--coral)}
+/* top kategori bertingkat */
+.tops{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+.toprow{display:flex;align-items:center;gap:9px;font-size:12px}
+.toprow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toprow .b{flex:0 0 88px;height:7px;border-radius:5px;background:var(--s2);overflow:hidden}
+.toprow .b i{display:block;height:100%;border-radius:5px}
+.toprow .v{font-variant-numeric:tabular-nums;color:var(--mut);font-size:11px;flex:none}
 /* kartu Safe to Spend (info utama) */
 .s2s{position:relative;overflow:hidden;border-radius:22px;padding:15px 16px 13px;margin-bottom:14px;
   background:linear-gradient(150deg,#0F9D6B,#0C7D55 60%,#0A6344);color:#fff;
@@ -558,7 +584,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.52';
+  var VERSION = '3.53';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -920,6 +946,57 @@ body.dark{--row:#0C1726}
       elapsed: Math.max(0, Math.round((now - start) / day))
     };
   }
+  function insightCard(d) {
+    var k = d.kpi || {};
+    if (!k.count) return '';
+    var pv = (d.trend && d.trend.length > 1) ? d.trend[d.trend.length - 2] : null;
+    var delta = (pv && pv.keluar) ? Math.round((k.keluar - pv.keluar) / pv.keluar * 100) : 0;
+    var top = (d.categories && d.categories[0]) || null;
+    var hinfo = paydayInfo(d.today);
+    var limit = 0, spent = 0;
+    (d.budgets || []).forEach(function (b) { limit += b.limit; spent += Math.min(b.spent, b.limit); });
+    var remaining = limit > 0 ? Math.max(0, limit - spent) : Math.max(0, k.selisih);
+    var perDay = Math.round(remaining / Math.max(hinfo.left, 1));
+    var pctBudget = limit > 0 ? Math.round(spent / limit * 100) : 0;
+    var tone = 'good', icon = '💡', lines = [];
+    if (pctBudget >= 90) { tone = 'bad'; icon = '⚠️'; }
+    else if (pctBudget >= 70 || (pv && delta > 15)) { tone = 'warn'; icon = '🔎'; }
+    if (pv && pv.keluar) {
+      lines.push((delta <= 0 ? 'Pengeluaran <b>' + Math.abs(delta) + '% lebih hemat</b>' : 'Pengeluaran <b>' + delta + '% lebih tinggi</b>') +
+        ' dibanding bulan lalu.');
+    } else {
+      lines.push('Ini bulan pertamamu punya catatan — <b>terus catat</b> agar perbandingan muncul.');
+    }
+    if (top) lines.push('Terbesar: <b>' + esc(top.name) + '</b> ' + rp(top.amount) + ' (' + top.pct + '%).');
+    lines.push('Sisa <b>' + rp(remaining) + '</b> untuk ' + hinfo.left + ' hari — aman <b>' + rp(perDay) + '/hari</b>.');
+    return '<div class="ins ' + tone + '"><div class="ic">' + icon + '</div><div class="tx">' +
+      lines.join(' ') +
+      '<span class="tagline">' + (d.health ? 'Skor kesehatan: ' + d.health.score + ' (' + esc(d.health.grade) + ')' : 'Insight dibuat dari data bulan ini') + '</span>' +
+      '</div></div>';
+  }
+
+  function weekDaysBar(d) {
+    var labels = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+    var today = new Date(d.today + 'T00:00:00');
+    var dow = (today.getDay() + 6) % 7;
+    var start = new Date(today); start.setDate(today.getDate() - dow);
+    var sums = [0, 0, 0, 0, 0, 0, 0];
+    ((d.recent || [])).forEach(function (x) {
+      if (x.tipe !== 'Keluar' || x.loan) return;
+      var dd = new Date(x.date + 'T00:00:00');
+      var idx = Math.round((dd - start) / 86400000);
+      if (idx >= 0 && idx <= 6 && idx <= dow) sums[idx] += x.amount;
+    });
+    var mx = Math.max.apply(null, sums) || 1;
+    var bars = '', lbls = '';
+    for (var i = 0; i < 7; i++) {
+      var hgt = Math.max(4, Math.round(sums[i] / mx * 44));
+      bars += '<i class="' + (sums[i] === mx && mx > 1 ? 'hi' : '') + '" style="height:' + hgt + 'px"></i>';
+      lbls += '<span>' + labels[i] + '</span>';
+    }
+    return '<div class="wkbar">' + bars + '</div><div class="wklbl">' + lbls + '</div>';
+  }
+
   function safeToSpendCard(d) {
   if (!d || !d.today) return '';
   var info = paydayInfo(d.today);
@@ -1049,18 +1126,29 @@ function paydayCard(d) {
       '<div class="herostats"><div class="stat"><div class="k">Pemasukan</div><div class="v mono pos">' + mrp(k.masuk, 'hero') + '</div></div>' +
       '<div class="stat"><div class="k">Selisih</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + mrp(sel, 'hero') + '</div></div></div></div>';
 
+    h += insightCard(d);
     var w = d.week;
     if (w) {
       var delta = w.prevKeluar ? Math.round((w.keluar - w.prevKeluar) / w.prevKeluar * 100) : 0;
-      var deltaTxt = !w.prevKeluar ? 'No spending recorded last week.'
-        : (delta === 0 ? 'Same as last week (' + rp(w.prevKeluar) + ').'
-          : (delta > 0 ? delta + '% more' : Math.abs(delta) + '% less') + ' than last week (' + rp(w.prevKeluar) + ').');
-      h += '<div class="card"><h2>This week</h2><div class="wkrow">' +
-        '<div><div class="k">Spent</div><div class="v mono">' + rp(w.keluar) + '</div></div>' +
-        '<div><div class="k">Received</div><div class="v mono pos">' + rp(w.masuk) + '</div></div></div>' +
-        '<div class="wkmeta">' + deltaTxt +
-        (w.topCat ? '<br><span style="color:var(--mut)">Top category: </span>' + esc((d.options && d.options.emoji && d.options.emoji[w.topCat]) || '🏷️') + ' ' + esc(w.topCat) + ' · ' + rp(w.topCatAmount) : '') +
-        '</div></div>';
+      var dRp = w.keluar - (w.prevKeluar || 0);
+      h += '<div class="card"><h2>Minggu ini</h2><div class="wkrow">' +
+        '<div><div class="k">Keluar</div><div class="v mono">' + rp(w.keluar) + '</div></div>' +
+        '<div><div class="k">Masuk</div><div class="v mono pos">' + rp(w.masuk) + '</div></div>' +
+        '<div><div class="k">Transaksi</div><div class="v mono">' + (w.count || 0) + '</div></div></div>' +
+        weekDaysBar(d) +
+        (w.prevKeluar
+          ? '<span class="wkchip ' + (dRp <= 0 ? 'down' : 'up') + '">' + (dRp <= 0 ? '↓' : '↑') + ' ' + Math.abs(delta) + '% · ' +
+            (dRp <= 0 ? '−' : '+') + rp(Math.abs(dRp)) + ' vs minggu lalu</span>'
+          : '<div class="wkmeta">Belum ada data minggu lalu.</div>');
+      if (w.topCat) {
+        h += '<div class="tops">' + (d.categories || []).slice(0, 3).map(function (c, i) {
+          var colors = ['var(--mint)', 'var(--amber)', '#5483B3'];
+          return '<div class="toprow"><span class="nm">' + esc(c.name) + '</span>' +
+            '<span class="b"><i style="width:' + Math.min(100, c.pct) + '%;background:' + colors[i % 3] + '"></i></span>' +
+            '<span class="v mono">' + rp(c.amount) + '</span></div>';
+        }).join('') + '</div>';
+      }
+      h += '</div>';
     }
 
     /* kartu payday lama digantikan safeToSpendCard */
@@ -1957,7 +2045,7 @@ function paydayCard(d) {
       '<text x="32" y="37" text-anchor="middle" font-size="17" font-weight="700" fill="var(--tx)">' + score + '</text></svg>';
   }
   function healthCard(h) {
-    return '<div class="card"><h2>Financial health</h2><div class="hrow">' + scoreRing(h.score) +
+    return '<div class="card"><h2>Kesehatan finansial</h2><div class="hrow">' + scoreRing(h.score) +
       '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div>' +
       '<div class="empty" style="padding:2px 0 0;font-size:12px">' + esc((h.parts && h.parts[0] ? h.parts[0].detail : '')) + '</div></div></div>' +
       '<button class="bc" data-act="goto-insights">See the full analysis →</button></div>';
