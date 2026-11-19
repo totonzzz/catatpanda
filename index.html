@@ -627,7 +627,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.59';
+  var VERSION = '3.60';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1665,9 +1665,9 @@ function paydayCard(d) {
     var list = d.goals || [];
     var total = 0, saved = 0;
     list.forEach(function (x) { total += x.target; saved += x.saved; });
-    var h = '<div class="card"><h2>Tujuan</h2>';
+    var h = '<div class="card"><h2>Goals</h2>';
     if (!list.length) {
-      h += '<div class="es" style="padding:8px 0 4px"><div class="emo">🎯</div><div class="ttl">Belum ada tujuan</div>' +
+      h += '<div class="es" style="padding:8px 0 4px"><div class="emo">🎯</div><div class="ttl">Belum ada goal</div>' +
         '<div class="hint">Contoh: liburan Jepang Rp 20 juta, dana darurat Rp 30 juta.</div></div>';
     } else {
       h += '<div class="nw" style="margin-bottom:4px"><div><div class="k">Terkumpul</div><div class="v mono">' + rp(saved) + '</div></div>' +
@@ -1683,7 +1683,7 @@ function paydayCard(d) {
             (sisa > 0 ? ' · sisa ' + rp(sisa) : ' · tercapai 🎉') + (x.due ? ' · ' + x.due : '') + '</div></div>';
       });
     }
-    h += '<button class="btn ghost" data-act="goal-add" style="margin-top:12px">Tambah tujuan</button></div>';
+    h += '<button class="btn ghost" data-act="goal-add" style="margin-top:12px">Tambah goal</button></div>';
     return h;
   }
   function subsCard(d) {
@@ -1700,17 +1700,70 @@ function paydayCard(d) {
     h += '<button class="btn ghost" data-act="sub-add" style="margin-top:10px">Tambah langganan</button></div>';
     return h;
   }
+  function sheetFormActs() {
+    var sd = $('sheetDetail');
+    if (!sd) return;
+    sd.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-act]');
+      if (!el) return;
+      var act = el.getAttribute('data-act');
+      if (act === 'goal-save') {
+        var gn = ($('gName') || {}).value ? $('gName').value.trim() : '';
+        if (!gn) { if ($('gErr')) $('gErr').textContent = 'Nama wajib diisi'; return; }
+        el.disabled = true;
+        api('goal_set', { nama: gn, target: $('gTarget').value, terkumpul: $('gSaved').value, tenggat: $('gDue').value })
+          .then(function (r) {
+            el.disabled = false;
+            if (r && r.ok) {
+              closeSheets(); toast('🎯 Goal disimpan');
+              var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll);
+            } else if ($('gErr')) $('gErr').textContent = (r && r.error) || 'Gagal menyimpan';
+          }).catch(function () { el.disabled = false; if ($('gErr')) $('gErr').textContent = 'Tidak bisa terhubung'; });
+        return;
+      }
+      if (act === 'goal-del') {
+        if (!confirm('Hapus goal ini?')) return;
+        api('goal_delete', { nama: el.getAttribute('data-name') }).then(function () {
+          closeSheets(); toast('Goal dihapus');
+          var p1 = loadMonth(state.month, { silent: true }); if (p1 && p1.then) p1.then(renderAll);
+        });
+        return;
+      }
+      if (act === 'sub-save') {
+        var sn = ($('sName') || {}).value ? $('sName').value.trim() : '';
+        if (!sn) { if ($('sErr')) $('sErr').textContent = 'Nama wajib diisi'; return; }
+        el.disabled = true;
+        api('sub_set', { nama: sn, biaya: $('sCost').value, siklus: $('sCycle').value, tanggal: $('sDay').value })
+          .then(function (r) {
+            el.disabled = false;
+            if (r && r.ok) {
+              closeSheets(); toast('Langganan disimpan');
+              var p2 = loadMonth(state.month, { silent: true }); if (p2 && p2.then) p2.then(renderAll);
+            } else if ($('sErr')) $('sErr').textContent = (r && r.error) || 'Gagal menyimpan';
+          }).catch(function () { el.disabled = false; if ($('sErr')) $('sErr').textContent = 'Tidak bisa terhubung'; });
+        return;
+      }
+      if (act === 'sub-del') {
+        if (!confirm('Hapus langganan ini?')) return;
+        api('sub_delete', { nama: el.getAttribute('data-name') }).then(function () {
+          closeSheets(); toast('Langganan dihapus');
+          var p3 = loadMonth(state.month, { silent: true }); if (p3 && p3.then) p3.then(renderAll);
+        });
+      }
+    });
+  }
+
   function openGoalForm(name) {
     var d0 = state.data || {}, cur = null;
     (d0.goals || []).forEach(function (x) { if (x.name === name) cur = x; });
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Tujuan</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Goals</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
       '<div class="fld"><label>Nama</label><input id="gName" value="' + esc(cur ? cur.name : '') + '" placeholder="Liburan Jepang"></div>' +
       '<div class="fld"><label>Target</label><input id="gTarget" class="mono" inputmode="numeric" value="' + (cur ? cur.target : '') + '"></div>' +
       '<div class="fld"><label>Terkumpul</label><input id="gSaved" class="mono" inputmode="numeric" value="' + (cur ? cur.saved : '') + '"></div>' +
       '<div class="fld"><label>Tenggat (opsional)</label><input id="gDue" type="date" value="' + esc(cur ? cur.due : '') + '"></div>' +
-      '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan tujuan</button>' +
-      (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tujuan</button>' : '');
+      '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan goal</button>' +
+      (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus goal</button>' : '');
   }
   function openSubForm(name) {
     var d0 = state.data || {}, cur = null;
@@ -2667,7 +2720,8 @@ function paydayCard(d) {
     var prev = sheetStack.pop(); if (!prev) return;
     $('sheetDetail').innerHTML = prev.html;
     $('sheetDetail').scrollTop = prev.scroll || 0;
-    refreshPush();
+    sheetFormActs();
+  refreshPush();
   }
   function openBg() { $('sheetBg').hidden = false; }
   function closeSheets() { sheetStack = []; $('sheetBg').hidden = true; $('sheetAdd').hidden = true; $('sheetDetail').hidden = true; }
@@ -3019,9 +3073,9 @@ function paydayCard(d) {
       }).catch(function () { el.disabled = false; $('gErr').textContent = 'Tidak bisa terhubung'; });
     }
     else if (act === 'goal-del') {
-      if (!confirm('Hapus tujuan ini?')) return;
+      if (!confirm('Hapus goal ini?')) return;
       api('goal_delete', { nama: el.getAttribute('data-name') }).then(function () {
-        closeSheets(); toast('Tujuan dihapus'); var pz1 = loadMonth(state.month, { silent: true }); if (pz1 && pz1.then) pz1.then(renderAll);
+        closeSheets(); toast('Goal dihapus'); var pz1 = loadMonth(state.month, { silent: true }); if (pz1 && pz1.then) pz1.then(renderAll);
       });
     }
     else if (act === 'sub-add') openSubForm('');
