@@ -3068,7 +3068,7 @@ function paydayCard(d) {
       el.disabled = true;
       api('goal_set', { nama: gn, target: $('gTarget').value, terkumpul: $('gSaved').value, tenggat: $('gDue').value }).then(function (r) {
         el.disabled = false;
-        if (r && r.ok) { closeSheets(); toast('🎯 Tujuan disimpan'); var pz0 = loadMonth(state.month, { silent: true }); if (pz0 && pz0.then) pz0.then(renderAll); }
+        if (r && r.ok) { closeSheets(); toast('🎯 Goal disimpan'); var pz0 = loadMonth(state.month, { silent: true }); if (pz0 && pz0.then) pz0.then(renderAll); }
         else $('gErr').textContent = (r && r.error) || 'Gagal';
       }).catch(function () { el.disabled = false; $('gErr').textContent = 'Tidak bisa terhubung'; });
     }
