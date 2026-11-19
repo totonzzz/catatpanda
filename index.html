@@ -627,7 +627,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.58';
+  var VERSION = '3.59';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -3041,7 +3041,8 @@ function paydayCard(d) {
         closeSheets(); toast('Langganan dihapus'); var pz3 = loadMonth(state.month, { silent: true }); if (pz3 && pz3.then) pz3.then(renderAll);
       });
     }
-    else if (act === 'seg') { state.walletSeg = (el.getAttribute('data-seg') === 'aset') ? 'aset' : 'dompet'; renderAll(); }
+    else if (act === 'seg') { var sg = el.getAttribute('data-seg');
+      state.walletSeg = (sg === 'aset' || sg === 'rencana') ? sg : 'dompet'; renderAll(); }
     else if (act === 'wallet-add') openWalletForm('');
     else if (act === 'transfer-add') openTransferForm();
     else if (act === 'wallet-edit') openWalletForm(el.getAttribute('data-name'));
