@@ -627,7 +627,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.57';
+  var VERSION = '3.58';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1381,7 +1381,7 @@ function paydayCard(d) {
       var b = bankOf(m.name), empty = !!m.empty && !m.value && !m.monthOut;
       var hasCycle = typeof m.dueAmount === 'number';
       var billLbl = hasCycle ? (m.dueAmount > 0 && m.dueDate ? 'Bill · ' + dlabel(m.dueDate) : 'No bill due') : 'Balance';
-      var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
+      var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0);
       var rightLbl = hasCycle ? 'Unbilled' : 'This month';
       var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
@@ -1703,17 +1703,21 @@ function paydayCard(d) {
   function openGoalForm(name) {
     var d0 = state.data || {}, cur = null;
     (d0.goals || []).forEach(function (x) { if (x.name === name) cur = x; });
-    sheetOpen('Tujuan', '<div class="fld"><label>Nama</label><input id="gName" value="' + esc(cur ? cur.name : '') + '" placeholder="Liburan Jepang"></div>' +
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Tujuan</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+      '<div class="fld"><label>Nama</label><input id="gName" value="' + esc(cur ? cur.name : '') + '" placeholder="Liburan Jepang"></div>' +
       '<div class="fld"><label>Target</label><input id="gTarget" class="mono" inputmode="numeric" value="' + (cur ? cur.target : '') + '"></div>' +
       '<div class="fld"><label>Terkumpul</label><input id="gSaved" class="mono" inputmode="numeric" value="' + (cur ? cur.saved : '') + '"></div>' +
       '<div class="fld"><label>Tenggat (opsional)</label><input id="gDue" type="date" value="' + esc(cur ? cur.due : '') + '"></div>' +
       '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan tujuan</button>' +
-      (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tujuan</button>' : ''));
+      (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tujuan</button>' : '');
   }
   function openSubForm(name) {
     var d0 = state.data || {}, cur = null;
     (d0.subs || []).forEach(function (x) { if (x.name === name) cur = x; });
-    sheetOpen('Langganan', '<div class="fld"><label>Nama</label><input id="sName" value="' + esc(cur ? cur.name : '') + '" placeholder="Netflix"></div>' +
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Langganan</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+      '<div class="fld"><label>Nama</label><input id="sName" value="' + esc(cur ? cur.name : '') + '" placeholder="Netflix"></div>' +
       '<div class="fld"><label>Biaya</label><input id="sCost" class="mono" inputmode="numeric" value="' + (cur ? cur.cost : '') + '"></div>' +
       '<div class="fld"><label>Siklus</label><select id="sCycle"><option value="bulanan"' + (cur && cur.cycle === 'bulanan' ? ' selected' : '') + '>Bulanan</option>' +
       '<option value="tahunan"' + (cur && cur.cycle === 'tahunan' ? ' selected' : '') + '>Tahunan</option></select></div>' +
@@ -1905,13 +1909,19 @@ function paydayCard(d) {
     var kk = d.kkTotal || 0, saldo = 0;
     methods.forEach(function (m) { if (m.kind !== 'utang') saldo += m.value; });
 
-    var seg = state.walletSeg === 'aset' ? 'aset' : 'dompet';
-    h += '<div class="seg"><button data-act="seg" data-seg="dompet" class="' + (seg === 'dompet' ? 'on' : '') + '">Dompet</button>' +
-      '<button data-act="seg" data-seg="aset" class="' + (seg === 'aset' ? 'on' : '') + '">Aset</button></div>';
+    var seg = (state.walletSeg === 'aset' || state.walletSeg === 'rencana') ? state.walletSeg : 'dompet';
+    h += '<div class="seg">' +
+      '<button data-act="seg" data-seg="dompet" class="' + (seg === 'dompet' ? 'on' : '') + '">Dompet</button>' +
+      '<button data-act="seg" data-seg="aset" class="' + (seg === 'aset' ? 'on' : '') + '">Aset</button>' +
+      '<button data-act="seg" data-seg="rencana" class="' + (seg === 'rencana' ? 'on' : '') + '">Rencana</button></div>';
 
+    if (seg === 'rencana') {
+      h += goalsCard(d);
+      h += subsCard(d);
+      return h;
+    }
     if (seg === 'aset') {
       h += netWorthCard(d);
-      h += goalsCard(d);
       h += portfolioCard(d);
       h += allocCard(d);
       h += assetsCard(d);
@@ -1925,7 +1935,6 @@ function paydayCard(d) {
 
     h += emoneyDeck(d);
     h += walletsCard(d);
-    h += subsCard(d);
     h += instalmentsCard(d);
     if (!methods.length) {
       h += '<div class="card"><h2>Payment methods</h2><div class="empty">No transactions with a payment method yet.</div></div>';
