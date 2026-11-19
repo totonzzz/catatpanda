@@ -164,7 +164,26 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .filters::-webkit-scrollbar{display:none}
 .filters button{flex:none;border:1px solid var(--line);background:var(--s1);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
 .filters button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-.fab{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:21;width:56px;height:56px;border-radius:20px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:30px;font-weight:500;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
+/* filter terstruktur */
+.seg2{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin:2px 0 8px}
+.seg2 button{flex:1;border:0;background:none;padding:9px 4px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:700;color:var(--mut);cursor:pointer}
+.seg2 button.on{background:var(--card);color:var(--tx);box-shadow:0 2px 8px rgba(1,8,20,.10)}
+.chiprow{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.fchip{flex:none;border:1px solid var(--line);background:var(--s1);color:var(--mut);border-radius:999px;
+  padding:7px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.fchip.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.rangerow{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+.rangerow input{flex:1;min-width:0;border:1px solid var(--line);background:var(--s1);color:var(--tx);
+  border-radius:12px;padding:9px 10px;font:inherit;font-size:12.5px}
+/* daftar transaksi: jarak & pemisah */
+.txwrap + .txwrap{border-top:1px solid var(--line)}
+.txwrap .tx{padding:10px 0}
+.day{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 4px 6px;font-size:11.5px;color:var(--mut);font-weight:600}
+.day .cnt{font-weight:500;opacity:.8}
+.tag.auto{opacity:.55;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;background:none;border:0;padding:0 0 0 5px}
+.tag.auto::before{content:''}
+.fab{position:fixed;right:14px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:21;width:48px;height:48px;border-radius:17px;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-size:25px;font-weight:500;box-shadow:0 12px 28px rgba(84,131,179,.45);cursor:pointer;transition:transform .15s}
 .fab:active{transform:scale(.93)}
 .add:active{transform:scale(.93)}
 .sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;animation:fadebg .2s}
@@ -539,7 +558,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.50';
+  var VERSION = '3.52';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -713,7 +732,8 @@ body.dark{--row:#0C1726}
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
     hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false, portfolio: false, s2s: false }), catsAll: false,
-    prices: {}, pricesAt: 0, pricesAsked: '', walletSeg: 'dompet'
+    prices: {}, pricesAt: 0, pricesAsked: '', walletSeg: 'dompet',
+    rangeOpen: false, rangeFrom: '', rangeTo: ''
   };
   var flushing = false;
 
@@ -764,6 +784,7 @@ body.dark{--row:#0C1726}
     } catch (e) {}
   }
 
+  function resetRange() { state.rangeFrom = ''; state.rangeTo = ''; }
   function loadMonth(month, opts) {
     opts = opts || {};
     if (!connected()) return renderAll();
@@ -978,9 +999,9 @@ function paydayCard(d) {
 
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
-    var meta = dlabel(t.date) + (t.metode ? ' · ' + t.metode : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
+    var meta = (t.metode || t.cat) + (t.loan && t.nama ? ' · ' + t.nama : '');
     return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
-      (t.flag ? '<span class="tag cek">check</span>' : (t.src === 'notif' ? '<span class="tag">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
+       (t.flag ? '<span class="tag cek">cek</span>' : (t.src === 'notif' ? '<span class="tag auto">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
       '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button></div>';
   }
   function pendingRow(p, i) {
@@ -1081,7 +1102,12 @@ function paydayCard(d) {
       if (f === 'masuk' && !(t.tipe === 'Masuk' && !t.loan)) return false;
       if (f === 'hutang' && !t.loan) return false;
       if (f === 'otomatis' && t.src !== 'notif') return false;
-      if (q && (t.desc + ' ' + t.cat + ' ' + t.metode + ' ' + t.nama).toLowerCase().indexOf(q) < 0) return false;
+      if (state.rangeFrom && t.date < state.rangeFrom) return false;
+      if (state.rangeTo && t.date > state.rangeTo) return false;
+      if (q) {
+        var hay = (t.desc + ' ' + t.cat + ' ' + t.metode + ' ' + t.nama + ' ' + t.amount).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
       return true;
     });
   }
@@ -1095,15 +1121,35 @@ function paydayCard(d) {
     while (i < list.length) {
       var date = list[i].date, group = [], sum = 0;
       while (i < list.length && list[i].date === date) { group.push(list[i]); if (list[i].tipe === 'Keluar' && !list[i].loan) sum += list[i].amount; i++; }
-      h += '<div class="day"><span>' + esc(dayHeader(date, today)) + '</span><span class="mono">' + (sum ? rp(sum) : '') + '</span></div><div class="card" style="padding:4px 14px;margin-bottom:0">' + group.map(txRow).join('') + '</div>';
+      h += '<div class="day"><span>' + esc(dayHeader(date, today)) + '</span>' +
+        '<span class="cnt">' + group.length + ' trx' + (sum ? ' · <span class="mono">' + rp(sum) + '</span>' : '') + '</span></div>' +
+        '<div class="card" style="padding:2px 14px;margin-bottom:0">' + group.map(txRow).join('') + '</div>';
     }
     return h;
   }
   function viewTransaksi(d) {
-    var F = [['semua', 'All'], ['keluar', 'Out'], ['masuk', 'In'], ['hutang', 'Debts'], ['otomatis', 'Auto']];
-    return '<input class="search" id="q" type="search" placeholder="Search transactions" value="' + esc(state.q) + '" autocomplete="off">' +
-      '<div class="filters">' + F.map(function (x) { return '<button data-act="filter" data-v="' + x[0] + '" class="' + (state.filter === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>' +
-      '<div id="txlist">' + (state.search ? searchHtml() : txListHtml(d)) + '</div>';
+    var f = state.filter;
+    var tipe = (f === 'keluar' || f === 'masuk') ? f : 'semua';
+    var extra = (f === 'hutang' || f === 'otomatis') ? f : '';
+    var seg = [['semua', 'Semua'], ['keluar', 'Keluar'], ['masuk', 'Masuk']].map(function (x) {
+      return '<button data-act="filter" data-v="' + x[0] + '" class="' + (tipe === x[0] && !extra ? 'on' : '') + '">' + x[1] + '</button>';
+    }).join('');
+    var h = '<input class="search" id="q" type="search" placeholder="Cari keterangan, kategori, metode…" value="' + esc(state.q) + '" autocomplete="off">' +
+      '<div class="seg2">' + seg + '</div>' +
+      '<div class="chiprow">' +
+        '<button class="fchip ' + (extra === 'hutang' ? 'on' : '') + '" data-act="filter" data-v="hutang">Hutang / Piutang</button>' +
+        '<button class="fchip ' + (extra === 'otomatis' ? 'on' : '') + '" data-act="filter" data-v="otomatis">Otomatis</button>' +
+        '<button class="fchip ' + (state.rangeOpen || state.rangeFrom ? 'on' : '') + '" data-act="range-toggle">Rentang tanggal</button>' +
+      '</div>';
+    if (state.rangeOpen) {
+      h += '<div class="rangerow">' +
+        '<input type="date" id="rangeFrom" value="' + esc(state.rangeFrom || '') + '">' +
+        '<span style="color:var(--mut);font-size:12px">s/d</span>' +
+        '<input type="date" id="rangeTo" value="' + esc(state.rangeTo || '') + '">' +
+        '<button class="fchip" data-act="range-clear">Hapus</button></div>';
+    }
+    h += '<div id="txlist">' + (state.search ? searchHtml() : txListHtml(d)) + '</div>';
+    return h;
   }
   function fullDate(d) { return parseInt(d.slice(8, 10), 10) + ' ' + MON[parseInt(d.slice(5, 7), 10) - 1] + ' ' + d.slice(0, 4); }
   function searchRow(t) {
@@ -2509,6 +2555,7 @@ function paydayCard(d) {
         '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
         : (t.flag ? '<button class="btn" data-act="flag-ok" data-id="' + esc(t.id) + '" style="margin-top:14px">Mark as checked</button>' : '') +
           '<button class="btn' + (t.flag ? ' ghost' : '') + '" data-act="edit" data-id="' + esc(t.id) + '" style="margin-top:' + (t.flag ? 8 : 14) + 'px">Edit</button>' +
+          '<button class="btn ghost" data-act="dup" data-id="' + esc(t.id) + '" style="margin-top:8px">Duplikat</button>' +
           '<button class="btn danger" data-act="del1" data-id="' + esc(t.id) + '" style="margin-top:8px">Delete entry</button>');
     openBg(); $('sheetDetail').hidden = false;
   }
@@ -2645,6 +2692,8 @@ function paydayCard(d) {
   document.addEventListener('pointerup', function () { if (swipe.on) swipeEnd(); });
 
   $('view').addEventListener('change', function (e) {
+    if (e.target && e.target.id === 'rangeFrom') { state.rangeFrom = e.target.value; renderAll(); return; }
+    if (e.target && e.target.id === 'rangeTo') { state.rangeTo = e.target.value; renderAll(); return; }
     var s = e.target.closest('[data-bucket]');
     if (!s) return;
     var cat = s.getAttribute('data-bucket'), val = s.value;
@@ -2783,7 +2832,25 @@ function paydayCard(d) {
     }
     else if (act === 'goto-transaksi') setTab('transaksi');
     else if (act === 'hint-ok') { LS.set('ck_hint', '1'); renderAll(); }
-    else if (act === 'filter') { state.filter = el.getAttribute('data-v'); renderAll(); }
+    else if (act === 'filter') {
+      var v = el.getAttribute('data-v');
+      state.filter = (state.filter === v && v !== 'semua') ? 'semua' : v;
+      renderAll();
+    }
+    else if (act === 'range-toggle') { state.rangeOpen = !state.rangeOpen; renderAll(); }
+    else if (act === 'range-clear') { state.rangeFrom = ''; state.rangeTo = ''; state.rangeOpen = false; renderAll(); }
+    else if (act === 'dup') {
+      var src0 = null; ((state.data && state.data.recent) || []).forEach(function (x) { if (x.id === id) src0 = x; });
+      if (!src0) return;
+      closeSheets(); openAdd();
+      setTimeout(function () {
+        var q0 = function (sel) { return document.querySelector(sel); };
+        var setV = function (sel, val) { var e = q0(sel); if (e) e.value = val; };
+        setV('#desc', src0.desc); setV('#amt', src0.amount);
+        state.editId = null; state.extraCat = src0.cat; state.tipe = src0.tipe; state.jenis = src0.jenis || '';
+        toast('Salinan dibuat — ubah bila perlu');
+      }, 260);
+    }
     else if (act === 'detail') openDetail(el.getAttribute('data-id'), false);
     else if (act === 'jump') {
       var jm = el.getAttribute('data-month'), jid = el.getAttribute('data-id');
