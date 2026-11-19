@@ -517,7 +517,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.48';
+  var VERSION = '3.49';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2419,6 +2419,17 @@ body.dark{--row:#0C1726}
     }).catch(function () { toast('Cannot reach the server'); });
   }
 
+  function fmtCreated(ms) {
+    if (!ms) return '';
+    var d0 = new Date(ms);
+    var bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    var jam = String(d0.getHours()).padStart(2, '0') + ':' + String(d0.getMinutes()).padStart(2, '0');
+    var now = new Date();
+    var samaHari = d0.getFullYear() === now.getFullYear() && d0.getMonth() === now.getMonth() && d0.getDate() === now.getDate();
+    if (samaHari) return 'Hari ini · ' + jam;
+    return d0.getDate() + ' ' + bulan[d0.getMonth()] + ' ' + d0.getFullYear() + ' · ' + jam;
+  }
+
   function openDetail(id, confirmDel) {
     if (!confirmDel) sheetPush();
     var t = null; (state.data ? state.data.recent : []).forEach(function (x) { if (x.id === id) t = x; });
@@ -2430,7 +2441,9 @@ body.dark{--row:#0C1726}
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><span style="display:inline-flex;gap:6px">' + backBtn + '<button class="iconbtn" data-close aria-label="Close">✕</button></span></h3>' +
       '<div style="text-align:center;margin:4px 0 14px"><div class="ico" style="margin:0 auto 8px;width:52px;height:52px;font-size:26px">' + esc(t.emoji) + '</div>' +
       '<div style="font-weight:700;font-size:17px">' + esc(t.desc) + '</div><div class="mono ' + (t.loan ? 'warn' : (inc ? 'pos' : '')) + '" style="font-size:28px;margin-top:4px">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>' +
-      row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) + row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
+      row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) +
+      (fmtCreated(t.created) ? row('Dicatat', fmtCreated(t.created)) : '') +
+      row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
       (t.loan && t.nama ? row('Name', t.nama) : '') + row('Source', SRC[t.src] || 'Form') +
       '<div class="err" id="delErr"></div>' +
       (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
