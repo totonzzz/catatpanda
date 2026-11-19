@@ -251,7 +251,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .revnote{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--mut);margin:0 0 12px;word-break:break-word}
 .revnote b{color:var(--tx);display:block;font-size:12px;margin-bottom:3px}
 /* dompet & ringkasan mingguan */
-.wkrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.wkrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .wkrow .k{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .wkrow .v{font-size:19px;font-weight:500;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wkmeta{font-size:12px;color:var(--mut);margin-top:10px;line-height:1.45}
@@ -352,15 +352,15 @@ body.dark{--row:#0C1726}
 .ins{display:flex;gap:11px;align-items:flex-start;border-radius:20px;padding:14px 15px;margin-bottom:14px;
   background:var(--card);border:1px solid var(--line);box-shadow:0 10px 26px rgba(12,32,60,.06)}
 .ins .ic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;flex:none;font-size:17px}
-.ins .tx{font-size:13px;line-height:1.5;min-width:0}
-.ins .tx b{font-weight:700}
-.ins .tx .tagline{display:block;font-size:11px;color:var(--mut);margin-top:3px}
+.ins .ibody{font-size:13px;line-height:1.5;min-width:0;display:block;width:auto;border:0;padding:0}
+.ins .ibody b{font-weight:700}
+.ins .ibody .tagline{display:block;font-size:11px;color:var(--mut);margin-top:4px}
 .ins.good .ic{background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
 .ins.warn .ic{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
 .ins.bad .ic{background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral)}
 /* tren mingguan */
 .wkbar{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:12px}
-.wkbar i{flex:1;border-radius:5px;background:color-mix(in srgb,var(--mint) 35%,transparent);min-height:4px}
+.wkbar i{flex:1;border-radius:4px;background:color-mix(in srgb,var(--mint) 32%,transparent);min-height:4px;max-width:22px}
 .wkbar i.hi{background:var(--mint)}
 .wklbl{display:flex;gap:5px;margin-top:5px}
 .wklbl span{flex:1;text-align:center;font-size:8.5px;color:var(--mut)}
@@ -584,7 +584,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.53';
+  var VERSION = '3.54';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -969,7 +969,7 @@ body.dark{--row:#0C1726}
     }
     if (top) lines.push('Terbesar: <b>' + esc(top.name) + '</b> ' + rp(top.amount) + ' (' + top.pct + '%).');
     lines.push('Sisa <b>' + rp(remaining) + '</b> untuk ' + hinfo.left + ' hari — aman <b>' + rp(perDay) + '/hari</b>.');
-    return '<div class="ins ' + tone + '"><div class="ic">' + icon + '</div><div class="tx">' +
+    return '<div class="ins ' + tone + '"><div class="ic">' + icon + '</div><div class="ibody">' +
       lines.join(' ') +
       '<span class="tagline">' + (d.health ? 'Skor kesehatan: ' + d.health.score + ' (' + esc(d.health.grade) + ')' : 'Insight dibuat dari data bulan ini') + '</span>' +
       '</div></div>';
@@ -1131,7 +1131,7 @@ function paydayCard(d) {
     if (w) {
       var delta = w.prevKeluar ? Math.round((w.keluar - w.prevKeluar) / w.prevKeluar * 100) : 0;
       var dRp = w.keluar - (w.prevKeluar || 0);
-      h += '<div class="card"><h2>Minggu ini</h2><div class="wkrow">' +
+      h += '<div class="card"><h2>Minggu ini</h2><div class="wkrow" style="grid-template-columns:repeat(3,1fr)">' +
         '<div><div class="k">Keluar</div><div class="v mono">' + rp(w.keluar) + '</div></div>' +
         '<div><div class="k">Masuk</div><div class="v mono pos">' + rp(w.masuk) + '</div></div>' +
         '<div><div class="k">Transaksi</div><div class="v mono">' + (w.count || 0) + '</div></div></div>' +
