@@ -511,7 +511,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.45';
+  var VERSION = '3.46';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1287,6 +1287,12 @@ body.dark{--row:#0C1726}
 
   var ASSET_COLORS = ['#2F6FB2', '#E0534A', '#F2B84B', '#8FB3D9', '#0F9D6B', '#7C5CBF'];
   function assetTint(i) { return ASSET_COLORS[i % ASSET_COLORS.length]; }
+  function assetQtyText(a) {
+    var u = Number(a.units) || 0;
+    if (a.kind === 'saham' && u > 0 && u % 100 === 0) return (u / 100) + ' lot';
+    return u + '';
+  }
+
   function assetInitials(a) {
     var c = String(a.code || a.name || '?').replace(/[^A-Za-z ]/g, ' ').trim();
     var parts = c.split(/\s+/);
@@ -1376,7 +1382,7 @@ body.dark{--row:#0C1726}
         h += '<div class="arow">' +
           '<div class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</div>' +
           '<div class="amid"><div class="acode">' + esc(a.code) + '</div>' +
-            '<div class="asub">' + esc(a.name) + ' · ' + (a.units || 0) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
+            '<div class="asub">' + esc(a.name) + ' · ' + assetQtyText(a) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
           '<div class="aright"><div class="aval">' + rp(val) + '</div>' +
             (px > 0 ? '<div class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '▲' : '▼') + ' ' +
               rp(Math.abs(pl)) + ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</div>' : '<div class="apl">harga belum diisi</div>') +
@@ -1429,8 +1435,13 @@ body.dark{--row:#0C1726}
         }).join('') + '</select></div>' +
       '<div class="fld"><label>Code</label><input id="aCode" value="' + esc(cur ? cur.code : '') + '" placeholder="BBCA"></div>' +
       '<div class="fld"><label>Name</label><input id="aName" value="' + esc(cur ? cur.name : '') + '" placeholder="Bank Central Asia"></div>' +
-      '<div class="fld"><label>Units / lots</label><input id="aUnits" class="mono" inputmode="numeric" value="' + (cur ? cur.units : '') + '"></div>' +
-      '<div class="fld"><label>Buy price (per unit)</label><input id="aBuy" class="mono" inputmode="numeric" value="' + (cur ? cur.buyPrice : '') + '"></div>' +
+      '<div class="fld"><label>Satuan</label><select id="aUnit">' +
+        '<option value="lot"' + (cur && cur.kind === 'saham' && cur.units % 100 === 0 ? ' selected' : (!cur ? ' selected' : '')) + '>Lot (1 lot = 100 lembar)</option>' +
+        '<option value="lembar"' + (cur && !(cur.kind === 'saham' && cur.units % 100 === 0) ? ' selected' : '') + '>Lembar / unit</option>' +
+        '</select></div>' +
+      '<div class="fld"><label>Jumlah</label><input id="aUnits" class="mono" inputmode="numeric" value="' +
+        (cur ? (cur.kind === 'saham' && cur.units % 100 === 0 ? Math.round(cur.units / 100) : cur.units) : '') + '" placeholder="13"></div>' +
+      '<div class="fld"><label>Harga rata-rata / lembar</label><input id="aBuy" class="mono" inputmode="numeric" value="' + (cur ? cur.buyPrice : '') + '" placeholder="8246"></div>' +
       '<div class="fld"><label>Harga kini / NAV <span style="color:var(--mut)">— untuk reksadana</span></label>' +
         '<input id="aNow" class="mono" inputmode="numeric" value="' + (cur && cur.priceManual ? cur.priceManual : '') + '" placeholder="opsional"></div>' +
       '<div class="err" id="aErr"></div><button class="btn" data-act="asset-save" data-code="' + esc(cur ? cur.code : '') + '">Save asset</button>';
@@ -2816,8 +2827,11 @@ body.dark{--row:#0C1726}
     else if (act === 'asset-save') {
       var ak = $('aCode').value.trim();
       if (!ak) { $('aErr').textContent = 'Give the asset a code'; return; }
+      var unitSel = $('aUnit') ? $('aUnit').value : 'lembar';
+      var qty = Number(String($('aUnits').value).replace(/\D/g, '')) || 0;
+      if (unitSel === 'lot') qty = qty * 100;   // 1 lot IDX = 100 lembar
       el.disabled = true; el.textContent = 'Saving…';
-      api('aset_set', { jenis: $('aKind').value, kode: ak, nama: $('aName').value, jumlah: $('aUnits').value, hargaBeli: $('aBuy').value, hargaKini: $('aNow').value })
+      api('aset_set', { jenis: $('aKind').value, kode: ak, nama: $('aName').value, jumlah: qty, hargaBeli: $('aBuy').value, hargaKini: $('aNow').value })
         .then(function (r) {
           if (r && r.ok) { closeSheets(); toast('✅ Asset saved'); var p2b = loadMonth(state.month, { silent: true }); if (p2b && p2b.then) p2b.then(renderAll); }
           else { el.disabled = false; el.textContent = 'Save asset'; $('aErr').textContent = (r && r.error) || 'Could not save'; }
