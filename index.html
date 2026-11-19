@@ -251,7 +251,9 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .revnote{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--mut);margin:0 0 12px;word-break:break-word}
 .revnote b{color:var(--tx);display:block;font-size:12px;margin-bottom:3px}
 /* dompet & ringkasan mingguan */
-.wkrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.wkrow{display:grid;grid-template-columns:1.25fr 1fr 0.75fr;gap:8px;align-items:start}
+.wkrow .k{font-size:10.5px;color:var(--mut);font-weight:600;letter-spacing:.02em}
+.wkrow .v{font-size:13.5px;font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .wkrow .k{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .wkrow .v{font-size:19px;font-weight:500;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wkmeta{font-size:12px;color:var(--mut);margin-top:10px;line-height:1.45}
@@ -359,10 +361,10 @@ body.dark{--row:#0C1726}
 .ins.warn .ic{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
 .ins.bad .ic{background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral)}
 /* tren mingguan */
-.wkbar{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:12px}
-.wkbar i{flex:1;border-radius:4px;background:color-mix(in srgb,var(--mint) 32%,transparent);min-height:4px;max-width:22px}
+.wkbar{display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:12px;width:100%}
+.wkbar i{flex:1 1 0;min-width:0;border-radius:4px;background:color-mix(in srgb,var(--mint) 32%,transparent);min-height:4px}
 .wkbar i.hi{background:var(--mint)}
-.wklbl{display:flex;gap:5px;margin-top:5px}
+.wklbl{display:flex;gap:5px;margin-top:5px;width:100%}
 .wklbl span{flex:1;text-align:center;font-size:8.5px;color:var(--mut)}
 .wkchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;margin-top:9px}
 .wkchip.down{background:color-mix(in srgb,var(--mint) 16%,transparent);color:var(--mint)}
@@ -584,7 +586,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.54';
+  var VERSION = '3.55';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
