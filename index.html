@@ -719,7 +719,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.73';
+  var VERSION = '3.74';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -792,6 +792,10 @@ body.dark{
     "hadiah": { i: "<svg\n  class=\"lucide lucide-gift\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M12 7v14\" />\n  <path d=\"M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8\" />\n  <path d=\"M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5\" />\n  <rect x=\"3\" y=\"7\" width=\"18\" height=\"4\" rx=\"1\" />", c: "#FF9AD5" },
     "investasi": { i: "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"m19 9-5 5-4-4-3 3\" />", c: "#6FC3FF" },
     "cicilan": { i: "<path d=\"M16 2v3\" /> <path d=\"M17 15.5v1.7l1 .625\" /> <path d=\"M21 8.936V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.935\" /> <path d=\"M3 9h9.873\" /> <path d=\"M8 2v3\" /> <circle cx=\"17\" cy=\"17\" r=\"5\" />", c: "#8FB3D9" },
+    "listrik": { i: "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", c: "#E3B341" },
+    "air": { i: "<path d=\"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z\" /> <path d=\"M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97\" />", c: "#4A9BD1" },
+    "internet": { i: "<path d=\"M12 20h.01\" /> <path d=\"M2 8.82a15 15 0 0 1 20 0\" /> <path d=\"M5 12.859a10 10 0 0 1 14 0\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" />", c: "#7C5CBF" },
+    "pulsa": { i: "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />", c: "#4E9E7F" },
     "lainnya": { i: "<svg\n  class=\"lucide lucide-sparkles\"\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" />\n  <path d=\"M20 2v4\" />\n  <path d=\"M22 4h-4\" />\n  <circle cx=\"4\" cy=\"20\" r=\"2\" />", c: "#C1E8FF" }
   };
 
@@ -810,6 +814,10 @@ body.dark{
     if (n.indexOf('gaji') >= 0) return 'gaji';
     if (n.indexOf('makan') >= 0) return 'makan';
     if (n.indexOf('jajan') >= 0) return 'jajan';
+    if (n.indexOf('listrik') >= 0 || n.indexOf('pln') >= 0) return 'listrik';
+    if (n.indexOf('pdam') >= 0 || n.indexOf('air') >= 0) return 'air';
+    if (n.indexOf('internet') >= 0 || n.indexOf('wifi') >= 0) return 'internet';
+    if (n.indexOf('pulsa') >= 0) return 'pulsa';
     if (n.indexOf('kos') >= 0 || n.indexOf('sewa') >= 0) return 'kos';
     if (n.indexOf('sumbangan') >= 0 || n.indexOf('kondangan') >= 0) return 'sumbangan';
     if (n.indexOf('bbm') >= 0 || n.indexOf('bensin') >= 0) return 'bbm';
@@ -2535,7 +2543,7 @@ function paydayCard(d) {
   }
 
   // ================= keranjang anggaran (Needs / Wants) =================
-  var BUCKET_NEEDS = ['tagihan & utilitas', 'transportasi', 'kos / sewa tempat', 'bbm', 'makan', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
+  var BUCKET_NEEDS = ['tagihan & utilitas', 'listrik', 'air pdam', 'internet & tv', 'pulsa & data', 'transportasi', 'kos / sewa tempat', 'bbm', 'makan', 'belanja kebutuhan harian', 'kesehatan', 'pendidikan', 'perawatan kendaraan', 'asuransi'];
   var BUCKET_WANTS = ['sumbangan / kondangan', 'jajan', 'belanja', 'belanja pakaian / fashion', 'hiburan', 'hadiah', 'lainnya'];
   function periodMode() { var s = serverSettings(); return (s && s.periodMode) || LS.get('ck_period', 'calendar'); }
   function planTargets() {
