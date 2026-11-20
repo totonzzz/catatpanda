@@ -458,7 +458,9 @@ body.dark{--row:#0C1726}
 .legend3 span b{color:var(--tx);font-weight:700}
 .legend3 .dot{width:8px;height:8px;border-radius:3px;display:inline-block;margin-right:5px}
 .arow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);
-  width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+  width:100%;min-height:54px;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.amid{display:flex;flex-direction:column;justify-content:center;gap:1px}
+.aright{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:1px}
 .arow:focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:10px}
 .arow:last-child{border-bottom:0;padding-bottom:2px}
 .abadge{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
@@ -468,7 +470,7 @@ body.dark{--row:#0C1726}
 .aright{text-align:right;flex:none;min-width:0;max-width:52%}
 .aval{font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
 .apl{font-size:10px;font-weight:700;margin-top:2px;white-space:nowrap;letter-spacing:-.01em}
-.apl.up{color:#0B7A52} .apl.down{color:#C23A32}
+.apl.up{color:#0B7A52} .apl.down{color:#C23A32} .apl.muted{color:var(--mut);font-weight:600}
 /* isi kartu e-money (khusus, tidak menimpa kartu kredit) */
 .cc.wallet .em-brand{font-size:15px;font-weight:700;letter-spacing:-.01em}
 .cc.wallet .em-type{font-size:10.5px;opacity:.8;margin-top:2px}
@@ -668,7 +670,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.68';
+  var VERSION = '3.69';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1864,26 +1866,31 @@ function paydayCard(d) {
     var list = pt.list;
     var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
     if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana, isi "Harga kini" agar untung/rugi muncul.</div>';
+      h += '<div class="es" style="padding:10px 0 4px"><div class="emo">📈</div><div class="ttl">Belum ada aset</div>' +
+        '<div class="hint">Tambahkan saham atau reksadana. Harga saham diambil otomatis, reksadana pakai NAV yang kamu isi.</div></div>';
     } else {
       list.forEach(function (a, idx) {
         var px = assetPrice(a);
-        var val = px > 0 ? a.units * px : a.units * a.buyPrice;
-        var base0 = a.units * a.buyPrice;
-        var pl = px > 0 ? val - base0 : 0;
-        var pct = (px > 0 && base0 > 0) ? (pl / base0 * 100) : 0;
+        var qty = Number(a.units) || 0;
+        var val = qty * (px > 0 ? px : a.buyPrice);
+        var cost = qty * a.buyPrice;
+        var pl = px > 0 ? val - cost : 0;
+        var pct = (px > 0 && cost > 0) ? (pl / cost * 100) : 0;
         var color = assetTint(idx);
+        var priceTxt = px > 0 ? rp(px) : rp(a.buyPrice);
+        var line2 = px > 0
+          ? '<span class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '+' : '−') + rp(Math.abs(pl)) +
+              ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</span>'
+          : '<span class="apl muted">harga belum diisi</span>';
         h += '<button class="arow" type="button" data-act="asset-edit" data-code="' + esc(a.code) + '" aria-label="Ubah aset ' + esc(a.code) + '">' +
-          '<div class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</div>' +
-          '<div class="amid"><div class="acode">' + esc(a.code) + '</div>' +
-            '<div class="asub">' + esc(a.name) + ' · ' + assetQtyText(a) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
-          '<div class="aright"><div class="aval">' + rp(val) + '</div>' +
-            (px > 0 ? '<div class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '▲' : '▼') + ' ' +
-              rp(Math.abs(pl)) + ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</div>' : '<div class="apl">harga belum diisi</div>') +
-          '</div></div>';
+          '<span class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</span>' +
+          '<span class="amid"><span class="acode">' + esc(a.code) + '</span>' +
+            '<span class="asub">' + assetQtyText(a) + ' × ' + priceTxt + '</span></span>' +
+          '<span class="aright"><span class="aval">' + rp(val) + '</span>' + line2 + '</span>' +
+          '</button>';
       });
       h += '<div class="partact" style="margin-top:12px"><button class="mini" data-act="asset-add">Tambah aset</button></div>' +
-        '<div class="empty" style="padding:8px 0 0;font-size:10.5px;text-align:center">Ketuk salah satu aset untuk mengubah atau menghapus</div>';
+        '<div class="empty" style="padding:8px 0 0;font-size:10.5px;text-align:center">Ketuk aset untuk mengubah atau menghapus</div>';
     }
     h += '</div>';
     return h;
