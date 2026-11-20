@@ -444,6 +444,46 @@ body.dark{--row:#0C1726}
 .cstat.warn{background:color-mix(in srgb,var(--amber) 20%,transparent);color:#8A5A00}
 .cstat.over{background:color-mix(in srgb,var(--coral) 14%,transparent);color:#C23A32}
 .cstat.none{background:var(--s2);color:var(--mut)}
+/* ==== sistem ikon final: Soft Monochrome x Apple Minimalist x Semantic ==== */
+:root{
+  --ic-ink:#64748B; --ic-bg:#FFFFFF; --ic-line:#E5E7EB;
+  --exp:#C6534A; --exp-bg:#FCEDEC;
+  --inc:#39866A; --inc-bg:#EAF5EF;
+  --trf:#3478C6; --trf-bg:#EDF4FC;
+  --wn:#B78335; --wn-bg:#FBF3E6;
+  --neu:#64748B; --neu-bg:#F1F3F5;
+}
+body.dark{
+  --ic-ink:#94A3B8; --ic-bg:#121C29; --ic-line:#22303F;
+  --exp:#E0776E; --exp-bg:rgba(224,119,110,.14);
+  --inc:#5FB394; --inc-bg:rgba(95,179,148,.14);
+  --trf:#6FA6E8; --trf-bg:rgba(111,166,232,.14);
+  --wn:#D2A35A; --wn-bg:rgba(210,163,90,.16);
+  --neu:#94A3B8; --neu-bg:rgba(148,163,184,.14);
+}
+.ico.cat-ico{width:46px;height:46px;min-width:46px;border-radius:14px;background:var(--ic-bg);
+  border:1px solid var(--ic-line);color:var(--ic-ink);box-shadow:none}
+.ico.cat-ico svg{width:22px;height:22px;stroke-width:1.9}
+.cattile,.catb .ci{background:var(--ic-bg);border:1px solid var(--ic-line);color:var(--ic-ink);box-shadow:none}
+.cattile{width:44px;height:44px;border-radius:14px}
+.catb .ci{width:34px;height:34px;border-radius:12px}
+.catb .ci svg{width:18px;height:18px;stroke-width:1.9}
+.abadge{background:var(--ic-bg);border:1px solid var(--ic-line);color:var(--ic-ink);box-shadow:none}
+.cidot{color:var(--ic-ink);opacity:1}
+.cidot svg{width:16px;height:16px;stroke-width:1.9}
+/* nominal dan status memakai warna semantik */
+.pos,.apl.up{color:var(--inc)}
+.neg,.apl.down{color:var(--exp)}
+.appl.muted,.apl.muted{color:var(--neu)}
+.bstat,.cstat{background:var(--inc-bg);color:var(--inc)}
+.bstat.warn,.cstat.warn,.bhero.warn .bstat,.envbox.warn .bstat{background:var(--wn-bg);color:var(--wn)}
+.bstat.high,.cstat.high,.bhero.high .bstat,.envbox.high .bstat{background:var(--exp-bg);color:var(--exp)}
+.bstat.over,.cstat.over,.bhero.over .bstat,.envbox.over .bstat{background:var(--exp-bg);color:var(--exp)}
+.cstat.none{background:var(--neu-bg);color:var(--neu)}
+.alertline{background:var(--wn-bg);color:var(--wn)}
+.alertline.over{background:var(--exp-bg);color:var(--exp)}
+.wkchip.up{background:var(--exp-bg);color:var(--exp)}
+.wkchip.down{background:var(--inc-bg);color:var(--inc)}
 /* sistem ikon: mono di atas latar netral, warna hanya untuk status */
 .ico.cat-ico{background:var(--s2);color:var(--tx)}
 .cattile,.catb .ci{background:var(--s2);color:var(--tx)}
@@ -679,7 +719,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.71';
+  var VERSION = '3.72';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
