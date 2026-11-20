@@ -444,6 +444,13 @@ body.dark{--row:#0C1726}
 .cstat.warn{background:color-mix(in srgb,var(--amber) 20%,transparent);color:#8A5A00}
 .cstat.over{background:color-mix(in srgb,var(--coral) 14%,transparent);color:#C23A32}
 .cstat.none{background:var(--s2);color:var(--mut)}
+/* sistem ikon: mono di atas latar netral, warna hanya untuk status */
+.ico.cat-ico{background:var(--s2);color:var(--tx)}
+.cattile,.catb .ci{background:var(--s2);color:var(--tx)}
+.cidot{color:var(--tx);opacity:.8}
+.abadge{background:var(--s2);color:var(--tx);border:1px solid var(--line);font-weight:600}
+.pos,.apl.up{color:#0B7A52}
+.neg,.apl.down{color:#C23A32}
 /* pilihan Dompet / Aset */
 .seg{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
@@ -672,7 +679,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.70';
+  var VERSION = '3.71';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -781,7 +788,7 @@ body.dark{--row:#0C1726}
   }
   function catTile(name, size) {
     var s = size || 42;
-    return '<span class="cattile" style="width:' + s + 'px;height:' + s + 'px;--c:' + catColor(name) + '">' + catIcon(name) + '</span>';
+    return '<span class="cattile" style="width:' + s + 'px;height:' + s + 'px">' + catIcon(name) + '</span>';
   }
   // delapan kategori teratas + More
   function popularCats(list) {
@@ -1885,7 +1892,7 @@ function paydayCard(d) {
               ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</span>'
           : '<span class="apl muted">harga belum diisi</span>';
         h += '<button class="arow" type="button" data-act="asset-edit" data-code="' + esc(a.code) + '" aria-label="Ubah aset ' + esc(a.code) + '">' +
-          '<span class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</span>' +
+          '<span class="abadge">' + assetInitials(a) + '</span>' +
           '<span class="amid"><span class="acode">' + esc(a.code) + '</span>' +
             '<span class="asub">' + assetQtyText(a) + ' × ' + priceTxt + '</span></span>' +
           '<span class="aright"><span class="aval">' + rp(val) + '</span>' + line2 + '</span>' +
@@ -2680,7 +2687,7 @@ function paydayCard(d) {
           var cst = !c.limit ? 'none' : (cp >= 100 ? 'over' : (cp >= 80 ? 'warn' : 'ok'));
           var cLabel = !c.limit ? 'Belum dianggarkan' : (cp >= 100 ? 'Lewat ' + rp(c.spent - c.limit) : cp + '%');
           html += '<button class="catb" type="button" data-act="budget-view" data-cat="' + esc(c.name) + '">' +
-            '<span class="ci" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</span>' +
+            '<span class="ci">' + catIcon(c.name) + '</span>' +
             '<span class="cmid"><span class="cname">' + esc(c.name) + '</span>' +
             '<span class="csub">' + rp(c.spent) + (c.limit ? ' dari ' + rp(c.limit) : '') + '</span></span>' +
             '<span class="cstat ' + cst + '">' + cLabel + '</span></button>';
@@ -2739,7 +2746,7 @@ function paydayCard(d) {
   function txRowsHtml(rows) {
     return rows.map(function (t) {
       return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
-        '<div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div>' +
+        '<div class="ico cat-ico">' + catIcon(t.cat) + '</div>' +
         '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(t.date) + ' · ' + esc(t.metode || '') + '</div></div>' +
         '<div class="a mono neg">' + rp(t.amount) + '</div></button></div>';
     }).join('');
