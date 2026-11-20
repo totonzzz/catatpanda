@@ -414,6 +414,8 @@ body.dark{--row:#0C1726}
   background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
 .bhero.over .bstat,.envbox.over .bstat{background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral)}
 .bhero.warn .bstat,.envbox.warn .bstat{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
+.bhero.high .bstat,.envbox.high .bstat{background:color-mix(in srgb,var(--coral) 12%,transparent);color:#C23A32}
+.cstat.high{background:color-mix(in srgb,var(--coral) 10%,transparent);color:#C23A32}
 .bmeta{font-size:11.5px;color:var(--mut);margin-top:7px}
 .bmeta b{color:var(--tx);font-weight:700}
 .bgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 10px;margin-top:12px}
@@ -670,7 +672,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.69';
+  var VERSION = '3.70';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2524,9 +2526,9 @@ function paydayCard(d) {
     var names = {};
     Object.keys(cats).forEach(function (n) { names[n] = true; });
     Object.keys(limits).forEach(function (n) { names[n] = true; });
-    var out = { needs: { key: 'needs', label: 'Needs', pct: plan.needs, note: 'Bills, transport, groceries, health', cats: [] },
-                wants: { key: 'wants', label: 'Wants', pct: plan.wants, note: 'Dining out, fun, shopping', cats: [] },
-                skip:  { key: 'skip', label: 'Not counted', pct: 0, note: 'Out of the 50/30/20 ceiling', cats: [] } };
+    var out = { needs: { key: 'needs', label: 'Needs', pct: plan.needs, note: 'Tagihan, transportasi, belanja harian, kesehatan', cats: [] },
+                wants: { key: 'wants', label: 'Wants', pct: plan.wants, note: 'Makan di luar, hiburan, belanja', cats: [] },
+                skip:  { key: 'skip', label: 'Tidak dihitung', pct: 0, note: 'Di luar batas pengeluaran', cats: [] } };
     Object.keys(names).forEach(function (n) {
       var b = bucketOf(n);
       (out[b] || out.skip).cats.push({ name: n, spent: cats[n] || 0, limit: limits[n] || 0 });
@@ -2539,6 +2541,46 @@ function paydayCard(d) {
       g.cats.sort(function (a, b) { return b.spent - a.spent; });
     });
     return { groups: out, plan: plan, income: income };
+  }
+
+  function smartAllocation() {
+    var d = state.data || {};
+    var env = envelopeData(d);
+    var plan = [];
+    ['needs', 'wants'].forEach(function (k) {
+      var g = env.groups[k];
+      if (!g.ceiling || !g.cats.length) return;
+      var totalSpent = g.cats.reduce(function (s, c) { return s + (c.spent || 0); }, 0);
+      var weights = g.cats.map(function (c) {
+        return totalSpent > 0 ? (c.spent || 0) : 1;
+      });
+      var wsum = weights.reduce(function (s, w) { return s + w; }, 0) || 1;
+      g.cats.forEach(function (c, i) {
+        var raw = g.ceiling * (weights[i] / wsum);
+        var lim = Math.max(50000, Math.round(raw / 10000) * 10000);
+        plan.push({ cat: c.name, limit: lim, group: g.label });
+      });
+    });
+    if (!plan.length) { toast('Belum ada kategori untuk dibagi'); return; }
+    var total = plan.reduce(function (s, x) { return s + x.limit; }, 0);
+    var preview = plan.slice(0, 4).map(function (x) { return x.cat + ' ' + rp(x.limit); }).join(', ');
+    if (!confirm('Bagi limit otomatis?\n\n' + plan.length + ' kategori, total ' + rp(total) +
+      '\n\n' + preview + (plan.length > 4 ? ', dan ' + (plan.length - 4) + ' lainnya' : '') +
+      '\n\nLimit yang sudah ada akan ditimpa.')) return;
+    var i = 0;
+    function next() {
+      if (i >= plan.length) {
+        toast('✅ ' + plan.length + ' limit dibagi');
+        var pr = loadMonth(state.month, { silent: true });
+        if (pr && pr.then) pr.then(function () { closeSheets(); setTab('insights'); });
+        return;
+      }
+      var it = plan[i++];
+      api('budget_set', { kategori: it.cat, limit: it.limit })
+        .then(next)
+        .catch(function () { toast('Gagal di ' + it.cat); });
+    }
+    next();
   }
 
   function insightsBody() {
@@ -2651,7 +2693,10 @@ function paydayCard(d) {
             (c.limit ? 'Ubah limit' : 'Atur limit') + '</button></div>';
         });
       } else {
-        html += '<div class="alertline warn">Belum ada kategori di bagian ini. Atur keranjang kategori di menu Atur rencana.</div>';
+        html += '<div class="alertline warn">Belum ada kategori di bagian ini. Pindahkan kategori ke keranjang ini lewat menu Atur rencana.</div>' +
+          '<div class="partact" style="margin-top:8px">' +
+          '<button class="mini" data-act="smart-alloc">Bagi limit otomatis</button>' +
+          '<button class="mini" data-act="budget-add">Set limit kategori</button></div>';
       }
       html += '</div>';
     });
@@ -2675,8 +2720,10 @@ function paydayCard(d) {
     }
 
     html += '<div class="partact" style="margin-top:14px">' +
+      '<button class="mini" data-act="smart-alloc">Bagi limit otomatis</button>' +
       '<button class="mini" data-act="plan-adjust">Atur rencana</button>' +
-      '<button class="mini" data-act="budget-add">Tambah anggaran</button></div>';
+      '<button class="mini" data-act="budget-add">Tambah anggaran</button></div>' +
+      '<div class="bnote" style="margin-top:8px">Bagi limit otomatis membagi batas Needs dan Wants ke kategori menurut porsi pengeluaran bulan ini. Kamu bisa mengubahnya setelah itu.</div>';
     html += '</div>';
     html += '<div class="card"><h2>AI advisor</h2><div class="empty" style="padding:0 0 10px;font-size:12px">A short read of your month, written from the numbers above.</div>' +
       '<button class="btn" data-act="ai">Get AI advice</button><div id="aiOut" class="revitem" hidden style="margin-top:10px"></div></div>';
@@ -3159,6 +3206,7 @@ function paydayCard(d) {
       }).catch(function () { toast('Cannot reach the server'); });
     }
     else if (act === 'plan-adjust') openPlanForm();
+    else if (act === 'smart-alloc') smartAllocation();
     else if (act === 'budget-add') openBudgetForm('');
     else if (act === 'budget-view') openBudgetDetail(el.getAttribute('data-cat'));
     else if (act === 'cat-view') openCategoryDetail(el.getAttribute('data-cat'));
