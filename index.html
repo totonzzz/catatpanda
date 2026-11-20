@@ -403,6 +403,45 @@ body.dark{--row:#0C1726}
 .goal .gb{height:8px;border-radius:6px;background:var(--s2);margin-top:6px;overflow:hidden}
 .goal .gb i{display:block;height:100%;border-radius:6px;background:var(--mint)}
 .goal .gm{font-size:10.5px;color:var(--mut);margin-top:4px}
+/* rencana belanja */
+.bhero{border-radius:18px;padding:14px 15px;background:var(--s2);border:1px solid var(--line);margin-top:2px}
+.bhero.over{background:color-mix(in srgb,var(--coral) 10%,var(--s2));border-color:color-mix(in srgb,var(--coral) 34%,var(--line))}
+.bhero.warn{background:color-mix(in srgb,var(--amber) 12%,var(--s2));border-color:color-mix(in srgb,var(--amber) 36%,var(--line))}
+.bhero .k,.bgrid .k{font-size:10px;color:var(--mut);font-weight:700;letter-spacing:.03em}
+.bhero .big{font-size:clamp(20px,6vw,25px);font-weight:700;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
+.brow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bstat{font-size:10px;font-weight:700;border-radius:999px;padding:4px 9px;white-space:nowrap;
+  background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
+.bhero.over .bstat,.envbox.over .bstat{background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral)}
+.bhero.warn .bstat,.envbox.warn .bstat{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
+.bmeta{font-size:11.5px;color:var(--mut);margin-top:7px}
+.bmeta b{color:var(--tx);font-weight:700}
+.bgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 10px;margin-top:12px}
+.bgrid .v{font-size:13px;font-weight:700;margin-top:2px;white-space:nowrap;letter-spacing:-.02em}
+.bnote{font-size:11px;color:var(--mut);line-height:1.5;margin-top:6px}
+.seg50{display:flex;height:10px;border-radius:6px;overflow:hidden}
+.seg50 i{display:block;height:100%}
+.envbox{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.envbox .envname{font-size:13px;font-weight:700}
+.envbox .bamt{font-size:17px;font-weight:700;margin-top:6px;letter-spacing:-.02em}
+.envbox .bamt span{font-size:11px;font-weight:600;color:var(--mut)}
+.alertline{font-size:11px;font-weight:600;border-radius:10px;padding:8px 10px;margin-top:9px;line-height:1.45;
+  background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.alertline.over{background:color-mix(in srgb,var(--coral) 14%,transparent);color:var(--coral)}
+.catb{display:flex;align-items:center;gap:10px;width:100%;padding:9px 0 7px;margin-top:6px;
+  background:none;border:0;border-top:1px solid var(--line);text-align:left;font:inherit;color:inherit;cursor:pointer}
+.catb:focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:8px}
+.catb .ci{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;
+  background:var(--s2)}
+.catb .ci svg{width:16px;height:16px;stroke-width:1.8}
+.cmid{flex:1;min-width:0;display:flex;flex-direction:column}
+.cname{font-size:12.5px;font-weight:600}
+.csub{font-size:10.5px;color:#55677A}
+.cstat{font-size:10px;font-weight:700;white-space:nowrap;border-radius:999px;padding:3px 8px;
+  background:color-mix(in srgb,var(--mint) 16%,transparent);color:#0B7A52}
+.cstat.warn{background:color-mix(in srgb,var(--amber) 20%,transparent);color:#8A5A00}
+.cstat.over{background:color-mix(in srgb,var(--coral) 14%,transparent);color:#C23A32}
+.cstat.none{background:var(--s2);color:var(--mut)}
 /* pilihan Dompet / Aset */
 .seg{display:flex;gap:5px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
@@ -629,7 +668,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.67';
+  var VERSION = '3.68';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2524,66 +2563,113 @@ function paydayCard(d) {
     }
     html += '</div>';
     var env = envelopeData(d);
-    var totalCeil = env.groups.needs.ceiling + env.groups.wants.ceiling;
-    var totalSpent = env.groups.needs.spent + env.groups.wants.spent;
-    html += '<div class="card"><h2>Spending plan</h2>';
-    html += '<div class="kv"><span>Needs + Wants<small>ceiling ' + env.plan.needs + '% + ' + env.plan.wants + '% of income</small></span>' +
-      '<span class="mono">' + rp(totalSpent) + ' / ' + rp(totalCeil) + '</span></div>';
-    html += '<div class="hbar" style="margin-top:8px"><span class="' + (totalSpent > totalCeil ? 'over' : '') + '" style="width:' +
-      Math.min(100, totalCeil ? Math.round(totalSpent / totalCeil * 100) : 0) + '%"></span></div>';
+    var plan = env.plan, income = env.income;
+    var ceil = env.groups.needs.ceiling + env.groups.wants.ceiling;
+    var spent = env.groups.needs.spent + env.groups.wants.spent;
+    var alloc = env.groups.needs.catLimits + env.groups.wants.catLimits;
+    var free = Math.max(0, ceil - alloc);
+    var remain = ceil - spent;
+    var usedPct = ceil ? Math.round(spent / ceil * 100) : 0;
+    var stat = usedPct >= 100 ? 'over' : (usedPct >= 80 ? 'warn' : 'ok');
+    var statTxt = stat === 'over' ? 'Lewat anggaran' : (stat === 'warn' ? 'Hampir habis' : 'Aman');
+
+    html += '<div class="card"><h2>Rencana belanja</h2>';
+    html += '<div class="bhero ' + stat + '">' +
+      '<div class="brow"><div><div class="k">Batas pengeluaran</div><div class="big mono">' + rp(ceil) + '</div></div>' +
+      '<span class="bstat">' + statTxt + '</span></div>' +
+      '<div class="hbar" style="margin-top:10px"><span class="' + (remain < 0 ? 'over' : '') + '" style="width:' + Math.min(100, usedPct) + '%"></span></div>' +
+      '<div class="bmeta">' + usedPct + '% terpakai · sisa <b>' + rp(Math.max(0, remain)) + '</b>' +
+        (remain < 0 ? ' · kelebihan ' + rp(-remain) : '') + '</div></div>';
+
+    html += '<div class="bgrid">' +
+      '<div><div class="k">Terpakai</div><div class="v mono">' + rp(spent) + '</div></div>' +
+      '<div><div class="k">Limit teralokasi</div><div class="v mono">' + rp(alloc) + '</div></div>' +
+      '<div><div class="k">Belum dialokasikan</div><div class="v mono">' + rp(free) + '</div></div>' +
+      '<div><div class="k">Pendapatan</div><div class="v mono">' + rp(income) + '</div></div></div>';
+    html += '<div class="bnote">Belum dialokasikan artinya limit yang belum dibagi ke kategori. Itu bukan uang yang belum dibelanjakan.</div>';
+
+    var pn = plan.needs || 0, pw = plan.wants || 0, ps = Math.max(0, 100 - pn - pw);
+    html += '<div class="seg50" style="margin-top:12px">' +
+      '<i style="width:' + pn + '%;background:var(--mint)"></i>' +
+      '<i style="width:' + pw + '%;background:var(--amber)"></i>' +
+      '<i style="width:' + ps + '%;background:#5483B3"></i></div>' +
+      '<div class="legend3" style="margin-top:7px">' +
+        '<span><span class="dot" style="background:var(--mint)"></span>Needs <b>' + pn + '%</b></span>' +
+        '<span><span class="dot" style="background:var(--amber)"></span>Wants <b>' + pw + '%</b></span>' +
+        '<span><span class="dot" style="background:#5483B3"></span>Tabungan <b>' + ps + '%</b></span></div>';
+    html += '<details style="margin-top:10px"><summary style="cursor:pointer;font-size:11.5px;color:var(--mut)">Cara menghitung batas</summary>' +
+      '<div class="bnote" style="margin-top:6px">Batas = pendapatan bulan ini × persentase. Needs ' + pn + '% = ' +
+      rp(env.groups.needs.ceiling) + ', Wants ' + pw + '% = ' + rp(env.groups.wants.ceiling) +
+      '. Ubah persentase lewat tombol Atur rencana di bawah.</div></details>';
+
     ['needs', 'wants'].forEach(function (k) {
       var g = env.groups[k];
-      var usedPct = g.ceiling ? Math.round(g.spent / g.ceiling * 100) : 0;
-      var over = g.spent > g.ceiling;
-      var overCats = g.catLimits > g.ceiling;
-      var diff = Math.abs(g.catLimits - g.ceiling);
-      html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
-        '<div class="parttop"><span>' + g.label + ' <span class="empty" style="font-size:11px">· ' + g.pct + '% of income</span></span>' +
-        '<span class="mono ' + (over ? 'neg' : '') + '">' + (g.ceiling ? usedPct + '%' : ',') + '</span></div>' +
-        '<div class="empty" style="padding:2px 0 0;font-size:11.5px">' + rp(g.spent) + ' of ' + rp(g.ceiling) + ' ceiling · ' + g.note + '</div>' +
-        '<div class="hbar" style="margin-top:8px"><span class="' + (over ? 'over' : '') + '" style="width:' + Math.min(100, usedPct) + '%"></span></div>' +
-        '<div style="margin-top:9px;font-size:11px;font-weight:600;border-radius:10px;padding:7px 10px;' +
-          (overCats ? 'background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral)' : 'background:color-mix(in srgb,var(--mint) 14%,transparent);color:var(--mint)') + '">' +
-          (g.catLimits ? (overCats ? 'Category limits total ' + rp(g.catLimits) + ', ' + rp(diff) + ' above the ceiling'
-                                   : 'Category limits total ' + rp(g.catLimits) + ', ' + rp(diff) + ' under the ceiling')
-                       : 'No category limits inside this envelope yet') + '</div>';
+      var gp = g.ceiling ? Math.round(g.spent / g.ceiling * 100) : 0;
+      var gst = gp >= 100 ? 'over' : (gp >= 80 ? 'warn' : 'ok');
+      var gRemain = g.ceiling - g.spent;
+      var gFree = Math.max(0, g.ceiling - g.catLimits);
+      var gStat = gst === 'over' ? 'Lewat budget' : (gst === 'warn' ? 'Waspada' : 'Normal');
+      html += '<div class="envbox ' + gst + '">' +
+        '<div class="brow"><div class="envname">' + g.label + '</div><span class="bstat">' + gStat + '</span></div>' +
+        '<div class="bnote" style="margin-top:2px">' + g.pct + '% dari pendapatan · ' + esc(g.note) + '</div>' +
+        '<div class="bamt mono">' + rp(g.spent) + ' <span>dari ' + rp(g.ceiling) + '</span></div>' +
+        '<div class="hbar" style="margin-top:8px"><span class="' + (gst === 'over' ? 'over' : '') + '" style="width:' + Math.min(100, gp) + '%"></span></div>' +
+        '<div class="bgrid" style="margin-top:9px">' +
+          '<div><div class="k">Sisa</div><div class="v mono">' + rp(Math.max(0, gRemain)) + '</div></div>' +
+          '<div><div class="k">Terpakai</div><div class="v mono">' + gp + '%</div></div>' +
+          '<div><div class="k">Limit kategori</div><div class="v mono">' + rp(g.catLimits) + '</div></div>' +
+          '<div><div class="k">Belum dialokasikan</div><div class="v mono">' + rp(gFree) + '</div></div></div>' +
+        (gst === 'over'
+          ? '<div class="alertline over">Kelebihan ' + rp(g.spent - g.ceiling) + '. Kurangi pengeluaran, atau pindahkan limit dari kategori yang tidak terpakai.</div>'
+          : (gst === 'warn'
+            ? '<div class="alertline warn">Sudah ' + gp + '%. Sisa ' + rp(Math.max(0, gRemain)) + ' untuk bulan ini.</div>'
+            : ''));
+
       if (g.cats.length) {
         g.cats.forEach(function (c) {
-          var cp = c.limit ? Math.min(100, Math.round(c.spent / c.limit * 100)) : 0;
-          var cov = c.limit && c.spent > c.limit;
-          html += '<div class="part" style="margin-top:10px;margin-bottom:0"><div class="parttop"><span>' + esc(c.name) + '</span>' +
-            '<span class="mono ' + (cov ? 'neg' : '') + '" style="font-size:11.5px">' + rp(c.spent) + (c.limit ? ' / ' + rp(c.limit) : '') + '</span></div>' +
-            (c.limit ? '<div class="hbar" style="margin-top:5px"><span class="' + (cov ? 'over' : '') + '" style="width:' + cp + '%;background:' + (cov ? '' : catColor(c.name)) + '"></span></div>' : '') +
-            '<div class="partact" style="margin-top:6px">' +
-              bucketSelect(c.name) +
-              '<button class="mini" data-act="budget-view" data-cat="' + esc(c.name) + '">View</button>' +
-              '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' + (c.limit ? 'Edit' : 'Set budget') + '</button>' +
-            '</div>' +
-            '</div>';
+          var cp = c.limit ? Math.round(c.spent / c.limit * 100) : 0;
+          var cst = !c.limit ? 'none' : (cp >= 100 ? 'over' : (cp >= 80 ? 'warn' : 'ok'));
+          var cLabel = !c.limit ? 'Belum dianggarkan' : (cp >= 100 ? 'Lewat ' + rp(c.spent - c.limit) : cp + '%');
+          html += '<button class="catb" type="button" data-act="budget-view" data-cat="' + esc(c.name) + '">' +
+            '<span class="ci" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</span>' +
+            '<span class="cmid"><span class="cname">' + esc(c.name) + '</span>' +
+            '<span class="csub">' + rp(c.spent) + (c.limit ? ' dari ' + rp(c.limit) : '') + '</span></span>' +
+            '<span class="cstat ' + cst + '">' + cLabel + '</span></button>';
+          if (c.limit) {
+            html += '<div class="hbar" style="margin:-2px 0 8px"><span class="' + (cp >= 100 ? 'over' : '') +
+              '" style="width:' + Math.min(100, cp) + '%;background:' + (cp >= 100 ? '' : catColor(c.name)) + '"></span></div>';
+          }
+          html += '<div class="partact" style="margin:-2px 0 10px">' + bucketSelect(c.name) +
+            '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' +
+            (c.limit ? 'Ubah limit' : 'Atur limit') + '</button></div>';
         });
+      } else {
+        html += '<div class="alertline warn">Belum ada kategori di bagian ini. Atur keranjang kategori di menu Atur rencana.</div>';
       }
       html += '</div>';
     });
+
     var sk = env.groups.skip;
     if (sk && sk.cats.length) {
-      html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
-        '<div class="parttop"><span>' + sk.label + ' <span class="empty" style="font-size:11px">· out of ceiling</span></span>' +
-        '<span class="mono">' + rp(sk.spent) + '</span></div>' +
-        '<div class="empty" style="padding:2px 0 0;font-size:11.5px">' + sk.note + '</div>';
+      html += '<div class="envbox skip">' +
+        '<div class="brow"><div class="envname">' + sk.label + '</div><span class="bstat">Di luar batas</span></div>' +
+        '<div class="bamt mono">' + rp(sk.spent) + '</div>' +
+        '<div class="bnote" style="margin-top:4px">Kategori di sini tidak dihitung ke Needs maupun Wants, jadi tidak memengaruhi batas dan persentase di atas. Totalnya ' +
+          rp(sk.spent) + ' dari ' + sk.cats.length + ' kategori.</div>';
       sk.cats.forEach(function (c) {
-        html += '<div class="part" style="margin-top:10px;margin-bottom:0"><div class="parttop"><span>' + esc(c.name) + '</span>' +
-          '<span class="mono" style="font-size:11.5px">' + rp(c.spent) + '</span></div>' +
-          '<div class="partact" style="margin-top:6px">' +
-            bucketSelect(c.name) +
-            '<button class="mini" data-act="budget-view" data-cat="' + esc(c.name) + '">View</button>' +
-            '<button class="mini" data-act="budget-edit" data-cat="' + esc(c.name) + '">' + (c.limit ? 'Edit' : 'Set budget') + '</button>' +
-          '</div></div>';
+        html += '<button class="catb" type="button" data-act="budget-view" data-cat="' + esc(c.name) + '">' +
+          '<span class="ci" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</span>' +
+          '<span class="cmid"><span class="cname">' + esc(c.name) + '</span><span class="csub">' + rp(c.spent) + '</span></span>' +
+          '<span class="cstat none">Tidak dihitung</span></button>';
       });
+      html += '<div class="bnote" style="margin-top:6px">Kalau kategori ini sebenarnya kebutuhan, ubah keranjangnya jadi Needs atau Wants lewat tombol di bawah tiap kategori.</div>' +
+        '<div class="partact" style="margin-top:8px">' + bucketSelect(sk.cats[0].name) + '</div>';
       html += '</div>';
     }
+
     html += '<div class="partact" style="margin-top:14px">' +
-      '<button class="mini" data-act="plan-adjust">Adjust plan</button>' +
-      '<button class="mini" data-act="budget-add">Add a budget</button></div>';
+      '<button class="mini" data-act="plan-adjust">Atur rencana</button>' +
+      '<button class="mini" data-act="budget-add">Tambah anggaran</button></div>';
     html += '</div>';
     html += '<div class="card"><h2>AI advisor</h2><div class="empty" style="padding:0 0 10px;font-size:12px">A short read of your month, written from the numbers above.</div>' +
       '<button class="btn" data-act="ai">Get AI advice</button><div id="aiOut" class="revitem" hidden style="margin-top:10px"></div></div>';
