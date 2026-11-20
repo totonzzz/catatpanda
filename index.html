@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<title>Bamboo — Finance Tracker</title>
+<title>Bamboo, Finance Tracker</title>
 <link rel="icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,7 +93,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.view > *{animation:none}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:14px;
-  backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);box-shadow:0 12px 32px rgba(1,8,20,.35),inset 0 1px 0 rgba(193,232,255,.09)}
+  box-shadow:0 12px 32px rgba(1,8,20,.35),inset 0 1px 0 rgba(193,232,255,.09)}
 .card h2{margin:0 0 14px;font-size:13.5px;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--tx);display:flex;justify-content:space-between;align-items:center;position:relative;padding-left:11px}
 .card h2::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:14px;border-radius:2px;background:linear-gradient(180deg,var(--mint),#5483B3)}
 .card h2 a{font-size:12px;letter-spacing:0;text-transform:none;color:var(--mint);font-weight:500;background:none;border:none;cursor:pointer;padding:0}
@@ -418,16 +418,18 @@ body.dark{--row:#0C1726}
 .legend3{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--mut)}
 .legend3 span b{color:var(--tx);font-weight:700}
 .legend3 .dot{width:8px;height:8px;border-radius:3px;display:inline-block;margin-right:5px}
-.arow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.arow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);
+  width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.arow:focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:10px}
 .arow:last-child{border-bottom:0;padding-bottom:2px}
 .abadge{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
 .amid{flex:1;min-width:0}
 .acode{font-weight:700;font-size:13.5px}
-.asub{font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asub{font-size:11px;color:#55677A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aright{text-align:right;flex:none;min-width:0;max-width:52%}
 .aval{font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
 .apl{font-size:10px;font-weight:700;margin-top:2px;white-space:nowrap;letter-spacing:-.01em}
-.apl.up{color:var(--mint)} .apl.down{color:var(--coral)}
+.apl.up{color:#0B7A52} .apl.down{color:#C23A32}
 /* isi kartu e-money (khusus, tidak menimpa kartu kredit) */
 .cc.wallet .em-brand{font-size:15px;font-weight:700;letter-spacing:-.01em}
 .cc.wallet .em-type{font-size:10.5px;opacity:.8;margin-top:2px}
@@ -627,7 +629,7 @@ body.dark{--row:#0C1726}
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.62';
+  var VERSION = '3.64';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -919,7 +921,7 @@ body.dark{--row:#0C1726}
       if (e.code === 'NET') {
         state.fromCache = !!state.data; renderAll();
         if (!state.data) fail('No connection and nothing saved on this phone yet.');
-        else if (opts.manual) toast('Offline — showing saved data');
+        else if (opts.manual) toast('Offline, showing saved data');
         return;
       }
       fail('The Web App did not respond correctly. Check the URL and make sure deployment access is "Anyone".');
@@ -1033,7 +1035,7 @@ body.dark{--row:#0C1726}
     var lvl = worst.pct >= 100 ? 'bad' : 'warn';
     return '<div class="ins ' + lvl + '"><div class="ic">' + (worst.pct >= 100 ? '⚠️' : '🔔') + '</div><div class="ibody">' +
       (worst.pct >= 100 ? '<b>Anggaran ' + esc(worst.name) + ' terlampaui</b>' : '<b>Anggaran ' + esc(worst.name) + ' ' + worst.pct + '%</b>') +
-      ' — ' + rp(worst.spent) + ' dari ' + rp(worst.limit) + '.' +
+      ', ' + rp(worst.spent) + ' dari ' + rp(worst.limit) + '.' +
       (over.length > 1 ? ' ' + over.length + ' kategori perlu perhatian.' : '') +
       '<span class="tagline">Ketuk Insights untuk merinci anggaran</span></div></div>';
   }
@@ -1057,10 +1059,10 @@ body.dark{--row:#0C1726}
       lines.push((delta <= 0 ? 'Pengeluaran <b>' + Math.abs(delta) + '% lebih hemat</b>' : 'Pengeluaran <b>' + delta + '% lebih tinggi</b>') +
         ' dibanding bulan lalu.');
     } else {
-      lines.push('Ini bulan pertamamu punya catatan — <b>terus catat</b> agar perbandingan muncul.');
+      lines.push('Ini bulan pertamamu punya catatan, <b>terus catat</b> agar perbandingan muncul.');
     }
     if (top) lines.push('Terbesar: <b>' + esc(top.name) + '</b> ' + rp(top.amount) + ' (' + top.pct + '%).');
-    lines.push('Sisa <b>' + rp(remaining) + '</b> untuk ' + hinfo.left + ' hari — aman <b>' + rp(perDay) + '/hari</b>.');
+    lines.push('Sisa <b>' + rp(remaining) + '</b> untuk ' + hinfo.left + ' hari, aman <b>' + rp(perDay) + '/hari</b>.');
     return '<div class="ins ' + tone + '"><div class="ic">' + icon + '</div><div class="ibody">' +
       lines.join(' ') +
       '<span class="tagline">' + (d.health ? 'Skor kesehatan: ' + d.health.score + ' (' + esc(d.health.grade) + ')' : 'Insight dibuat dari data bulan ini') + '</span>' +
@@ -1116,7 +1118,7 @@ body.dark{--row:#0C1726}
     '<div class="hbar2"><span style="width:' + pct + '%"></span></div>' +
     '<div class="foot">' + (limit > 0
       ? 'Anggaran terpakai ' + pct + '% · ' + rps(spent) + ' dari ' + rps(limit)
-      : 'Belum ada anggaran — angka dari selisih pemasukan dan pengeluaran') + '</div>' +
+      : 'Belum ada anggaran, angka dari selisih pemasukan dan pengeluaran') + '</div>' +
     '</div>';
 }
 
@@ -1392,7 +1394,7 @@ function paydayCard(d) {
         '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
         '<div class="cc-mid"><div class="em-chip"></div><div class="cc-num">•••• •••• •••• ••••</div></div>' +
         (empty
-          ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">—</div></div></div>'
+          ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">,</div></div></div>'
           : '<div class="cc-bot">' +
             '<div><div class="cc-lbl">' + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
             '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
@@ -1468,7 +1470,7 @@ function paydayCard(d) {
     var total = list.reduce(function (s, a) { return s + a.balance; }, 0);
     var h = '<div class="card"><h2>Wallets</h2>';
     if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Add a wallet with its starting balance — GoPay, OVO, cash, anything.</div>';
+      h += '<div class="empty" style="padding:0 0 10px">Add a wallet with its starting balance, GoPay, OVO, cash, anything.</div>';
     } else {
       h += '<div class="kv"><span>Total<small>' + list.length + (list.length === 1 ? ' wallet' : ' wallets') + '</small></span>' +
         '<span class="mono ' + (total < 0 ? 'neg' : '') + '">' + rp(total) + '</span></div>';
@@ -1822,7 +1824,7 @@ function paydayCard(d) {
     var list = pt.list;
     var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
     if (!list.length) {
-      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana — isi "Harga kini" agar untung/rugi muncul.</div>';
+      h += '<div class="empty" style="padding:0 0 10px">Belum ada aset. Tambahkan saham atau reksadana, isi "Harga kini" agar untung/rugi muncul.</div>';
     } else {
       list.forEach(function (a, idx) {
         var px = assetPrice(a);
@@ -1831,7 +1833,7 @@ function paydayCard(d) {
         var pl = px > 0 ? val - base0 : 0;
         var pct = (px > 0 && base0 > 0) ? (pl / base0 * 100) : 0;
         var color = assetTint(idx);
-        h += '<div class="arow" data-act="asset-edit" data-code="' + esc(a.code) + '" style="cursor:pointer">' +
+        h += '<button class="arow" type="button" data-act="asset-edit" data-code="' + esc(a.code) + '" aria-label="Ubah aset ' + esc(a.code) + '">' +
           '<div class="abadge" style="background:' + color + '22;color:' + color + '">' + assetInitials(a) + '</div>' +
           '<div class="amid"><div class="acode">' + esc(a.code) + '</div>' +
             '<div class="asub">' + esc(a.name) + ' · ' + assetQtyText(a) + ' × ' + (px > 0 ? rp(px) : rp(a.buyPrice)) + '</div></div>' +
@@ -1853,7 +1855,7 @@ function paydayCard(d) {
     var opts = list.map(function (a) { return '<option value="' + esc(a.name) + '">' + esc(a.name) + ' (' + rp(a.balance) + ')</option>'; }).join('');
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Move money</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
-      '<div class="empty" style="padding:0 0 12px;font-size:12px">Moving money between your own wallets is not spending — totals stay unchanged.</div>' +
+      '<div class="empty" style="padding:0 0 12px;font-size:12px">Moving money between your own wallets is not spending, totals stay unchanged.</div>' +
       '<div class="fld"><label>From</label><select id="tFrom">' + opts + '</select></div>' +
       '<div class="fld"><label>To</label><select id="tTo">' + opts + '</select></div>' +
       '<div class="fld"><label>Amount</label><input id="tAmt" class="mono" inputmode="numeric" placeholder="200000"></div>' +
@@ -1895,7 +1897,7 @@ function paydayCard(d) {
       '<div class="fld"><label>Jumlah</label><input id="aUnits" class="mono" inputmode="numeric" value="' +
         (cur ? (cur.kind === 'saham' && cur.units % 100 === 0 ? Math.round(cur.units / 100) : cur.units) : '') + '" placeholder="13"></div>' +
       '<div class="fld"><label>Harga rata-rata / lembar</label><input id="aBuy" class="mono" inputmode="numeric" value="' + (cur ? cur.buyPrice : '') + '" placeholder="8246"></div>' +
-      '<div class="fld"><label>Harga kini / NAV <span style="color:var(--mut)">— untuk reksadana</span></label>' +
+      '<div class="fld"><label>Harga kini / NAV <span style="color:var(--mut)">, untuk reksadana</span></label>' +
         '<input id="aNow" class="mono" inputmode="numeric" value="' + (cur && cur.priceManual ? cur.priceManual : '') + '" placeholder="opsional"></div>' +
       '<div class="err" id="aErr"></div><button class="btn" data-act="asset-save" data-code="' + esc(cur ? cur.code : '') + '">Save asset</button>' +
       (cur ? '<button class="btn ghost" data-act="asset-del" data-code="' + esc(cur.code) + '" style="margin-top:8px;color:var(--coral)">Hapus aset ini</button>' : '');
@@ -2073,7 +2075,7 @@ function paydayCard(d) {
       (LS.get('ck_pin', '')
         ? '<div class="empty" style="padding:0;font-size:13px">PIN is on. The app asks for it every time it opens.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Change PIN</button><button class="btn ghost" data-act="pin-off" style="margin-top:8px">Remove PIN</button>'
         : '<div class="empty" style="padding:0;font-size:13px">Set a PIN so your finances stay private if someone borrows your phone.</div><button class="btn ghost" data-act="pin-set" style="margin-top:10px">Create PIN</button>') +
-      '<div class="empty" style="padding:10px 0 0;font-size:11px">The PIN is stored as a hash on this phone and never sent anywhere. Face ID/Touch ID is not used in this version — Safari does not expose biometrics for a local lock like this.</div>' +
+      '<div class="empty" style="padding:10px 0 0;font-size:11px">The PIN is stored as a hash on this phone and never sent anywhere. Face ID/Touch ID is not used in this version, Safari does not expose biometrics for a local lock like this.</div>' +
       '</div>' +
       '<div class="card"><h2>More</h2><button class="btn ghost" data-act="clear">Clear data saved on this phone</button>' +
       '<button class="btn danger" data-act="disconnect" style="margin-top:8px">Change connection</button>' +
@@ -2155,7 +2157,7 @@ function paydayCard(d) {
     $('hdr').hidden = true; $('tabbar').hidden = true;
     $('view').className = 'setup';
     $('view').innerHTML = '<img class="logo" src="icons/icon-192.png" alt="">' +
-      '<h1>Hi, I’m Bamboo</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough — it stays on this phone.</p>' +
+      '<h1>Hi, I’m Bamboo</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough, it stays on this phone.</p>' +
       '<div class="fld"><label for="sUrl">Web App URL (ends with /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(state.url) + '"></div>' +
       '<div class="fld"><label for="sTok">Secret code (TOKEN)</label><input id="sTok" type="password" autocomplete="off" placeholder="Same code as in the script"></div>' +
       '<div class="err" id="sErr">' + esc(state.setupMsg) + '</div><button class="btn" data-act="connect" id="sGo">Connect</button>';
@@ -2313,7 +2315,7 @@ function paydayCard(d) {
     'Jajan': [
       { t: 'That treat is logged.', s: 'Now it cannot hide.', e: '☕' },
       { t: 'Small, but recorded.', s: 'Small amounts repeat more often than big ones.', e: '🍪' },
-      { t: 'Tracked.', s: 'If you buy it daily, it is not a treat — it is a subscription.', e: '🧋' }
+      { t: 'Tracked.', s: 'If you buy it daily, it is not a treat, it is a subscription.', e: '🧋' }
     ],
     'Transportasi': [
       { t: 'Fuel logged.', s: 'The road is expensive; the record makes it visible.', e: '⛽' },
@@ -2333,7 +2335,7 @@ function paydayCard(d) {
     'Belanja Kebutuhan Harian': [
       { t: 'Groceries recorded.', s: 'Planning beats improvising.', e: '🧺' },
       { t: 'Shopping logged.', s: 'A list is the cheapest tool you own.', e: '📝' },
-      { t: 'Noted.', s: 'Cook what expires first — that is free money.', e: '🥬' }
+      { t: 'Noted.', s: 'Cook what expires first, that is free money.', e: '🥬' }
     ],
     'Tagihan & Utilitas': [
       { t: 'Bill logged.', s: 'Nobody enjoys this, but everybody needs it.', e: '⚡' },
@@ -2341,7 +2343,7 @@ function paydayCard(d) {
       { t: 'Paid and noted.', s: 'Fixed costs deserve a fixed place in your month.', e: '💡' }
     ],
     'Hiburan': [
-      { t: 'Fun logged — no guilt.', s: 'That is the point of a budget.', e: '🎬' },
+      { t: 'Fun logged, no guilt.', s: 'That is the point of a budget.', e: '🎬' },
       { t: 'Recorded.', s: 'Enjoying money is allowed, as long as it is on purpose.', e: '🎧' },
       { t: 'Noted.', s: 'Entertainment costs less when it is planned.', e: '🍿' }
     ],
@@ -2362,9 +2364,9 @@ function paydayCard(d) {
     ]
   };
   var PEARLS_BY_CAT = {
-    'Makan': ['The cheapest restaurant is the one you cook in.', 'You do not need a budget you follow perfectly — you need one you look at.', 'Food spending grows quietly, one delivery at a time.'],
-    'Jajan': ['The daily coffee is never the problem — the unrecorded one is.', 'Treats are fine. Treats you never see are not.', 'Small repeats beat big splurges in the long run.'],
-    'Transportasi': ['Distance is not the only cost — timing is too.', 'A full tank is cheaper per litre than five half tanks.', 'The cheapest commute is the one you can walk part of.'],
+    'Makan': ['The cheapest restaurant is the one you cook in.', 'You do not need a budget you follow perfectly, you need one you look at.', 'Food spending grows quietly, one delivery at a time.'],
+    'Jajan': ['The daily coffee is never the problem, the unrecorded one is.', 'Treats are fine. Treats you never see are not.', 'Small repeats beat big splurges in the long run.'],
+    'Transportasi': ['Distance is not the only cost, timing is too.', 'A full tank is cheaper per litre than five half tanks.', 'The cheapest commute is the one you can walk part of.'],
     'Perawatan Kendaraan': ['Service on time costs a fraction of service too late.', 'A noise you ignore today is a bill you meet next month.', 'Tyres, oil, brakes: cheap to check, expensive to skip.'],
     'Belanja': ['Wait 24 hours before a non-essential purchase; most wants do not survive the night.', 'Discounts you did not plan for are still spending.', 'Buy once, cry once.'],
     'Belanja Kebutuhan Harian': ['A list turns groceries into a plan.', 'Buying hungry is the most expensive way to shop.', 'The freezer is a savings account with a door.'],
@@ -2372,10 +2374,10 @@ function paydayCard(d) {
     'Hiburan': ['Entertainment is a line item, not a betrayal.', 'The best fun per rupiah is usually shared.', 'Planned fun costs less than spontaneous fun.'],
     'Kesehatan': ['You only notice health spending when you skipped it.', 'Sleep and water are free and they are still the best medicine.', 'Prevention is the only purchase that pays you back.'],
     'Cicilan': ['A paid instalment is progress you can measure.', 'Debt gets smaller the moment you stop adding to it.', 'Finish one before starting another.'],
-    'Lainnya': ['Track it and forget it — the record does the remembering.', 'Small entries add up to a clear picture.', 'If you can see it, you can change it.']
+    'Lainnya': ['Track it and forget it, the record does the remembering.', 'Small entries add up to a clear picture.', 'If you can see it, you can change it.']
   };
   var EDIT_LINES = [
-    { t: 'Fixed — cleaner now.', s: 'Correcting a record is a form of caring.', e: '✏️' },
+    { t: 'Fixed, cleaner now.', s: 'Correcting a record is a form of caring.', e: '✏️' },
     { t: 'Updated.', s: 'Good data in, good advice out.', e: '🔧' },
     { t: 'Saved.', s: 'Accuracy compounds exactly like money.', e: '🫱' }
   ];
@@ -2412,7 +2414,7 @@ function paydayCard(d) {
       : '';
     var nudge = (opts.pct != null && opts.pct >= 90)
       ? '<div style="margin-top:8px;background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral);border-radius:12px;padding:8px 11px;font-size:11.5px;font-weight:600">⚠️ ' +
-        esc(opts.cat) + ' is at ' + opts.pct + '% of its budget — ' + (opts.pct >= 100 ? 'over the line' : 'almost there') + '.</div>'
+        esc(opts.cat) + ' is at ' + opts.pct + '% of its budget, ' + (opts.pct >= 100 ? 'over the line' : 'almost there') + '.</div>'
       : '';
     var old = document.getElementById('praise'); if (old) old.remove();
     var el = document.createElement('div');
@@ -2494,7 +2496,7 @@ function paydayCard(d) {
 
   function insightsBody() {
     var d = state.data; if (!d) return skeleton();
-    var h = d.health || { score: 0, grade: '—', parts: [] };
+    var h = d.health || { score: 0, grade: ',', parts: [] };
     var b = d.behavior || {};
     var html = '<div class="card"><h2>Financial health</h2><div class="hrow big"><div class="hbig mono">' + h.score + '</div>' +
       '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 · recalculated on every refresh</div></div></div>';
@@ -2509,8 +2511,8 @@ function paydayCard(d) {
       gcell('Projected month', rp(b.projected || 0)) +
       gcell('Weekend spending', (b.weekendShare || 0) + '%') +
       gcell('Small purchases', (b.smallShare || 0) + '% of entries') +
-      gcell('Top category', (b.topCat || '—') + ' · ' + (b.topShare || 0) + '%') +
-      gcell('Largest entry', b.largest ? rp(b.largest.amount) : '—') +
+      gcell('Top category', (b.topCat || ',') + ' · ' + (b.topShare || 0) + '%') +
+      gcell('Largest entry', b.largest ? rp(b.largest.amount) : ',') +
       '</div>';
     if ((b.movers || []).length) {
       html += '<div class="empty" style="padding:12px 0 0;font-size:11px">Biggest changes vs last month</div>';
@@ -2536,13 +2538,13 @@ function paydayCard(d) {
       var diff = Math.abs(g.catLimits - g.ceiling);
       html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">' +
         '<div class="parttop"><span>' + g.label + ' <span class="empty" style="font-size:11px">· ' + g.pct + '% of income</span></span>' +
-        '<span class="mono ' + (over ? 'neg' : '') + '">' + (g.ceiling ? usedPct + '%' : '—') + '</span></div>' +
+        '<span class="mono ' + (over ? 'neg' : '') + '">' + (g.ceiling ? usedPct + '%' : ',') + '</span></div>' +
         '<div class="empty" style="padding:2px 0 0;font-size:11.5px">' + rp(g.spent) + ' of ' + rp(g.ceiling) + ' ceiling · ' + g.note + '</div>' +
         '<div class="hbar" style="margin-top:8px"><span class="' + (over ? 'over' : '') + '" style="width:' + Math.min(100, usedPct) + '%"></span></div>' +
         '<div style="margin-top:9px;font-size:11px;font-weight:600;border-radius:10px;padding:7px 10px;' +
           (overCats ? 'background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral)' : 'background:color-mix(in srgb,var(--mint) 14%,transparent);color:var(--mint)') + '">' +
-          (g.catLimits ? (overCats ? 'Category limits total ' + rp(g.catLimits) + ' — ' + rp(diff) + ' above the ceiling'
-                                   : 'Category limits total ' + rp(g.catLimits) + ' — ' + rp(diff) + ' under the ceiling')
+          (g.catLimits ? (overCats ? 'Category limits total ' + rp(g.catLimits) + ', ' + rp(diff) + ' above the ceiling'
+                                   : 'Category limits total ' + rp(g.catLimits) + ', ' + rp(diff) + ' under the ceiling')
                        : 'No category limits inside this envelope yet') + '</div>';
       if (g.cats.length) {
         g.cats.forEach(function (c) {
@@ -2746,7 +2748,7 @@ function paydayCard(d) {
     $('kat').innerHTML = list.map(function (c) { return '<option value="' + esc(c) + '">' + esc((o.emoji[c] || '') + ' ' + c) + '</option>'; }).join('');
     if (list.indexOf(cur) > -1) $('kat').value = cur;
     var curM = $('met').value;
-    $('met').innerHTML = (state.editId ? '<option value="">— no method —</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
+    $('met').innerHTML = (state.editId ? '<option value="">, no method ,</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
     if (curM && Array.prototype.some.call($('met').options, function (x) { return x.value === curM; })) $('met').value = curM;
     onKat();
     renderCatChips(list);
@@ -3148,7 +3150,7 @@ function paydayCard(d) {
         .then(function (r) { return r.json(); })
         .then(function (r) {
           if (r && r.ok) out.innerHTML = '<div class="revtext" style="font-weight:400">' + esc(r.text).replace(/\n/g, '<br>') + '</div>';
-          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet — add an AI_API_KEY secret in the Worker.';
+          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet, add an AI_API_KEY secret in the Worker.';
           else out.textContent = (r && r.error) || 'AI could not answer right now.';
         })
         .catch(function () { out.textContent = 'Could not reach the AI service.'; });
@@ -3227,7 +3229,7 @@ function paydayCard(d) {
         var setV = function (sel, val) { var e = q0(sel); if (e) e.value = val; };
         setV('#desc', src0.desc); setV('#amt', src0.amount);
         state.editId = null; state.extraCat = src0.cat; state.tipe = src0.tipe; state.jenis = src0.jenis || '';
-        toast('Salinan dibuat — ubah bila perlu');
+        toast('Salinan dibuat, ubah bila perlu');
       }, 260);
     }
     else if (act === 'detail') openDetail(el.getAttribute('data-id'), false);
@@ -3246,7 +3248,7 @@ function paydayCard(d) {
       toast('Sending test push…');
       pushApi('test', { token: state.token }).then(function (r) {
         if (r && r.ok) toast('✅ Test push sent (' + r.sent + ')');
-        else if (r && r.sent === 0) toast('⚠️ No subscription yet — turn notifications on first');
+        else if (r && r.sent === 0) toast('⚠️ No subscription yet, turn notifications on first');
         else toast((r && r.error) || 'Could not send the test push');
       }).catch(function () { toast('Cannot reach the notification server'); });
     }
@@ -3343,7 +3345,7 @@ function paydayCard(d) {
           if (r && r.ok) {
             LS.set('ck_last_met', $('cpMet').value || 'Transfer');
             closeSheets();
-            toast(r.left > 0 ? '✅ Paid — ' + r.left + ' months left' : '🎉 Instalment finished');
+            toast(r.left > 0 ? '✅ Paid, ' + r.left + ' months left' : '🎉 Instalment finished');
             var pr4 = loadMonth(state.month, { silent: true });
             if (pr4 && pr4.then) pr4.then(renderAll); else renderAll();
           } else { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = (r && r.error) || 'Could not record'; }
@@ -3428,7 +3430,7 @@ function paydayCard(d) {
         .then(function (r) { return r.json(); })
         .then(function (r) {
           if (r && r.ok) out.innerHTML = '<div class="revtext" style="font-weight:400">' + esc(r.text).replace(/\n/g, '<br>') + '</div>';
-          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet — add an AI_API_KEY secret in the Worker.';
+          else if (r && /not configured/i.test(r.error || '')) out.textContent = 'AI advisor is not set up yet, add an AI_API_KEY secret in the Worker.';
           else out.textContent = (r && r.error) || 'AI could not answer right now.';
         })
         .catch(function () { out.textContent = 'Could not reach the AI service.'; });
@@ -3512,7 +3514,7 @@ function paydayCard(d) {
     el.textContent = n ? 'Offline · ' + n + ' waiting to send' : 'Offline · showing saved data';
     el.hidden = false;
   }
-  window.addEventListener('offline', function () { updateOffline(); toast('Offline — new entries stay on this phone'); });
+  window.addEventListener('offline', function () { updateOffline(); toast('Offline, new entries stay on this phone'); });
   window.addEventListener('online', function () { updateOffline(); toast('Back online'); });
   updateOffline();
 
@@ -3520,18 +3522,18 @@ function paydayCard(d) {
   function installSteps() {
     if (isIOS()) return [
       'Open this page in <b>Safari</b> (not Chrome, not an in-app browser)',
-      'Tap the <b>Share</b> button — square with an arrow pointing up',
+      'Tap the <b>Share</b> button, square with an arrow pointing up',
       'Scroll down and choose <b>Add to Home Screen</b>, then <b>Add</b>'
     ];
     if (/Android/i.test(navigator.userAgent)) return [
       'Open the browser menu (<b>⋮</b>) at the top right',
       'Choose <b>Install app</b> or <b>Add to Home screen</b>',
-      'Confirm — Bamboo gets its own icon'
+      'Confirm, Bamboo gets its own icon'
     ];
     return [
       'Open the address bar menu in your browser',
       'Choose <b>Install Bamboo</b>',
-      'Confirm — it opens in its own window'
+      'Confirm, it opens in its own window'
     ];
   }
   function maybeInstallSheet() {
@@ -3545,7 +3547,7 @@ function paydayCard(d) {
       openBg();
       $('sheetDetail').hidden = false;
       $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
-        '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen — it then opens full screen, works offline, and can send notifications.</div>' +
+        '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen, it then opens full screen, works offline, and can send notifications.</div>' +
         steps +
         '<button class="btn" data-act="install-ok" style="margin-top:16px">Got it</button>' +
         '<div class="empty" style="padding:10px 0 0;font-size:11px">You will only see this once.</div>';
