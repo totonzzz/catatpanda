@@ -729,7 +729,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.79';
+  var VERSION = '3.80';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -903,7 +903,7 @@ body.dark{
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list'; $('sheetDetail').innerHTML = html;
   }
 
-  var SRC = { form: 'Form Tally', app: 'Aplikasi ini', notif: 'Notifikasi bank (otomatis)' };
+  var SRC = { form: 'Form Tally', app: 'Aplikasi ini', notif: 'Notifikasi bank' };
 
   var state = {
     url: LS.get('ck_url', ''), token: LS.get('ck_token', ''),
@@ -2170,6 +2170,7 @@ function paydayCard(d) {
       '<div class="kv"><span>Last updated</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
       '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
       '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
+      '<button class="btn ghost" data-act="backfill-app">Lengkapi sumber aplikasi (data lama)</button>' +
       '<button class="btn ghost" data-act="hide-all">' + (state.hide.all ? 'Tampilkan semua nominal' : 'Sembunyikan semua nominal') + '</button>' +
       '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
       '<button class="btn ghost" data-act="purge" style="margin-top:8px">Tidy sheet (remove deleted rows)</button>' +
@@ -3102,7 +3103,7 @@ function paydayCard(d) {
       (fmtCreated(t.created) ? row('Dicatat', fmtCreated(t.created)) : '') +
       row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
       (t.loan && t.nama ? row('Name', t.nama) : '') +
-      row('Sumber', (SRC[t.src] || 'Form') + (t.appName ? ' · ' + t.appName : '')) +
+      row('Sumber', t.appName ? (t.src === 'notif' ? 'Notifikasi ' + t.appName : t.appName) : (SRC[t.src] || 'Form')) +
       '<div class="err" id="delErr"></div>' +
       (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
         '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
@@ -3472,6 +3473,14 @@ function paydayCard(d) {
         if (r && r.ok) { toast('🧹 ' + (r.removed || 0) + ' row(s) removed'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
         else toast((r && r.error) || 'Could not tidy');
       }).catch(function () { el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)'; toast('Cannot reach the server'); });
+    }
+    else if (act === 'backfill-app') {
+      toast('Melengkapi sumber...');
+      api('backfill_app').then(function (r) {
+        if (r && r.ok) toast(r.filled + ' dari ' + r.checked + ' transaksi lama dilengkapi');
+        else toast((r && r.error) || 'Gagal melengkapi');
+        var pr = loadMonth(state.month, { silent: true }); if (pr && pr.then) pr.then(renderAll);
+      }).catch(function () { toast('Tidak bisa terhubung'); });
     }
     else if (act === 'go-insights') {
       setTab('insights');
