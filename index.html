@@ -729,7 +729,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.80';
+  var VERSION = '3.81';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -3104,6 +3104,8 @@ function paydayCard(d) {
       row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
       (t.loan && t.nama ? row('Name', t.nama) : '') +
       row('Sumber', t.appName ? (t.src === 'notif' ? 'Notifikasi ' + t.appName : t.appName) : (SRC[t.src] || 'Form')) +
+      (t.rawText ? '<div class="kv" style="display:block"><span style="font-size:10.5px;color:var(--mut)">Teks notifikasi asli</span>' +
+        '<div style="font-size:11.5px;color:var(--tx);line-height:1.45;margin-top:3px">' + esc(t.rawText) + '</div></div>' : '') +
       '<div class="err" id="delErr"></div>' +
       (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
         '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
