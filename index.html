@@ -725,7 +725,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.77';
+  var VERSION = '3.78';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -743,13 +743,14 @@ body.dark{
   function grp(n) { return String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
   var MASK_RP = 'Rp ••••';
   function rp(n) {
+    if (state.hide && state.hide.all) return (n < 0 ? '−' : '') + MASK_RP;
     n = Math.round(Number(n) || 0);
     return (n < 0 ? '−' : '') + 'Rp ' + grp(n);
   }
   // sensor hanya untuk bagian yang dipilih
   function mrp(n, scope) {
     n = Math.round(Number(n) || 0);
-    if (state.hide && state.hide[scope]) return (n < 0 ? '−' : '') + MASK_RP;
+    if (state.hide && (state.hide.all || state.hide[scope])) return (n < 0 ? '−' : '') + MASK_RP;
     return rp(n);
   }
   function short(n) {
@@ -898,7 +899,7 @@ body.dark{
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list'; $('sheetDetail').innerHTML = html;
   }
 
-  var SRC = { form: 'Tally form', app: 'This app', notif: 'Bank notification (auto)' };
+  var SRC = { form: 'Form Tally', app: 'Aplikasi ini', notif: 'Notifikasi bank (otomatis)' };
 
   var state = {
     url: LS.get('ck_url', ''), token: LS.get('ck_token', ''),
@@ -907,7 +908,7 @@ body.dark{
     filter: 'semua', q: '', tipe: 'Keluar', jenis: '', reqId: '', setupMsg: '', editId: '', extraCat: '',
     pending: pj(LS.get('ck_pending', '[]'), []), lastSync: LS.get('ck_sync', ''), prevKeluar: 0,
     review: null, reviewRow: '', search: null, cardActive: 0, walletActive: 0,
-    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false, portfolio: false, s2s: false }), catsAll: false,
+    hide: pj(LS.get('ck_hide', ''), { hero: false, wallet: false, portfolio: false, s2s: false, all: false }), catsAll: false,
     prices: {}, pricesAt: 0, pricesAsked: '', walletSeg: 'dompet',
     rangeOpen: false, rangeFrom: '', rangeTo: ''
   };
@@ -2164,6 +2165,7 @@ function paydayCard(d) {
       '<div class="kv"><span>Last updated</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
       '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
       '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
+      '<button class="btn ghost" data-act="hide-all">' + (state.hide.all ? 'Tampilkan semua nominal' : 'Sembunyikan semua nominal') + '</button>' +
       '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
       '<button class="btn ghost" data-act="purge" style="margin-top:8px">Tidy sheet (remove deleted rows)</button>' +
       '<button class="btn ghost" data-act="test-capture" style="margin-top:8px">Test notification capture</button>' +
@@ -3363,8 +3365,9 @@ function paydayCard(d) {
     else if (act === 'hide') {
       var sc = el.getAttribute('data-hide') || 'wallet';
       state.hide[sc] = !state.hide[sc];
+    if (sc === 'all') { state.hide.hero = state.hide.all; state.hide.wallet = state.hide.all; state.hide.portfolio = state.hide.all; state.hide.s2s = state.hide.all; }
       LS.set('ck_hide', JSON.stringify(state.hide));
-      toast(state.hide[sc] ? 'Hidden' : 'Shown');
+      toast(state.hide[sc] ? 'Nominal disembunyikan' : 'Nominal ditampilkan');
       renderAll();
     }
     else if (act === 'cats-toggle') { state.catsAll = !state.catsAll; renderAll(); }
@@ -3464,6 +3467,14 @@ function paydayCard(d) {
         if (r && r.ok) { toast('🧹 ' + (r.removed || 0) + ' row(s) removed'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
         else toast((r && r.error) || 'Could not tidy');
       }).catch(function () { el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)'; toast('Cannot reach the server'); });
+    }
+    else if (act === 'hide-all') {
+      state.hide.all = !state.hide.all;
+      state.hide.hero = state.hide.all; state.hide.wallet = state.hide.all;
+      state.hide.portfolio = state.hide.all; state.hide.s2s = state.hide.all;
+      LS.set('ck_hide', JSON.stringify(state.hide));
+      renderAll();
+      toast(state.hide.all ? 'Semua nominal disembunyikan' : 'Nominal ditampilkan');
     }
     else if (act === 'ping') {
       toast('Checking server…');
