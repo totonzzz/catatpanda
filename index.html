@@ -725,7 +725,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.76';
+  var VERSION = '3.77';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1275,7 +1275,7 @@ function paydayCard(d) {
 
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
-    var meta = (t.metode || t.cat) + (t.loan && t.nama ? ' · ' + t.nama : '');
+    var meta = (t.metode || t.cat) + (t.appName ? ' · ' + t.appName : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
     return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
        (t.flag ? '<span class="tag cek">cek</span>' : (t.src === 'notif' ? '<span class="tag auto">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
       '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button></div>';
@@ -3094,7 +3094,8 @@ function paydayCard(d) {
       row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) +
       (fmtCreated(t.created) ? row('Dicatat', fmtCreated(t.created)) : '') +
       row('Category', t.cat) + row('Type', t.tipe === 'Masuk' ? 'Income' : 'Expense') + (t.metode ? row('Method', t.metode) : '') +
-      (t.loan && t.nama ? row('Name', t.nama) : '') + row('Source', SRC[t.src] || 'Form') +
+      (t.loan && t.nama ? row('Name', t.nama) : '') +
+      row('Sumber', (SRC[t.src] || 'Form') + (t.appName ? ' · ' + t.appName : '')) +
       '<div class="err" id="delErr"></div>' +
       (confirmDel ? '<button class="btn danger" data-act="del2" data-id="' + esc(t.id) + '">Yes, delete this entry</button><button class="btn ghost" data-act="del0" data-id="' + esc(t.id) + '" style="margin-top:8px">Cancel</button>' +
         '<div class="empty" style="font-size:12px;margin-top:8px;text-align:center">A copy is kept in the Trash tab of the sheet.</div>'
