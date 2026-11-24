@@ -729,7 +729,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.83';
+  var VERSION = '3.84';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2988,7 +2988,7 @@ function paydayCard(d) {
     $('kat').innerHTML = list.map(function (c) { return '<option value="' + esc(c) + '">' + esc((o.emoji[c] || '') + ' ' + c) + '</option>'; }).join('');
     if (list.indexOf(cur) > -1) $('kat').value = cur;
     var curM = $('met').value;
-    $('met').innerHTML = (state.editId ? '<option value="">Tanpa metode</option>' : '') + o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
+    $('met').innerHTML = o.methods.map(function (m) { return '<option value="' + esc(m) + '">' + esc(m) + '</option>'; }).join('');
     if (curM && Array.prototype.some.call($('met').options, function (x) { return x.value === curM; })) $('met').value = curM;
     onKat();
     renderCatChips(list);
