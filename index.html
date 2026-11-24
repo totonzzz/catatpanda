@@ -114,14 +114,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .herostats .stat{flex:1;padding:8px 10px;border-radius:13px;min-width:0}
 .herostats .stat .k{font-size:10px}
 .herostats .stat .v{font-size:12.5px}
-.hero2 .stat{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12);backdrop-filter:blur(6px)}
+.hero2 .stat{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12)}
 .hero2 .stat .k{color:rgba(255,255,255,.6)}
 .hero2 .pos{color:#C1E8FF}.hero2 .neg{color:#FFC8BC}
 .herochip{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:5px 11px;border-radius:999px;
   background:rgba(255,255,255,.14);font-size:11.5px;font-weight:600;color:#fff}
 .hero .sub{font-size:13px;color:var(--mut)}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-.stat{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.stat{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0}
 .stat .k{font-size:11px;color:var(--mut);font-weight:500}
 .stat .v{font-size:13.5px;font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .pos{color:var(--mint)} .neg{color:var(--coral)} .warn{color:var(--amber)}
@@ -220,7 +220,7 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .btn{width:100%;border:none;background:linear-gradient(135deg,var(--mint),color-mix(in srgb,var(--mint) 42%,#052659));color:var(--mint-ink);font-weight:700;font-size:16px;padding:15px;border-radius:16px;cursor:pointer;margin-top:4px;
   box-shadow:0 10px 26px rgba(84,131,179,.35),inset 0 1px 0 rgba(255,255,255,.35)}
 .btn:disabled{opacity:.55}
-.btn.ghost{background:var(--s2);color:var(--tx);border:1px solid var(--line);font-weight:500;box-shadow:none;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.btn.ghost{background:var(--s2);color:var(--tx);border:1px solid var(--line);font-weight:500;box-shadow:none}
 .btn.danger{background:color-mix(in srgb,var(--coral) 18%,var(--s2));color:var(--coral);border:1px solid color-mix(in srgb,var(--coral) 45%,var(--line))}
 .err{color:var(--coral);font-size:13px;min-height:18px;margin:6px 2px 0}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:88vw;text-align:center}
@@ -729,7 +729,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.81';
+  var VERSION = '3.82';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1278,6 +1278,34 @@ function paydayCard(d) {
     return parseInt(p[2], 10) + ' ' + m[parseInt(p[1], 10) - 1];
   }
   function standalone() { return !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)); }
+
+  function keyboardTap() {
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var el = e.target && e.target.closest && e.target.closest('[data-act]');
+      if (!el || /^(button|a|input|select|textarea)$/i.test(el.tagName)) return;
+      e.preventDefault();
+      el.click();
+    });
+  }
+
+  function autoTapable() {
+    var pending = false;
+    var run = function () { pending = false; makeTapable(); };
+    new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      setTimeout(run, 40);
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  function makeTapable() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act]'), function (el) {
+      if (/^(button|a|input|select|textarea)$/i.test(el.tagName)) return;
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    });
+  }
 
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
@@ -1888,6 +1916,8 @@ function paydayCard(d) {
       '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan goal</button>' +
       (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus goal</button>' : '');
     sheetFormActs();
+  keyboardTap();
+  autoTapable();
   }
   function openSubForm(name) {
     var d0 = state.data || {}, cur = null;
