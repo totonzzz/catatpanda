@@ -19,11 +19,11 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Reset khusus: elemen kartu kini tombol, tampilannya tetap dari kelasnya */
-:where(button.catrowitem, button.goal, button.cc){
+:where(button.catrowitem, button.goal){
   border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
   background:none; appearance:none; -webkit-appearance:none; width:100%; cursor:pointer;
 }
-:where(button.catrowitem, button.goal, button.cc):focus-visible{
+:where(button.catrowitem, button.goal):focus-visible{
   outline:2px solid var(--mint); outline-offset:3px; border-radius:16px;
 }
 :root{
@@ -737,7 +737,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.87';
+  var VERSION = '3.88';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1334,7 +1334,7 @@ function paydayCard(d) {
       ? (d.today >= d.period.start && d.today <= d.period.end)
       : d.month === d.today.slice(0, 7);
     if (isIOS() && !standalone() && LS.get('ck_hint', '') !== '1') {
-      h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Mengerti</button></div>';
+      h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Got it</button></div>';
     }
     if (state.pending.length) h += '<div class="banner"><b>' + state.pending.length + (state.pending.length === 1 ? ' entry is' : ' entries are') + ' waiting for signal.</b> They will be sent automatically once online.</div>';
     var rv = d.review || { pending: 0, items: [] }, need = (rv.pending || 0) + (d.flagged || 0);
@@ -1492,7 +1492,7 @@ function paydayCard(d) {
     var inc = t.tipe === 'Masuk' && !t.loan;
     return '<button class="tx" data-act="jump" data-id="' + esc(t.id) + '" data-month="' + esc(t.date.slice(0, 7)) + '"><div class="ico">' + esc(t.emoji) + '</div>' +
       '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(fullDate(t.date)) + (t.metode ? ' · ' + esc(t.metode) : '') + '</div></div>' +
-      '<div class="a mono ' + (t.loan ? 'warn' : inc ? 'pos' : '') + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button>';
+      '<div class="a mono ' + (t.loan ? 'warn' : inc ? 'pos' : '') + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>';
   }
   function searchHtml() {
     var s = state.search;
@@ -1533,7 +1533,7 @@ function paydayCard(d) {
       var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
       var rightLbl = hasCycle ? 'Unbilled' : 'This month';
       var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
-      h += '<button type="button" class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
+      h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
         '<div class="cc-top"><div><div class="cc-brand">' +
         '<img class="cc-logo" src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
         '<span class="cc-bank" style="display:none">' + esc(b.label) + '</span>' +
@@ -1545,7 +1545,7 @@ function paydayCard(d) {
           : '<div class="cc-bot">' +
             '<div><div class="cc-lbl">' + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
             '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
-        '</button>';
+        '</div>';
     });
     h += '</div>';
     if (items.length > 1) {
@@ -1586,7 +1586,7 @@ function paydayCard(d) {
     var h = '<div class="card"><div style="display:flex;align-items:center;gap:8px"><h2 style="margin:0">E-money</h2>' + eyeBtnHtml('wallet') + '</div>' +
       '<div class="ccdeck" id="walletdeck" style="margin-top:12px">';
     list.forEach(function (a, i) {
-      h += '<button type="button" class="cc wallet" data-act="wallet-flip" data-i="' + i + '" style="background:' + emoneyColor(a.name) + '">' +
+      h += '<div class="cc wallet" data-act="wallet-flip" data-i="' + i + '" style="background:' + emoneyColor(a.name) + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
           '<div><div class="em-brand">' + esc(a.name) + '</div>' +
           '<div class="em-type">E-money wallet</div></div>' +
@@ -3797,19 +3797,19 @@ function paydayCard(d) {
   // ---------- layar pasang (sekali saja) ----------
   function installSteps() {
     if (isIOS()) return [
-      'Open this page in <b>Safari</b> (bukan Chrome, bukan browser di dalam aplikasi lain)',
-      'Ketuk tombol <b>Bagikan</b>, kotak dengan panah ke atas',
-      'Gulir ke bawah, pilih <b>Tambahkan ke Layar Utama</b>, lalu <b>Tambah</b>'
+      'Open this page in <b>Safari</b> (not Chrome, not an in-app browser)',
+      'Tap the <b>Share</b> button, square with an arrow pointing up',
+      'Scroll down and choose <b>Add to Home Screen</b>, then <b>Add</b>'
     ];
     if (/Android/i.test(navigator.userAgent)) return [
-      'Buka menu browser (<b>⋮</b>) di kanan atas',
-      'Pilih <b>Pasang aplikasi</b> atau <b>Tambahkan ke layar utama</b>',
-      'Konfirmasi, Bamboo mendapat ikon sendiri'
+      'Open the browser menu (<b>⋮</b>) at the top right',
+      'Choose <b>Install app</b> or <b>Add to Home screen</b>',
+      'Confirm, Bamboo gets its own icon'
     ];
     return [
-      'Buka menu di bilah alamat browser',
-      'Pilih <b>Pasang Bamboo</b>',
-      'Konfirmasi, Bamboo terbuka di jendela sendiri'
+      'Open the address bar menu in your browser',
+      'Choose <b>Install Bamboo</b>',
+      'Confirm, it opens in its own window'
     ];
   }
   function maybeInstallSheet() {
@@ -3822,11 +3822,11 @@ function paydayCard(d) {
       }).join('');
       openBg();
       $('sheetDetail').hidden = false;
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pasang Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
-        '<div class="empty" style="padding:0 0 14px">Pasang di Layar Utama agar terbuka penuh, bisa dipakai tanpa internet, dan bisa mengirim pengingat.</div>' +
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
+        '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen, it then opens full screen, works offline, and can send notifications.</div>' +
         steps +
-        '<button class="btn" data-act="install-ok" style="margin-top:16px">Mengerti</button>' +
-        '<div class="empty" style="padding:10px 0 0;font-size:11px">Pesan ini hanya muncul sekali.</div>';
+        '<button class="btn" data-act="install-ok" style="margin-top:16px">Got it</button>' +
+        '<div class="empty" style="padding:10px 0 0;font-size:11px">You will only see this once.</div>';
     }, 1500);
   }
 
