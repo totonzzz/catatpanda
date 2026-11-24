@@ -18,6 +18,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+/* Reset khusus: elemen kartu kini tombol, tampilannya tetap dari kelasnya */
+:where(button.catrowitem, button.goal, button.cc){
+  border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
+  background:none; appearance:none; -webkit-appearance:none; width:100%; cursor:pointer;
+}
+:where(button.catrowitem, button.goal, button.cc):focus-visible{
+  outline:2px solid var(--mint); outline-offset:3px; border-radius:16px;
+}
 :root{
   --bg:#021024; --s1:rgba(193,232,255,.06); --s2:rgba(193,232,255,.10); --line:rgba(193,232,255,.13);
   --tx:#E9F4FF; --mut:#8FB3D9;
@@ -729,7 +737,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.84';
+  var VERSION = '3.87';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1326,7 +1334,7 @@ function paydayCard(d) {
       ? (d.today >= d.period.start && d.today <= d.period.end)
       : d.month === d.today.slice(0, 7);
     if (isIOS() && !standalone() && LS.get('ck_hint', '') !== '1') {
-      h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Got it</button></div>';
+      h += '<div class="banner info"><b>Install on your Home Screen.</b> Tap Share in Safari, then "Add to Home Screen". It opens like a normal app.<br><button data-act="hint-ok">Mengerti</button></div>';
     }
     if (state.pending.length) h += '<div class="banner"><b>' + state.pending.length + (state.pending.length === 1 ? ' entry is' : ' entries are') + ' waiting for signal.</b> They will be sent automatically once online.</div>';
     var rv = d.review || { pending: 0, items: [] }, need = (rv.pending || 0) + (d.flagged || 0);
@@ -1402,8 +1410,8 @@ function paydayCard(d) {
       }
       h += '<div class="catrow" style="margin-top:12px">';
       (state.catsAll ? d.categories : d.categories.slice(0, 3)).forEach(function (c, i) {
-        h += '<div class="catrowitem" data-act="cat-view" data-cat="' + esc(c.name) + '"><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot" style="color:' + catColor(c.name) + '">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
-          '<div class="bar"><span style="width:' + Math.max(c.pct, 1.5) + '%;background:' + COLORS[i % COLORS.length] + '"></span></div></div>';
+        h += '<button type="button" class="catrowitem" data-act="cat-view" data-cat="' + esc(c.name) + '"><div class="cr"><span style="display:inline-flex;align-items:center;gap:8px"><i class="cidot">' + catIcon(c.name) + '</i>' + esc(c.name) + '</span><span class="a mono">' + rp(c.amount) + '</span></div>' +
+          '<div class="bar"><span style="width:' + Math.max(c.pct, 1.5) + '%;background:' + COLORS[i % COLORS.length] + '"></span></div></button>';
       });
       h += '</div>';
     }
@@ -1525,7 +1533,7 @@ function paydayCard(d) {
       var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
       var rightLbl = hasCycle ? 'Unbilled' : 'This month';
       var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
-      h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
+      h += '<button type="button" class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '" data-act="card" data-i="' + i + '">' +
         '<div class="cc-top"><div><div class="cc-brand">' +
         '<img class="cc-logo" src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
         '<span class="cc-bank" style="display:none">' + esc(b.label) + '</span>' +
@@ -1537,7 +1545,7 @@ function paydayCard(d) {
           : '<div class="cc-bot">' +
             '<div><div class="cc-lbl">' + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
             '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
-        '</div>';
+        '</button>';
     });
     h += '</div>';
     if (items.length > 1) {
@@ -1578,7 +1586,7 @@ function paydayCard(d) {
     var h = '<div class="card"><div style="display:flex;align-items:center;gap:8px"><h2 style="margin:0">E-money</h2>' + eyeBtnHtml('wallet') + '</div>' +
       '<div class="ccdeck" id="walletdeck" style="margin-top:12px">';
     list.forEach(function (a, i) {
-      h += '<div class="cc wallet" data-act="wallet-flip" data-i="' + i + '" style="background:' + emoneyColor(a.name) + '">' +
+      h += '<button type="button" class="cc wallet" data-act="wallet-flip" data-i="' + i + '" style="background:' + emoneyColor(a.name) + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
           '<div><div class="em-brand">' + esc(a.name) + '</div>' +
           '<div class="em-type">E-money wallet</div></div>' +
@@ -1826,11 +1834,11 @@ function paydayCard(d) {
       list.forEach(function (x) {
         var pct = x.target > 0 ? Math.min(100, Math.round(x.saved / x.target * 100)) : 0;
         var sisa = Math.max(0, x.target - x.saved);
-        h += '<div class="goal" data-act="goal-edit" data-name="' + esc(x.name) + '" style="cursor:pointer">' +
+        h += '<button type="button" class="goal" data-act="goal-edit" data-name="' + esc(x.name) + '" style="cursor:pointer">' +
           '<div class="gt"><span>' + esc(x.name) + '</span><span>' + pct + '%</span></div>' +
           '<div class="gb"><i style="width:' + pct + '%"></i></div>' +
           '<div class="gm">' + rp(x.saved) + ' dari ' + rp(x.target) +
-            (sisa > 0 ? ' · sisa ' + rp(sisa) : ' · tercapai 🎉') + (x.due ? ' · ' + x.due : '') + '</div></div>';
+            (sisa > 0 ? ' · sisa ' + rp(sisa) : ' · tercapai 🎉') + (x.due ? ' · ' + x.due : '') + '</div></button>';
       });
     }
     h += '<button class="btn ghost" data-act="goal-add" style="margin-top:12px">Tambah goal</button></div>';
@@ -1956,7 +1964,7 @@ function paydayCard(d) {
       leg += '<span><span class="dot" style="background:' + (colors[k] || '#8FB3D9') + '"></span>' +
         (k.charAt(0).toUpperCase() + k.slice(1)) + ' <b>' + Math.round(pct) + '%</b></span>';
     });
-    return '<div class="card"><h2>Alokasi</h2><div class="alloc">' + bar + '</div><div class="legend3">' + leg + '</div></div>';
+    return '<div class="card"><h2>Alokasi</h2><div class="alloc">' + bar + '</div><div class="legend3">' + leg + '</div></button>';
   }
 
   function assetsCard(d) {
@@ -2850,7 +2858,7 @@ function paydayCard(d) {
     var share = d.kpi && d.kpi.keluar ? Math.round(total / d.kpi.keluar * 100) : 0;
 
     var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
-      '<i class="cidot" style="color:' + catColor(name) + '">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
+      '<i class="cidot">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
       '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
 
     html += '<div class="card" style="margin-top:6px">' +
@@ -2881,7 +2889,7 @@ function paydayCard(d) {
     var pct = info.limit ? Math.round(total / info.limit * 100) : 0;
 
     var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
-      '<i class="cidot" style="color:' + catColor(name) + '">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
+      '<i class="cidot">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
       '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
 
     html += '<div class="card" style="margin-top:6px">' +
@@ -3789,19 +3797,19 @@ function paydayCard(d) {
   // ---------- layar pasang (sekali saja) ----------
   function installSteps() {
     if (isIOS()) return [
-      'Open this page in <b>Safari</b> (not Chrome, not an in-app browser)',
-      'Tap the <b>Share</b> button, square with an arrow pointing up',
-      'Scroll down and choose <b>Add to Home Screen</b>, then <b>Add</b>'
+      'Open this page in <b>Safari</b> (bukan Chrome, bukan browser di dalam aplikasi lain)',
+      'Ketuk tombol <b>Bagikan</b>, kotak dengan panah ke atas',
+      'Gulir ke bawah, pilih <b>Tambahkan ke Layar Utama</b>, lalu <b>Tambah</b>'
     ];
     if (/Android/i.test(navigator.userAgent)) return [
-      'Open the browser menu (<b>⋮</b>) at the top right',
-      'Choose <b>Install app</b> or <b>Add to Home screen</b>',
-      'Confirm, Bamboo gets its own icon'
+      'Buka menu browser (<b>⋮</b>) di kanan atas',
+      'Pilih <b>Pasang aplikasi</b> atau <b>Tambahkan ke layar utama</b>',
+      'Konfirmasi, Bamboo mendapat ikon sendiri'
     ];
     return [
-      'Open the address bar menu in your browser',
-      'Choose <b>Install Bamboo</b>',
-      'Confirm, it opens in its own window'
+      'Buka menu di bilah alamat browser',
+      'Pilih <b>Pasang Bamboo</b>',
+      'Konfirmasi, Bamboo terbuka di jendela sendiri'
     ];
   }
   function maybeInstallSheet() {
@@ -3814,11 +3822,11 @@ function paydayCard(d) {
       }).join('');
       openBg();
       $('sheetDetail').hidden = false;
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
-        '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen, it then opens full screen, works offline, and can send notifications.</div>' +
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pasang Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
+        '<div class="empty" style="padding:0 0 14px">Pasang di Layar Utama agar terbuka penuh, bisa dipakai tanpa internet, dan bisa mengirim pengingat.</div>' +
         steps +
-        '<button class="btn" data-act="install-ok" style="margin-top:16px">Got it</button>' +
-        '<div class="empty" style="padding:10px 0 0;font-size:11px">You will only see this once.</div>';
+        '<button class="btn" data-act="install-ok" style="margin-top:16px">Mengerti</button>' +
+        '<div class="empty" style="padding:10px 0 0;font-size:11px">Pesan ini hanya muncul sekali.</div>';
     }, 1500);
   }
 
