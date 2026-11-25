@@ -585,7 +585,7 @@ body.dark{
 .part{margin-bottom:12px}
 .part:last-child{margin-bottom:0}
 .parttop{display:flex;justify-content:space-between;font-size:13px;font-weight:600;gap:8px}
-.hbar{height:6px;border-radius:6px;background:var(--s2);overflow:hidden;margin-top:6px}
+.hbar{height:6px;border-radius:6px;overflow:hidden;margin-top:6px;background:color-mix(in srgb,var(--tx) 10%,transparent);box-shadow:inset 0 0 0 1px var(--line)}
 .hbar span{display:block;height:100%;background:linear-gradient(90deg,var(--mint),var(--accent-blue));border-radius:6px}
 .hbar span.over{background:var(--coral)}
 .partact{display:flex;gap:8px;margin-top:8px}
@@ -804,7 +804,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.98';
+  var VERSION = '3.99';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
