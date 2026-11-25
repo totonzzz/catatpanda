@@ -272,7 +272,8 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .wkmeta{font-size:12px;color:var(--mut);margin-top:10px;line-height:1.45}
 .methods{display:flex;flex-direction:column;gap:12px}
 .mth{display:flex;align-items:center;gap:10px}
-.mthico{width:38px;height:38px;border-radius:12px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.mthico{width:38px;height:38px;border-radius:12px;background:var(--ic-bg);border:1px solid var(--ic-line);color:var(--ic-ink);display:flex;align-items:center;justify-content:center;flex:none}
+.mthico svg{width:20px;height:20px;stroke-width:1.8}
 .mthmain{flex:1;min-width:0}
 .mthname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mthbar{height:6px;border-radius:6px;background:var(--s2);overflow:hidden;margin:5px 0 3px}
@@ -740,7 +741,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.90';
+  var VERSION = '3.91';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1509,12 +1510,13 @@ function paydayCard(d) {
   }
 
   function methodIcon(name) {
-    if (/kredit/i.test(name)) return '💳';
-    if (/qris/i.test(name)) return '📱';
-    if (/transfer/i.test(name)) return '🔄';
-    if (/cash|tunai/i.test(name)) return '💸';
-    if (/wallet|ovo|gopay|dana|shopeepay/i.test(name)) return '👛';
-    return '🏦';
+    function svg(inner) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>'; }
+    if (/kredit/i.test(name)) return svg("<rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\" /> <line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\" /> <path d=\"M6 14h2\" />");
+    if (/qris/i.test(name)) return svg("<rect width=\"5\" height=\"5\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"5\" height=\"5\" x=\"16\" y=\"3\" rx=\"1\" /> <rect width=\"5\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" /> <path d=\"M21 16h-3a2 2 0 0 0-2 2v3\" /> <path d=\"M21 21v.01\" /> <path d=\"M12 7v3a2 2 0 0 1-2 2H7\" /> <path d=\"M3 12h.01\" /> <path d=\"M12 3h.01\" /> <path d=\"M12 16v.01\" /> <path d=\"M16 12h1\" /> <path d=\"M21 12v.01\" /> <path d=\"M12 21v-1\" />");
+    if (/transfer/i.test(name)) return svg("<path d=\"M8 3 4 7l4 4\" /> <path d=\"M4 7h16\" /> <path d=\"m16 21 4-4-4-4\" /> <path d=\"M20 17H4\" />");
+    if (/cash|tunai/i.test(name)) return svg("<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />");
+    if (/wallet|ovo|gopay|dana|shopeepay/i.test(name)) return svg("<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />");
+    return svg("<path d=\"M10 18v-7\" /> <path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /> <path d=\"M14 18v-7\" /> <path d=\"M18 18v-7\" /> <path d=\"M3 22h18\" /> <path d=\"M6 18v-7\" />");
   }
   function bankOf(name) {
     var n = String(name || '').toUpperCase();
