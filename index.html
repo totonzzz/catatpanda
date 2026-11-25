@@ -806,7 +806,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.04';
+  var VERSION = '4.05';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -2109,13 +2109,14 @@ function paydayCard(d) {
         var from = ($('cpFrom') || {}).value || '';
         var amt = String(($('cpAmount') || {}).value || '').replace(/\D/g, '');
         var dt = ($('cpDate') || {}).value || '';
-        if (!card || !from) { if ($('cpPayErr')) $('cpPayErr').textContent = 'Pick a card and a wallet'; return; }
+        if (!card) { if ($('cpPayErr')) $('cpPayErr').textContent = 'Pilih kartu dulu'; return; }
         if (!amt || Number(amt) <= 0) { if ($('cpPayErr')) $('cpPayErr').textContent = 'Enter an amount'; return; }
         el.disabled = true;
         api('add', { desc: 'Card payment ' + card.replace('Kartu Kredit ', ''), amount: Number(amt), tipe: 'Masuk',
                      kategori: 'Lainnya', metode: card, tanggal: dt })
           .then(function (r) {
             if (!r || !r.ok) { el.disabled = false; if ($('cpPayErr')) $('cpPayErr').textContent = (r && r.error) || 'Failed'; return null; }
+            if (!from) return { ok: true, skipped: true };
             return api('transfer_add', { dari: from, ke: card, jumlah: Number(amt), tanggal: dt });
           })
           .then(function (r2) {
@@ -2257,7 +2258,9 @@ function paydayCard(d) {
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay credit card</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
       '<div class="empty" style="padding:0 0 12px;font-size:12px">This lowers the card debt right away and takes the money out of the wallet you pick. It is not counted as spending or income.</div>' +
       '<div class="fld"><label for="cpCard">Card</label><select id="cpCard">' + cardOpts + '</select></div>' +
-      '<div class="fld"><label for="cpFrom">Paid from</label><select id="cpFrom">' + walletOpts + '</select></div>' +
+      '<div class="fld"><label for="cpFrom">Paid from</label><select id="cpFrom">' +
+      '<option value="">Tidak mengurangi dompet (hanya kartu)</option>' + walletOpts + '</select></div>' +
+      '<div class="empty" style="padding:2px 0 0;font-size:11px">Pilih dompet bila uangnya keluar dari dompet yang kamu catat. Pilih opsi pertama bila saldo dompet tidak perlu diubah.</div>' +
       '<div class="fld"><label for="cpAmount">Amount</label><input id="cpAmount" class="mono" inputmode="numeric" placeholder="500000"></div>' +
       '<div class="fld"><label for="cpDate">Date</label><input id="cpDate" type="date" value="' + esc((d.today || '').slice(0, 10)) + '"></div>' +
       '<div class="err" id="cpPayErr"></div>' +
