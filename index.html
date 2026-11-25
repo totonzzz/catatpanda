@@ -806,7 +806,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.00';
+  var VERSION = '4.01';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1723,6 +1723,7 @@ function paydayCard(d) {
       h += '<div class="cc-dots" id="cc-dots">' + items.map(function (_, i) { return '<i' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('') + '</div>';
       h += '<div class="cc-hint">Tap the front card to flip through</div>';
     }
+    h += '<div class="partact" style="margin-top:12px"><button class="mini" data-act="card-pay">Pay credit card</button></div>';
     return h + '</div>';
   }
   // Kartu disusun bertumpuk; kartu terpilih ada paling depan, sisanya mengintip di bawah.
