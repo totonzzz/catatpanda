@@ -509,6 +509,8 @@ body.dark{
 .alertline.over{background:var(--exp-bg);color:var(--exp)}
 .wkchip.up{background:var(--exp-bg);color:var(--exp)}
 .wkchip.down{background:var(--inc-bg);color:var(--inc)}
+.cc-util{font-size:10px;font-weight:700;opacity:.9;margin-top:2px}
+.cc-fee{font-size:10px;font-weight:700;margin-top:2px;color:#F3D2A6}
 /* sistem ikon: mono di atas latar netral, warna hanya untuk status */
 .ico.cat-ico{background:var(--s2);color:var(--tx)}
 .cattile,.catb .ci{background:var(--s2);color:var(--tx)}
@@ -804,7 +806,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.99';
+  var VERSION = '4.00';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1236,6 +1238,68 @@ body.dark{
       elapsed: Math.max(0, Math.round((now - start) / day))
     };
   }
+  function upcomingCard(d) {
+    var list = d.upcoming || [];
+    var rec = d.recurring || [];
+    var rp2 = function (n) { return mrp(n, 'wallet'); };
+    var h = '<div class="card"><h2>Upcoming bills</h2>';
+    if (!list.length) {
+      h += '<div class="es" style="padding:8px 0 4px"><div class="ttl">Belum ada tagihan berulang</div>' +
+        '<div class="hint">Tambahkan listrik, internet, atau langganan. Bamboo mengingatkan tanggalnya tiap bulan.</div></div>' +
+        '<button class="mini" data-act="recurring-add" style="margin-top:10px">Tambah tagihan</button></div>';
+      return h;
+    }
+    list.slice(0, 5).forEach(function (b) {
+      var due = b.days === 0 ? 'hari ini' : (b.days === 1 ? 'besok' : b.days + ' hari lagi');
+      h += '<div class="kv"><span>' + esc(b.name) +
+        '<small>' + dlabel(b.date) + ' · ' + due + '</small></span>' +
+        '<span class="mono">' + rp2(b.amount) + '</span></div>' +
+        '<div class="partact" style="margin:-2px 0 8px">' +
+        '<button class="mini" data-act="bill-post" data-name="' + esc(b.name) + '">Catat sekarang</button>' +
+        '<button class="mini" data-act="recurring-edit" data-name="' + esc(b.name) + '">Ubah</button></div>';
+    });
+    h += '<div class="partact" style="margin-top:6px"><button class="mini" data-act="recurring-add">Tambah tagihan</button></div>';
+    h += '<div class="bnote" style="margin-top:8px">Tagihan yang sudah lewat tanggal otomatis pindah ke bulan berikutnya. Tidak ada pencatatan otomatis, kamu yang menekan Catat sekarang.</div></div>';
+    return h;
+  }
+
+  function openRecurringForm(name) {
+    var d = state.data || {};
+    var cur = null;
+    (d.recurring || []).forEach(function (x) { if (x.name === name) cur = x; });
+    var cats = (d.options && d.options.expense) || [];
+    var methods = ((d.options && d.options.methods) || []).map(function (m) { return typeof m === 'string' ? m : m.name; });
+    var opts = cats.map(function (c) { return '<option value="' + esc(c) + '"' + (cur && cur.cat === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
+    var mopts = methods.map(function (m) { return '<option value="' + esc(m) + '"' + (cur && cur.metode === m ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('');
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cur ? 'Ubah tagihan' : 'Tagihan berulang') + '</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="fld"><label for="rcName">Nama</label><input id="rcName" value="' + esc(cur ? cur.name : '') + '" placeholder="Internet IndiHome"></div>' +
+      '<div class="fld"><label for="rcAmt">Jumlah</label><input id="rcAmt" class="mono" inputmode="numeric" value="' + (cur ? cur.amount : '') + '" placeholder="450000"></div>' +
+      '<div class="fld"><label for="rcCat">Kategori</label><select id="rcCat">' + opts + '</select></div>' +
+      '<div class="fld"><label for="rcMet">Metode</label><select id="rcMet">' + mopts + '</select></div>' +
+      '<div class="fld"><label for="rcDay">Tanggal tiap bulan</label><input id="rcDay" class="mono" inputmode="numeric" value="' + (cur ? cur.day : 1) + '"></div>' +
+      '<div class="err" id="rcErr"></div>' +
+      '<button class="btn" data-act="recurring-save">Simpan</button>' +
+      (cur ? '<button class="btn ghost" data-act="recurring-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tagihan</button>' : '');
+  }
+
+  function openCardMetaForm() {
+    var d = state.data || {};
+    var cards = (d.methods || []).filter(function (m) { return /^Kartu Kredit/i.test(m.name); });
+    var lim = (d.settings && d.settings.kkLimits) || {};
+    var fee = (d.settings && d.settings.kkFees) || {};
+    if (!cards.length) { toast('No credit card found'); return; }
+    var rows = cards.map(function (m) {
+      return '<div class="card" style="padding:12px;margin-top:10px"><div class="kv" style="border:0;padding:0"><span>' + esc(m.name) + '</span></div>' +
+        '<div class="fld" style="margin-top:8px"><label>Credit limit</label><input class="mono" inputmode="numeric" data-lim="' + esc(m.name) + '" value="' + (lim[m.name] || '') + '" placeholder="15000000"></div>' +
+        '<div class="fld" style="margin-top:6px"><label>Annual fee date</label><input type="date" data-fee="' + esc(m.name) + '" value="' + (fee[m.name] || '') + '"></div></div>';
+    }).join('');
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Limit & biaya tahunan</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 6px;font-size:12px">Isi limit supaya pemakaian kartu muncul dalam persen. Isi tanggal biaya tahunan untuk pengingat.</div>' +
+      rows + '<div class="err" id="cmErr"></div><button class="btn" data-act="card-meta-save" style="margin-top:12px">Simpan</button>';
+  }
+
   function budgetAlertCard(d) {
     var over = (d.budgets || []).filter(function (b) { return b.limit > 0 && b.pct >= 80; });
     if (!over.length) return '';
@@ -1458,6 +1522,7 @@ function paydayCard(d) {
       '<div class="stat"><div class="k">Selisih</div><div class="v mono ' + (sel < 0 ? 'neg' : 'pos') + '">' + mrp(sel, 'hero') + '</div></div></div></div>';
 
     h += budgetAlertCard(d);
+    h += upcomingCard(d);
     h += insightCard(d);
     var w = d.week;
     if (w) {
@@ -1634,7 +1699,22 @@ function paydayCard(d) {
         (empty
           ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">,</div></div></div>'
           : '<div class="cc-bot">' +
-            '<div><div class="cc-lbl">' + uiIcon('receipt') + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
+            '<div><div class="cc-lbl">' + uiIcon('receipt') + billLbl + '</div><div class="cc-val">' + billVal + '</div>' +
+              (function () {
+                var lk = (state.data && state.data.settings && state.data.settings.kkLimits) || {};
+                var fk = (state.data && state.data.settings && state.data.settings.kkFees) || {};
+                var lim0 = lk[m.name], out = '';
+                if (lim0 > 0) {
+                  var pctU = Math.round(Math.abs(m.value || 0) / lim0 * 100);
+                  out += '<div class="cc-util">' + pctU + '% dari limit</div>';
+                }
+                if (fk[m.name]) {
+                  var ms = new Date(fk[m.name] + 'T00:00:00Z').getTime() - Date.now();
+                  var dd = Math.ceil(ms / 86400000);
+                  if (dd >= 0 && dd <= 45) out += '<div class="cc-fee">Biaya tahunan ' + (dd === 0 ? 'hari ini' : dd + ' hari lagi') + '</div>';
+                }
+                return out;
+              })() + '</div>' +
             '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
         '<button type="button" class="cchit" data-act="card" data-i="' + i + '" aria-label="Buka kartu kredit ' + esc(b.label) + '"></button></div>';
     });
@@ -1976,6 +2056,48 @@ function paydayCard(d) {
           closeSheets(); toast('Goal dihapus');
           var p1 = loadMonth(state.month, { silent: true }); if (p1 && p1.then) p1.then(renderAll);
         });
+        return;
+      }
+      if (act === 'recurring-save') {
+        var rn = ($('rcName') || {}).value ? $('rcName').value.trim() : '';
+        var ra = String(($('rcAmt') || {}).value || '').replace(/\D/g, '');
+        if (!rn) { if ($('rcErr')) $('rcErr').textContent = 'Nama wajib diisi'; return; }
+        if (!ra || Number(ra) <= 0) { if ($('rcErr')) $('rcErr').textContent = 'Jumlah harus di atas nol'; return; }
+        el.disabled = true;
+        api('recurring_set', { nama: rn, jumlah: Number(ra), kategori: $('rcCat').value, metode: $('rcMet').value, hari: $('rcDay').value, tipe: 'Keluar' })
+          .then(function (r) {
+            el.disabled = false;
+            if (r && r.ok) { closeSheets(); toast('Tagihan disimpan'); var p1 = loadMonth(state.month, { silent: true }); if (p1 && p1.then) p1.then(renderAll); }
+            else if ($('rcErr')) $('rcErr').textContent = (r && r.error) || 'Gagal menyimpan';
+          }).catch(function () { el.disabled = false; if ($('rcErr')) $('rcErr').textContent = 'Tidak bisa terhubung'; });
+        return;
+      }
+      if (act === 'recurring-del') {
+        if (!confirm('Hapus tagihan ini?')) return;
+        api('recurring_delete', { nama: el.getAttribute('data-name') }).then(function () {
+          closeSheets(); toast('Tagihan dihapus');
+          var p2 = loadMonth(state.month, { silent: true }); if (p2 && p2.then) p2.then(renderAll);
+        });
+        return;
+      }
+      if (act === 'card-meta-save') {
+        var sd = $('sheetDetail');
+        var lims = Array.prototype.slice.call(sd.querySelectorAll('[data-lim]'));
+        var fees = Array.prototype.slice.call(sd.querySelectorAll('[data-fee]'));
+        if (!lims.length) return;
+        el.disabled = true;
+        var tasks = [];
+        lims.forEach(function (inp) {
+          var v = String(inp.value).replace(/\D/g, '');
+          if (v) tasks.push(api('settings_set', { key: 'kklim:' + inp.getAttribute('data-lim'), value: Number(v) }));
+        });
+        fees.forEach(function (inp) {
+          if (inp.value) tasks.push(api('settings_set', { key: 'kkfee:' + inp.getAttribute('data-fee'), value: inp.value }));
+        });
+        Promise.all(tasks).then(function () {
+          el.disabled = false; closeSheets(); toast('Pengaturan kartu disimpan');
+          var p3 = loadMonth(state.month, { silent: true }); if (p3 && p3.then) p3.then(renderAll);
+        }).catch(function () { el.disabled = false; if ($('cmErr')) $('cmErr').textContent = 'Tidak bisa terhubung'; });
         return;
       }
       if (act === 'card-pay-save') {
@@ -2348,6 +2470,7 @@ function paydayCard(d) {
       '<div class="kv"><span>Last updated</span><span class="mono">' + esc(fmtSync(state.lastSync)) + '</span></div>' +
       '<div class="kv"><span>Waiting to send</span><span class="mono">' + state.pending.length + '</span></div>' +
       '<button class="btn ghost" data-act="sync" style="margin-top:10px">Reload now</button>' +
+      '<button class="btn ghost" data-act="card-meta">Limit & biaya tahunan kartu</button>' +
       '<button class="btn ghost" data-act="backfill-app">Lengkapi sumber aplikasi (data lama)</button>' +
       '<button class="btn ghost" data-act="hide-all">' + (state.hide.all ? 'Tampilkan semua nominal' : 'Sembunyikan semua nominal') + '</button>' +
       '<button class="btn ghost" data-act="ping" style="margin-top:8px">Check server version</button>' +
@@ -3506,6 +3629,21 @@ function paydayCard(d) {
     else if (act === 'wallet-add') openWalletForm('');
     else if (act === 'transfer-add') openTransferForm();
     else if (act === 'card-pay') openCardPayForm();
+    else if (act === 'recurring-add') openRecurringForm('');
+    else if (act === 'recurring-edit') openRecurringForm(el.getAttribute('data-name'));
+    else if (act === 'bill-post') {
+      var nm = el.getAttribute('data-name');
+      var it = ((state.data && state.data.upcoming) || []).filter(function (x) { return x.name === nm; })[0];
+      if (!it) { toast('Tagihan tidak ditemukan'); return; }
+      el.disabled = true;
+      api('add', { desc: it.name, amount: it.amount, tipe: it.tipe, kategori: it.cat, metode: it.metode, tanggal: (state.data.today || '').slice(0, 10) })
+        .then(function (r) {
+          el.disabled = false;
+          if (r && r.ok) { toast('✅ Tagihan dicatat'); var pr = loadMonth(state.month, { silent: true }); if (pr && pr.then) pr.then(renderAll); }
+          else toast((r && r.error) || 'Gagal mencatat');
+        }).catch(function () { el.disabled = false; toast('Tidak bisa terhubung'); });
+    }
+    else if (act === 'card-meta') openCardMetaForm();
     else if (act === 'retry-load') { state.loadError = null; loadMonth(state.month, { manual: true }); }
     else if (act === 'wallet-edit') openWalletForm(el.getAttribute('data-name'));
     else if (act === 'asset-add') openAssetForm('');
