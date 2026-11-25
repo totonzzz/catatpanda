@@ -744,7 +744,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.92';
+  var VERSION = '3.93';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1614,7 +1614,7 @@ function paydayCard(d) {
           '<div class="em-type">E-money wallet</div></div>' +
           '<div class="cc-chip"></div></div>' +
         '<div><div class="em-lbl">Balance</div><div class="em-amt">' + rp(a.balance) + '</div>' +
-          '<div class="em-type">start ' + rp(a.opening) + ' · ' + (a.masuk ? '+' + rp(a.masuk) : '–') + ' / ' + (a.keluar ? '−' + rp(a.keluar) : '–') + '</div></div>' +
+          '<div class="em-type">in ' + rp(a.masuk || 0) + ' · out ' + rp(a.keluar || 0) + '</div></div>' +
         '<button type="button" class="cchit" data-act="wallet-flip" data-i="' + i + '" aria-label="Buka dompet ' + esc(a.name) + '"></button></div>';
     });
     h += '</div><div class="cc-hint">Tap the front card to flip through</div></div>';
@@ -1647,8 +1647,7 @@ function paydayCard(d) {
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
           '<div class="parttop"><span>' + uiIcon('wallet-cards') + esc(a.name) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
           '<span class="mono ' + (a.balance < 0 ? 'neg' : 'pos') + '">' + rp(a.balance) + '</span></div>' +
-          '<div class="empty" style="padding:2px 0 0;font-size:11px">start ' + rp(a.opening) +
-            ' · in ' + rp(a.masuk) + ' · out ' + rp(a.keluar) + '</div>' +
+          '<div class="empty" style="padding:2px 0 0;font-size:11px">in ' + rp(a.masuk) + ' · out ' + rp(a.keluar) + '</div>' +
           '<div class="partact" style="margin-top:6px"><button class="mini" data-act="wallet-edit" data-name="' + esc(a.name) + '">Edit</button></div>' +
           '</div>';
       });
