@@ -744,7 +744,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.93';
+  var VERSION = '3.94';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1909,6 +1909,30 @@ function paydayCard(d) {
         });
         return;
       }
+      if (act === 'card-pay-save') {
+        var card = ($('cpCard') || {}).value || '';
+        var from = ($('cpFrom') || {}).value || '';
+        var amt = String(($('cpAmount') || {}).value || '').replace(/\D/g, '');
+        var dt = ($('cpDate') || {}).value || '';
+        if (!card || !from) { if ($('cpPayErr')) $('cpPayErr').textContent = 'Pick a card and a wallet'; return; }
+        if (!amt || Number(amt) <= 0) { if ($('cpPayErr')) $('cpPayErr').textContent = 'Enter an amount'; return; }
+        el.disabled = true;
+        api('add', { desc: 'Card payment ' + card.replace('Kartu Kredit ', ''), amount: Number(amt), tipe: 'Masuk',
+                     kategori: 'Lainnya', metode: card, tanggal: dt })
+          .then(function (r) {
+            if (!r || !r.ok) { el.disabled = false; if ($('cpPayErr')) $('cpPayErr').textContent = (r && r.error) || 'Failed'; return null; }
+            return api('transfer_add', { dari: from, ke: card, jumlah: Number(amt), tanggal: dt });
+          })
+          .then(function (r2) {
+            el.disabled = false;
+            if (r2 === null) return;
+            closeSheets();
+            toast('Card paid ' + rp(Number(amt)));
+            var pr = loadMonth(state.month, { silent: true }); if (pr && pr.then) pr.then(renderAll);
+          })
+          .catch(function () { el.disabled = false; if ($('cpPayErr')) $('cpPayErr').textContent = 'Cannot reach the server'; });
+        return;
+      }
       if (act === 'sub-save') {
         var sn = ($('sName') || {}).value ? $('sName').value.trim() : '';
         if (!sn) { if ($('sErr')) $('sErr').textContent = 'Nama wajib diisi'; return; }
@@ -2022,6 +2046,30 @@ function paydayCard(d) {
     }
     h += '</div>';
     return h;
+  }
+
+  function openCardPayForm() {
+    var d = state.data || {};
+    var cards = (d.methods || []).filter(function (m) { return /^Kartu Kredit/i.test(m.name); });
+    var wallets = (d.accounts || []).filter(function (a) { return a.kind !== 'utang'; });
+    if (!cards.length) { toast('No credit card found'); return; }
+    if (!wallets.length) { toast('Add a wallet first, it is the source of the payment'); return; }
+    var cardOpts = cards.map(function (m) {
+      var due = typeof m.dueAmount === 'number' ? m.dueAmount : Math.abs(m.value || 0);
+      return '<option value="' + esc(m.name) + '">' + esc(m.name) + ' (' + rp(due) + ')</option>';
+    }).join('');
+    var walletOpts = wallets.map(function (a) {
+      return '<option value="' + esc(a.name) + '">' + esc(a.name) + ' (' + rp(a.balance) + ')</option>';
+    }).join('');
+    openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay credit card</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<div class="empty" style="padding:0 0 12px;font-size:12px">This lowers the card debt right away and takes the money out of the wallet you pick. It is not counted as spending or income.</div>' +
+      '<div class="fld"><label for="cpCard">Card</label><select id="cpCard">' + cardOpts + '</select></div>' +
+      '<div class="fld"><label for="cpFrom">Paid from</label><select id="cpFrom">' + walletOpts + '</select></div>' +
+      '<div class="fld"><label for="cpAmount">Amount</label><input id="cpAmount" class="mono" inputmode="numeric" placeholder="500000"></div>' +
+      '<div class="fld"><label for="cpDate">Date</label><input id="cpDate" type="date" value="' + esc((d.today || '').slice(0, 10)) + '"></div>' +
+      '<div class="err" id="cpPayErr"></div>' +
+      '<button class="btn" data-act="card-pay-save">Pay card</button>';
   }
 
   function openTransferForm() {
@@ -2173,7 +2221,9 @@ function paydayCard(d) {
     h += '<div class="card"><h2>Wallet</h2><div class="wkrow">' +
       '<div><div class="k">Available balance</div><div class="v mono ' + (saldo < 0 ? 'neg' : 'pos') + '">' + rp(saldo) + '</div></div>' +
       '<div><div class="k">Credit card debt</div><div class="v mono ' + (kk > 0 ? 'neg' : '') + '">' + rp(Math.abs(kk)) + '</div></div>' +
-      '</div></div>';
+      '</div>' +
+      (kk > 0 ? '<div class="partact" style="margin-top:10px"><button class="mini" data-act="card-pay">Pay credit card</button></div>' : '') +
+      '</div>';
 
     h += emoneyDeck(d);
     h += walletsCard(d);
@@ -3386,6 +3436,7 @@ function paydayCard(d) {
       state.walletSeg = (sg === 'aset' || sg === 'rencana') ? sg : 'dompet'; renderAll(); }
     else if (act === 'wallet-add') openWalletForm('');
     else if (act === 'transfer-add') openTransferForm();
+    else if (act === 'card-pay') openCardPayForm();
     else if (act === 'wallet-edit') openWalletForm(el.getAttribute('data-name'));
     else if (act === 'asset-add') openAssetForm('');
     else if (act === 'asset-edit') openAssetForm(el.getAttribute('data-code'));
