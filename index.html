@@ -663,6 +663,61 @@ body.dark{
 .es .emo{font-size:26px;line-height:1}
 .es .ttl{font-size:13.5px;font-weight:700;margin-top:9px}
 .es .hint{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.5}
+
+/* ================= Pro Max polish layer =================
+   Tujuan tiap keputusan:
+   - Token jarak: membuat ritme vertikal konsisten, bukan angka acak per kartu.
+   - Dua tingkat elevasi: hanya dua bayangan supaya hierarki jelas, tidak semua melayang.
+   - Tiga tingkat radius: kartu, kontrol, dan pil status. Bukan semua serba pil.
+   - Tabular numerals: nominal rupiah tidak bergeser saat angka berubah.
+   - Transisi 150/220 ms: memberi umpan balik tekan tanpa animasi dekoratif.
+   ======================================================= */
+:root{
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
+  --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:22px;
+  --e1:0 1px 2px rgba(6,18,32,.05), 0 4px 12px rgba(6,18,32,.06);
+  --e2:0 10px 26px rgba(6,18,32,.13), 0 2px 6px rgba(6,18,32,.07);
+  --t-fast:150ms cubic-bezier(.2,.7,.3,1);
+  --t-base:220ms cubic-bezier(.2,.7,.3,1);
+}
+body.dark{
+  --e1:0 1px 2px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.28);
+  --e2:0 14px 32px rgba(0,0,0,.46), 0 2px 8px rgba(0,0,0,.30);
+}
+
+/* kartu: satu elevasi dasar, radius konsisten */
+.card{border-radius:var(--r-lg);box-shadow:var(--e1)}
+.card h2{font-size:12.5px;font-weight:700;letter-spacing:.02em;margin-bottom:var(--sp-3)}
+.part,.kv,.rowitem{scroll-margin-top:12px}
+
+/* angka selalu rata kolom */
+.mono,.big,.v,.nwbig,.aval,.mthval,.em-amt,.cc-val,.csub,.bamt,.wkrow .v,.bgrid .v,.nw .v{
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1
+}
+
+/* kontrol: umpan balik tekan, bukan animasi hiasan */
+.btn,.mini,.iconbtn,.seg button,.catb,.chip,.bc,.cc-dots i{
+  transition:transform var(--t-fast),background var(--t-fast),border-color var(--t-fast),color var(--t-fast),opacity var(--t-fast)
+}
+.btn:active,.mini:active,.iconbtn:active,.seg button:active,.catb:active{transform:scale(.97)}
+.btn:disabled,.mini:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+/* fokus keyboard terlihat di semua kontrol */
+:where(button,a,select,input,summary,[role="button"]):focus-visible{
+  outline:2px solid var(--mint);outline-offset:2px;border-radius:var(--r-sm)
+}
+
+/* bagian kosong: satu gaya, bukan teks telanjang */
+.es,.empty{color:var(--mut)}
+.es .ttl{font-weight:600;color:var(--tx);font-size:13px;margin-top:2px}
+
+/* jarak antarkartu konsisten */
+#view > .card + .card{margin-top:var(--sp-3)}
+
+@media (prefers-reduced-motion: reduce){
+  .btn,.mini,.iconbtn,.seg button,.catb,.chip,.bc{transition:none}
+  .btn:active,.mini:active,.iconbtn:active{transform:none}
+}
 </style>
 </head>
 <body>
@@ -744,7 +799,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.94';
+  var VERSION = '3.95';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
