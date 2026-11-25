@@ -1,5 +1,5 @@
 /* Service worker: membuat aplikasi bisa dibuka tanpa sinyal. Data keuangan TIDAK disimpan di sini. */
-var CACHE = 'bamboo-v22';
+var CACHE = 'bamboo-v23';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
