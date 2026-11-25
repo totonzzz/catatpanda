@@ -274,6 +274,9 @@ body.light .sheet{background:linear-gradient(180deg,#FFFFFF,#F4F8FF);box-shadow:
 .mth{display:flex;align-items:center;gap:10px}
 .mthico{width:38px;height:38px;border-radius:12px;background:var(--ic-bg);border:1px solid var(--ic-line);color:var(--ic-ink);display:flex;align-items:center;justify-content:center;flex:none}
 .mthico svg{width:20px;height:20px;stroke-width:1.8}
+.uico{display:inline-flex;align-items:center;justify-content:center;color:var(--ic-ink);vertical-align:-2px;margin-right:6px}
+.uico svg{display:block}
+.cc-lbl .uico,.em-lbl .uico{color:inherit;margin-right:5px;vertical-align:-1px}
 .mthmain{flex:1;min-width:0}
 .mthname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mthbar{height:6px;border-radius:6px;background:var(--s2);overflow:hidden;margin:5px 0 3px}
@@ -741,7 +744,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.91';
+  var VERSION = '3.92';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -854,6 +857,20 @@ body.dark{
   }
   function catMeta(name) { return CAT_ICON[catKey(name)] || CAT_ICON.lainnya; }
   function catColor(name) { return catMeta(name).c; }
+  var UI_ICONS = {
+    "receipt": "<path d=\"M12 17V7\" /> <path d=\"M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8\" /> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\" />",
+    "banknote": "<rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\" /> <circle cx=\"12\" cy=\"12\" r=\"2\" /> <path d=\"M6 12h.01M18 12h.01\" />",
+    "wallet-cards": "<path d=\"M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21\" /> <path d=\"M3 7h18\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />",
+    "credit-card": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\" /> <line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\" /> <path d=\"M6 14h2\" />",
+    "calendar-clock": "<path d=\"M16 2v3\" /> <path d=\"M17 15.5v1.7l1 .625\" /> <path d=\"M21 8.936V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.935\" /> <path d=\"M3 9h9.873\" /> <path d=\"M8 2v3\" /> <circle cx=\"17\" cy=\"17\" r=\"5\" />",
+  };
+  function uiIcon(name, size) {
+    var inner = UI_ICONS[name];
+    if (!inner) return '';
+    var px = size || 15;
+    return '<span class="uico"><svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg></span>';
+  }
   function catIcon(name, cls) {
     return '<svg class="' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + catMeta(name).i + '</svg>';
   }
@@ -1548,7 +1565,7 @@ function paydayCard(d) {
         (empty
           ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">,</div></div></div>'
           : '<div class="cc-bot">' +
-            '<div><div class="cc-lbl">' + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
+            '<div><div class="cc-lbl">' + uiIcon('receipt') + billLbl + '</div><div class="cc-val">' + billVal + '</div></div>' +
             '<div style="text-align:right"><div class="cc-lbl">' + rightLbl + '</div><div class="cc-val">' + rightVal + '</div></div></div>') +
         '<button type="button" class="cchit" data-act="card" data-i="' + i + '" aria-label="Buka kartu kredit ' + esc(b.label) + '"></button></div>';
     });
@@ -1628,7 +1645,7 @@ function paydayCard(d) {
         '<span class="mono ' + (total < 0 ? 'neg' : '') + '">' + rp(total) + '</span></div>';
       list.forEach(function (a) {
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
-          '<div class="parttop"><span>' + esc(a.name) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
+          '<div class="parttop"><span>' + uiIcon('wallet-cards') + esc(a.name) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
           '<span class="mono ' + (a.balance < 0 ? 'neg' : 'pos') + '">' + rp(a.balance) + '</span></div>' +
           '<div class="empty" style="padding:2px 0 0;font-size:11px">start ' + rp(a.opening) +
             ' · in ' + rp(a.masuk) + ' · out ' + rp(a.keluar) + '</div>' +
@@ -2083,12 +2100,12 @@ function paydayCard(d) {
           return;
         }
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
-          '<div class="parttop"><span>' + esc(x.name) + '</span><span class="mono" style="font-size:11.5px">' + rp(x.per) + ' × ' + x.left + ' left</span></div>' +
+          '<div class="parttop"><span>' + uiIcon('calendar-clock') + esc(x.name) + '</span><span class="mono" style="font-size:11.5px">' + rp(x.per) + ' × ' + x.left + ' left</span></div>' +
           '<div class="hbar" style="margin-top:6px"><span style="width:' + pct + '%"></span></div>' +
           '<div class="kv" style="border:0;padding:6px 0 0"><span class="empty" style="font-size:11px">Paid ' + x.paid + ' of ' + x.tenor +
             (x.dueDay ? ' · due day ' + x.dueDay : '') + ' · remaining ' + rp(x.remaining) + '</span>' +
             '<span style="display:inline-flex;gap:6px">' +
-              (x.left > 0 ? '<button class="mini" data-act="cicilan-pay" data-name="' + esc(x.name) + '" data-per="' + x.per + '">Pay</button>' : '') +
+              (x.left > 0 ? '<button class="mini" data-act="cicilan-pay" data-name="' + esc(x.name) + '" data-per="' + x.per + '">' + uiIcon('banknote') + 'Pay</button>' : '') +
               '<button class="mini danger" data-act="cicilan-del" data-name="' + esc(x.name) + '">Remove</button>' +
             '</span></div>' +
           '</div>';
