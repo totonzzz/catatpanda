@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -668,7 +668,7 @@ body.dark{
 /* Palet aktif: 2 warna inti + 1 aksen. Nilai brand (kartu bank, e-money,
    dan warna data kategori) sengaja tidak dijadikan token karena itu identitas,
    bukan warna antarmuka. Rinciannya ada di PALETTE.md. */
-:root{ --accent-blue:var(--accent-blue); --accent-amber:#F2B84B; }
+:root{ --accent-blue:#5483B3; --accent-amber:#F2B84B; }
 /* ================= Pro Max polish layer =================
    Tujuan tiap keputusan:
    - Token jarak: membuat ritme vertikal konsisten, bukan angka acak per kartu.
@@ -738,20 +738,20 @@ body.dark{
   } catch (e) {}
 })();
 </script>
-<div class="offbar" id="offbar" hidden>Offline · showing saved data</div>
+<div class="offbar" id="offbar" hidden>Offline Â· showing saved data</div>
 <div class="splash" id="splash" aria-hidden="true">
   <div class="mark"><img src="icons/icon-192.png" alt=""></div>
   <div class="name">Bamboo</div>
 </div>
 <header class="hdr" id="hdr" hidden>
   <div class="monthbar">
-    <button id="prev" aria-label="Previous month">‹</button>
-    <div class="lbl">Bamboo<small id="monthLabel">…</small></div>
-    <button id="next" aria-label="Next month">›</button>
+    <button id="prev" aria-label="Previous month">â€¹</button>
+    <div class="lbl">Bamboo<small id="monthLabel">â€¦</small></div>
+    <button id="next" aria-label="Next month">â€º</button>
   </div>
-  <span class="chip" id="streak">🔥 –</span>
+  <span class="chip" id="streak">ðŸ”¥ â€“</span>
 </header>
-<div class="ptr" id="ptr">↓ Pull to refresh</div>
+<div class="ptr" id="ptr">â†“ Pull to refresh</div>
 <main id="view" class="view"></main>
 
 <nav class="tabbar" id="tabbar" hidden aria-label="Main menu">
@@ -767,7 +767,7 @@ body.dark{
 <div class="sheetbg" id="sheetBg" hidden></div>
 <section class="sheet" id="sheetAdd" hidden aria-label="Add transaction">
   <div class="grab"></div>
-  <h3><span id="addTitle">Add transaction</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>
+  <h3><span id="addTitle">Add transaction</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>
   <div class="revnote" id="revNote" hidden></div>
   <div class="seg" id="segTipe"><button data-v="Keluar" class="on">Expense</button><button data-v="Masuk">Income</button></div>
   <div class="amtbox"><span>Rp</span><input id="amt" class="mono" inputmode="numeric" placeholder="0" autocomplete="off"></div>
@@ -793,7 +793,7 @@ body.dark{
     <img class="lockico" src="icons/icon-192.png" alt="">
     <div class="lockttl">Bamboo</div>
     <div class="locksub">Enter your PIN to unlock</div>
-    <input id="pin" class="mono" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="••••">
+    <input id="pin" class="mono" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="â€¢â€¢â€¢â€¢">
     <div class="err" id="pinErr"></div>
     <button class="btn" id="pinGo">Unlock</button>
     <button class="btn ghost" id="pinForget" style="margin-top:8px">Forgot PIN</button>
@@ -804,7 +804,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.96';
+  var VERSION = '3.97';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -820,16 +820,16 @@ body.dark{
   var ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ESC[c]; }); }
   function grp(n) { return String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
-  var MASK_RP = 'Rp ••••';
+  var MASK_RP = 'Rp â€¢â€¢â€¢â€¢';
   function rp(n) {
-    if (state.hide && state.hide.all) return (n < 0 ? '−' : '') + MASK_RP;
+    if (state.hide && state.hide.all) return (n < 0 ? 'âˆ’' : '') + MASK_RP;
     n = Math.round(Number(n) || 0);
-    return (n < 0 ? '−' : '') + 'Rp ' + grp(n);
+    return (n < 0 ? 'âˆ’' : '') + 'Rp ' + grp(n);
   }
   // sensor hanya untuk bagian yang dipilih
   function mrp(n, scope) {
     n = Math.round(Number(n) || 0);
-    if (state.hide && (state.hide.all || state.hide[scope])) return (n < 0 ? '−' : '') + MASK_RP;
+    if (state.hide && (state.hide.all || state.hide[scope])) return (n < 0 ? 'âˆ’' : '') + MASK_RP;
     return rp(n);
   }
   function short(n) {
@@ -958,7 +958,7 @@ body.dark{
       return '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat="' + esc(c) + '">' +
         catTile(c, 52) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
     }).join('');
-    if (hidden.length) html += '<button type="button" class="cat" data-cat-more="1"><span class="cattile more" style="width:52px;height:52px">⋯</span><span class="label">More</span></button>';
+    if (hidden.length) html += '<button type="button" class="cat" data-cat-more="1"><span class="cattile more" style="width:52px;height:52px">â‹¯</span><span class="label">More</span></button>';
     box.innerHTML = html;
     if (extra.length) box.scrollLeft = 0;
     var hint = $('catHint');
@@ -984,7 +984,7 @@ body.dark{
   function openCatMore() {
     var list = Array.prototype.map.call($('kat').options, function (o) { return o.value; });
     var cur = $('kat').value;
-    var html = '<div class="grab"></div><h3><span>All categories</span><button class="iconbtn" data-act="cat-more-close" aria-label="Close">✕</button></h3><div class="catgrid">';
+    var html = '<div class="grab"></div><h3><span>All categories</span><button class="iconbtn" data-act="cat-more-close" aria-label="Close">âœ•</button></h3><div class="catgrid">';
     list.forEach(function (c) {
       html += '<button type="button" class="cat ' + (c === cur ? 'on' : '') + '" data-cat-pick="' + esc(c) + '">' + catTile(c, 44) + '<span class="label">' + esc(shortCat(c)) + '</span></button>';
     });
@@ -1041,14 +1041,14 @@ body.dark{
     if (!rec) return;
     api('add', { desc: rec.desc, amount: rec.amount, tipe: rec.tipe, kategori: rec.cat, metode: rec.metode, tanggal: rec.date, nama: rec.nama || '' })
       .then(function (r) {
-        if (r && r.ok) { toast('↩️ Dikembalikan'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
+        if (r && r.ok) { toast('â†©ï¸ Dikembalikan'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
         else toast((r && r.error) || 'Gagal mengembalikan');
       }).catch(function () { toast('Tidak bisa terhubung'); });
   }
   function persistPending() { LS.set('ck_pending', JSON.stringify(state.pending)); }
   function connected() { return !!(state.url && state.token); }
   function todayStr() { return (state.data && state.data.today) || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()); }
-  function setSpin(on) { var c = $('streak'); if (state.data) c.innerHTML = (on ? '<span class="spin">⟳</span> ' : '🔥 ') + state.data.streak + (on ? '' : ' days'); }
+  function setSpin(on) { var c = $('streak'); if (state.data) c.innerHTML = (on ? '<span class="spin">âŸ³</span> ' : 'ðŸ”¥ ') + state.data.streak + (on ? '' : ' days'); }
 
   // ================= jaringan =================
   function api(action, payload) {
@@ -1152,7 +1152,7 @@ body.dark{
       state.pending.shift(); persistPending();
       if (r && r.ok === false) toast('Entry "' + p.desc + '" rejected: ' + r.error);
       if (state.pending.length) flushPending();
-      else { toast('✅ Offline entries sent'); loadMonth(state.month, { silent: true }); }
+      else { toast('âœ… Offline entries sent'); loadMonth(state.month, { silent: true }); }
     }).catch(function () { flushing = false; });
   }
 
@@ -1242,7 +1242,7 @@ body.dark{
     var worst = over.slice().sort(function (x, y) { return y.pct - x.pct; })[0];
     var lvl = worst.pct >= 100 ? 'bad' : 'warn';
     return '<button class="ins ' + lvl + '" type="button" data-act="go-insights" aria-label="Lihat rincian anggaran">' +
-      '<span class="ic">' + (worst.pct >= 100 ? '⚠️' : '🔔') + '</span><span class="ibody">' +
+      '<span class="ic">' + (worst.pct >= 100 ? 'âš ï¸' : 'ðŸ””') + '</span><span class="ibody">' +
       (worst.pct >= 100 ? '<b>Anggaran ' + esc(worst.name) + ' terlampaui</b>' : '<b>Anggaran ' + esc(worst.name) + ' ' + worst.pct + '%</b>') +
       ', ' + rp(worst.spent) + ' dari ' + rp(worst.limit) + '.' +
       (over.length > 1 ? ' ' + over.length + ' kategori perlu perhatian.' : '') +
@@ -1261,9 +1261,9 @@ body.dark{
     var remaining = limit > 0 ? Math.max(0, limit - spent) : Math.max(0, k.selisih);
     var perDay = Math.round(remaining / Math.max(hinfo.left, 1));
     var pctBudget = limit > 0 ? Math.round(spent / limit * 100) : 0;
-    var tone = 'good', icon = '💡', lines = [];
-    if (pctBudget >= 90) { tone = 'bad'; icon = '⚠️'; }
-    else if (pctBudget >= 70 || (pv && delta > 15)) { tone = 'warn'; icon = '🔎'; }
+    var tone = 'good', icon = 'ðŸ’¡', lines = [];
+    if (pctBudget >= 90) { tone = 'bad'; icon = 'âš ï¸'; }
+    else if (pctBudget >= 70 || (pv && delta > 15)) { tone = 'warn'; icon = 'ðŸ”Ž'; }
     if (pv && pv.keluar) {
       lines.push((delta <= 0 ? 'Pengeluaran <b>' + Math.abs(delta) + '% lebih hemat</b>' : 'Pengeluaran <b>' + delta + '% lebih tinggi</b>') +
         ' dibanding bulan lalu.');
@@ -1311,7 +1311,7 @@ body.dark{
   var bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   var tglGaji = info.date.getDate() + ' ' + bulan[info.date.getMonth()];
   var hide = state.hide && state.hide.s2s;
-  var rps = function (n) { return hide ? 'Rp ••••' : rp(n); };
+  var rps = function (n) { return hide ? 'Rp â€¢â€¢â€¢â€¢' : rp(n); };
   return '<div class="s2s">' +
     '<div class="k">Aman dibelanjakan / hari' +
       '<button class="iconbtn" data-act="hide" data-hide="s2s" aria-label="Sembunyikan" style="margin-left:auto;background:transparent;border:0;padding:2px;color:' +
@@ -1326,7 +1326,7 @@ body.dark{
     '</div>' +
     '<div class="hbar2"><span style="width:' + pct + '%"></span></div>' +
     '<div class="foot">' + (limit > 0
-      ? 'Anggaran terpakai ' + pct + '% · ' + rps(spent) + ' dari ' + rps(limit)
+      ? 'Anggaran terpakai ' + pct + '% Â· ' + rps(spent) + ' dari ' + rps(limit)
       : 'Belum ada anggaran, angka dari selisih pemasukan dan pengeluaran') + '</div>' +
     '</div>';
 }
@@ -1343,13 +1343,13 @@ function paydayCard(d) {
     return '<div class="card"><h2>Until payday</h2>' +
       '<div style="display:flex;align-items:baseline;gap:8px">' +
         '<div class="mono" style="font-size:30px;font-weight:700;letter-spacing:-.02em">' + info.left + '</div>' +
-        '<div class="empty" style="padding:0;font-size:12.5px">days left · ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + '</div></div>' +
+        '<div class="empty" style="padding:0;font-size:12.5px">days left Â· ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + '</div></div>' +
       '<div class="empty" style="padding:4px 0 0;font-size:12px">' + rp(remaining) + ' left for ' + info.left + ' days</div>' +
       '<div style="margin-top:12px;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center">' +
         '<span style="font-size:12px;color:var(--mut)">Safe to spend per day</span>' +
         '<b class="mono" style="font-size:15px">' + rp(perDay) + '</b></div>' +
       '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
-      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
+      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' â†’ ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' Â· payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
   }
 
   function syncNav() {
@@ -1407,15 +1407,15 @@ function paydayCard(d) {
 
   function txRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan, cls = t.loan ? 'warn' : (inc ? 'pos' : '');
-    var meta = (t.metode || t.cat) + (t.appName ? ' · ' + t.appName : '') + (t.loan && t.nama ? ' · ' + t.nama : '');
-    return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
+    var meta = (t.metode || t.cat) + (t.appName ? ' Â· ' + t.appName : '') + (t.loan && t.nama ? ' Â· ' + t.nama : '');
+    return '<div class="txwrap"><span class="txact edit">âœï¸ Edit</span><span class="txact del">ðŸ—‘ï¸ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '"><div class="ico cat-ico" style="color:' + catColor(t.cat) + '">' + catIcon(t.cat) + '</div><div class="m"><div class="d">' + esc(t.desc) +
        (t.flag ? '<span class="tag cek">cek</span>' : (t.src === 'notif' ? '<span class="tag auto">auto</span>' : '')) + '</div><div class="s">' + esc(meta) + '</div></div>' +
       '<div class="a mono ' + cls + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></button></div>';
   }
   function pendingRow(p, i) {
     var o = (state.data && state.data.options) || { emoji: {} };
     return '<div class="tx" style="cursor:default"><div class="ico cat-ico" style="color:' + catColor(p.kategori) + '">' + catIcon(p.kategori) + '</div><div class="m"><div class="d">' + esc(p.desc) +
-      '<span class="tag cek">waiting</span></div><div class="s">' + esc(dlabel(p.tanggal) + ' · ' + p.metode) + '</div></div><div class="a mono">' + rp(p.amount) + '</div></div>';
+      '<span class="tag cek">waiting</span></div><div class="s">' + esc(dlabel(p.tanggal) + ' Â· ' + p.metode) + '</div></div><div class="a mono">' + rp(p.amount) + '</div></div>';
   }
 
   function viewRingkasan(d) {
@@ -1432,8 +1432,8 @@ function paydayCard(d) {
       h += '<div class="banner"><b>' + need + ' automatic entries need review.</b> ';
       if (d.flagged) h += d.flagged + ' flagged for review this month. ';
       if (rv.pending) h += rv.pending + ' notifications could not be read.';
-      if (rv.pending) h += '<button class="bc" data-act="review">Review &amp; add now →</button>';
-      if (d.flagged) h += '<button class="bc" data-act="flagged">Review flagged entries →</button>';
+      if (rv.pending) h += '<button class="bc" data-act="review">Review &amp; add now â†’</button>';
+      if (d.flagged) h += '<button class="bc" data-act="flagged">Review flagged entries â†’</button>';
       h += '</div>';
     }
     h += safeToSpendCard(d);
@@ -1447,11 +1447,11 @@ function paydayCard(d) {
           '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
           '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button>' +
       '</div>' +
-      '<div class="sub" style="font-size:11.5px">' + k.count + ' transaksi' + (isCur ? ' · ' + (d.todayFilled ? 'sudah catat hari ini' : 'belum catat hari ini') : '') + '</div>' +
+      '<div class="sub" style="font-size:11.5px">' + k.count + ' transaksi' + (isCur ? ' Â· ' + (d.todayFilled ? 'sudah catat hari ini' : 'belum catat hari ini') : '') + '</div>' +
       ((pv && pv.keluar) ?
         '<div class="herochips">' +
-          '<span class="herochip" style="margin:0">' + (moDelta <= 0 ? '↓' : '↑') + ' ' + Math.abs(moDelta) + '% vs bulan lalu</span>' +
-          '<span class="herochip" style="margin:0">' + (deltaRp <= 0 ? '−' : '+') + ' ' + mrp(Math.abs(deltaRp), 'hero') + '</span>' +
+          '<span class="herochip" style="margin:0">' + (moDelta <= 0 ? 'â†“' : 'â†‘') + ' ' + Math.abs(moDelta) + '% vs bulan lalu</span>' +
+          '<span class="herochip" style="margin:0">' + (deltaRp <= 0 ? 'âˆ’' : '+') + ' ' + mrp(Math.abs(deltaRp), 'hero') + '</span>' +
         '</div>' : '') +
       (isCur && !d.todayFilled ? '<button class="bc" data-act="no-spend" style="margin-top:9px">Belum ada pengeluaran hari ini</button>' : '') +
       '<div class="herostats"><div class="stat"><div class="k">Pemasukan</div><div class="v mono pos">' + mrp(k.masuk, 'hero') + '</div></div>' +
@@ -1469,8 +1469,8 @@ function paydayCard(d) {
         '<div><div class="k">Transaksi</div><div class="v mono">' + (w.count || 0) + '</div></div></div>' +
         weekDaysBar(d) +
         (w.prevKeluar
-          ? '<span class="wkchip ' + (dRp <= 0 ? 'down' : 'up') + '">' + (dRp <= 0 ? '↓' : '↑') + ' ' + Math.abs(delta) + '% · ' +
-            (dRp <= 0 ? '−' : '+') + rp(Math.abs(dRp)) + ' vs minggu lalu</span>'
+          ? '<span class="wkchip ' + (dRp <= 0 ? 'down' : 'up') + '">' + (dRp <= 0 ? 'â†“' : 'â†‘') + ' ' + Math.abs(delta) + '% Â· ' +
+            (dRp <= 0 ? 'âˆ’' : '+') + rp(Math.abs(dRp)) + ' vs minggu lalu</span>'
           : '<div class="wkmeta">Belum ada data minggu lalu.</div>');
       if (w.topCat) {
         h += '<div class="tops">' + (d.categories || []).slice(0, 3).map(function (c, i) {
@@ -1486,7 +1486,7 @@ function paydayCard(d) {
     /* kartu payday lama digantikan safeToSpendCard */
     if (d.health) h += healthCard(d.health);
     h += '<div class="card"><h2>Categories</h2>';
-    if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry 🐼</div>';
+    if (!d.categories.length) h += '<div class="empty">No spending this month yet. Panda is waiting for your first entry ðŸ¼</div>';
     else {
       h += '<div class="donutwrap">' + donut(d.categories, k.keluar) + '<div class="legend">';
       var shown = state.catsAll ? d.categories.length : Math.min(3, d.categories.length);
@@ -1538,7 +1538,7 @@ function paydayCard(d) {
     }
     if (!list.length) {
       var filtered0 = state.filter !== 'semua' || state.q || state.rangeFrom || state.rangeTo;
-      return h + '<div class="es"><div class="emo">🧾</div><div class="ttl">' +
+      return h + '<div class="es"><div class="emo">ðŸ§¾</div><div class="ttl">' +
         (filtered0 ? 'Tidak ada yang cocok' : 'Belum ada transaksi') + '</div><div class="hint">' +
         (filtered0 ? 'Coba ubah filter atau hapus rentang tanggal.' : 'Tekan tombol + untuk mencatat pengeluaran pertamamu.') +
         '</div></div>';
@@ -1548,7 +1548,7 @@ function paydayCard(d) {
       var date = list[i].date, group = [], sum = 0;
       while (i < list.length && list[i].date === date) { group.push(list[i]); if (list[i].tipe === 'Keluar' && !list[i].loan) sum += list[i].amount; i++; }
       h += '<div class="day"><span>' + esc(dayHeader(date, today)) + '</span>' +
-        '<span class="cnt">' + group.length + ' trx' + (sum ? ' · <span class="mono">' + rp(sum) + '</span>' : '') + '</span></div>' +
+        '<span class="cnt">' + group.length + ' trx' + (sum ? ' Â· <span class="mono">' + rp(sum) + '</span>' : '') + '</span></div>' +
         '<div class="card" style="padding:2px 14px;margin-bottom:0">' + group.map(txRow).join('') + '</div>';
     }
     return h;
@@ -1560,7 +1560,7 @@ function paydayCard(d) {
     var seg = [['semua', 'Semua'], ['keluar', 'Keluar'], ['masuk', 'Masuk']].map(function (x) {
       return '<button data-act="filter" data-v="' + x[0] + '" class="' + (tipe === x[0] && !extra ? 'on' : '') + '">' + x[1] + '</button>';
     }).join('');
-    var h = '<input class="search" id="q" type="search" placeholder="Cari keterangan, kategori, metode…" value="' + esc(state.q) + '" autocomplete="off">' +
+    var h = '<input class="search" id="q" type="search" placeholder="Cari keterangan, kategori, metodeâ€¦" value="' + esc(state.q) + '" autocomplete="off">' +
       '<div class="seg2">' + seg + '</div>' +
       '<div class="chiprow">' +
         '<button class="fchip ' + (extra === 'hutang' ? 'on' : '') + '" data-act="filter" data-v="hutang">Hutang / Piutang</button>' +
@@ -1581,13 +1581,13 @@ function paydayCard(d) {
   function searchRow(t) {
     var inc = t.tipe === 'Masuk' && !t.loan;
     return '<button class="tx" data-act="jump" data-id="' + esc(t.id) + '" data-month="' + esc(t.date.slice(0, 7)) + '"><div class="ico">' + esc(t.emoji) + '</div>' +
-      '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(fullDate(t.date)) + (t.metode ? ' · ' + esc(t.metode) : '') + '</div></div>' +
+      '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(fullDate(t.date)) + (t.metode ? ' Â· ' + esc(t.metode) : '') + '</div></div>' +
       '<div class="a mono ' + (t.loan ? 'warn' : inc ? 'pos' : '') + '">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>';
   }
   function searchHtml() {
     var s = state.search;
     if (!s) return '';
-    if (s.loading) return '<div class="empty" style="padding:18px 2px">Searching all months…</div>';
+    if (s.loading) return '<div class="empty" style="padding:18px 2px">Searching all monthsâ€¦</div>';
     if (s.err) return '<div class="empty" style="padding:18px 2px">Search failed. Check your connection and try again.</div>';
     if (!s.items.length) return '<div class="empty" style="padding:18px 2px">Nothing matches in any month.</div>';
     var h = '<div class="day"><span>' + s.items.length + (s.items.length === 1 ? ' result' : ' results') + (s.total > s.items.length ? ' of ' + s.total : '') + '</span></div>';
@@ -1620,7 +1620,7 @@ function paydayCard(d) {
     items.forEach(function (m, i) {
       var b = bankOf(m.name), empty = !!m.empty && !m.value && !m.monthOut;
       var hasCycle = typeof m.dueAmount === 'number';
-      var billLbl = hasCycle ? (m.dueAmount > 0 && m.dueDate ? 'Bill · ' + dlabel(m.dueDate) : 'No bill due') : 'Balance';
+      var billLbl = hasCycle ? (m.dueAmount > 0 && m.dueDate ? 'Bill Â· ' + dlabel(m.dueDate) : 'No bill due') : 'Balance';
       var billVal = hasCycle ? rp(m.dueAmount || 0) : rp(Math.abs(m.value || 0));
       var rightLbl = hasCycle ? 'Unbilled' : 'This month';
       var rightVal = hasCycle ? rp(m.unbilled || 0) : rp(m.monthOut || 0);
@@ -1628,9 +1628,9 @@ function paydayCard(d) {
         '<div class="cc-top"><div><div class="cc-brand">' +
         '<img class="cc-logo" src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
         '<span class="cc-bank" style="display:none">' + esc(b.label) + '</span>' +
-        '</div><div class="cc-kind">Credit Card' + (b.full ? ' · ' + esc(b.full) : '') + '</div></div>' +
+        '</div><div class="cc-kind">Credit Card' + (b.full ? ' Â· ' + esc(b.full) : '') + '</div></div>' +
         '<div class="cc-wave"><i></i><i></i><i></i><i></i></div></div>' +
-        '<div class="cc-mid"><div class="em-chip"></div><div class="cc-num">•••• •••• •••• ••••</div></div>' +
+        '<div class="cc-mid"><div class="em-chip"></div><div class="cc-num">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢</div></div>' +
         (empty
           ? '<div class="cc-bot"><div><div class="cc-lbl">No entries yet</div><div class="cc-val">,</div></div></div>'
           : '<div class="cc-bot">' +
@@ -1683,7 +1683,7 @@ function paydayCard(d) {
           '<div class="em-type">E-money wallet</div></div>' +
           '<div class="cc-chip"></div></div>' +
         '<div><div class="em-lbl">Balance</div><div class="em-amt">' + rp(a.balance) + '</div>' +
-          '<div class="em-type">in ' + rp(a.masuk || 0) + ' · out ' + rp(a.keluar || 0) + '</div></div>' +
+          '<div class="em-type">in ' + rp(a.masuk || 0) + ' Â· out ' + rp(a.keluar || 0) + '</div></div>' +
         '<button type="button" class="cchit" data-act="wallet-flip" data-i="' + i + '" aria-label="Buka dompet ' + esc(a.name) + '"></button></div>';
     });
     h += '</div><div class="cc-hint">Tap the front card to flip through</div></div>';
@@ -1714,9 +1714,9 @@ function paydayCard(d) {
         '<span class="mono ' + (total < 0 ? 'neg' : '') + '">' + rp(total) + '</span></div>';
       list.forEach(function (a) {
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
-          '<div class="parttop"><span>' + uiIcon('wallet-cards') + esc(a.name) + ' <span class="empty" style="font-size:11px">· ' + esc(a.kind) + '</span></span>' +
+          '<div class="parttop"><span>' + uiIcon('wallet-cards') + esc(a.name) + ' <span class="empty" style="font-size:11px">Â· ' + esc(a.kind) + '</span></span>' +
           '<span class="mono ' + (a.balance < 0 ? 'neg' : 'pos') + '">' + rp(a.balance) + '</span></div>' +
-          '<div class="empty" style="padding:2px 0 0;font-size:11px">in ' + rp(a.masuk) + ' · out ' + rp(a.keluar) + '</div>' +
+          '<div class="empty" style="padding:2px 0 0;font-size:11px">in ' + rp(a.masuk) + ' Â· out ' + rp(a.keluar) + '</div>' +
           '<div class="partact" style="margin-top:6px"><button class="mini" data-act="wallet-edit" data-name="' + esc(a.name) + '">Edit</button></div>' +
           '</div>';
       });
@@ -1864,8 +1864,8 @@ function paydayCard(d) {
           '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div>' +
       '<div class="tot mono">' + (pt.value > 0 ? rpv(pt.value) : rpv(pt.cost)) + '</div></div></div>' +
       '<div class="chips">' +
-        (dayDelta ? '<span class="chip2">' + (dayDelta >= 0 ? '▲' : '▼') + ' ' + rpv(Math.abs(dayDelta)) + ' hari ini</span>' : '') +
-        '<span class="chip2">' + (gain >= 0 ? '+' : '−') + ' ' + rpv(Math.abs(gain)) + ' · ' +
+        (dayDelta ? '<span class="chip2">' + (dayDelta >= 0 ? 'â–²' : 'â–¼') + ' ' + rpv(Math.abs(dayDelta)) + ' hari ini</span>' : '') +
+        '<span class="chip2">' + (gain >= 0 ? '+' : 'âˆ’') + ' ' + rpv(Math.abs(gain)) + ' Â· ' +
           (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1).replace('.', ',') + '%</span>' +
       '</div>';
     if (hist.length >= 3 && !hide) {
@@ -1887,7 +1887,7 @@ function paydayCard(d) {
 
   function rpShort(n) {
     n = Math.round(Number(n) || 0);
-    var s = n < 0 ? '−' : '';
+    var s = n < 0 ? 'âˆ’' : '';
     n = Math.abs(n);
     if (n >= 1e9) return s + 'Rp ' + (n / 1e9).toFixed(2).replace('.', ',') + ' M';
     if (n >= 1e6) return s + 'Rp ' + (n / 1e6).toFixed(1).replace('.', ',') + ' jt';
@@ -1915,7 +1915,7 @@ function paydayCard(d) {
     list.forEach(function (x) { total += x.target; saved += x.saved; });
     var h = '<div class="card"><h2>Goals</h2>';
     if (!list.length) {
-      h += '<div class="es" style="padding:8px 0 4px"><div class="emo">🎯</div><div class="ttl">Belum ada goal</div>' +
+      h += '<div class="es" style="padding:8px 0 4px"><div class="emo">ðŸŽ¯</div><div class="ttl">Belum ada goal</div>' +
         '<div class="hint">Contoh: liburan Jepang Rp 20 juta, dana darurat Rp 30 juta.</div></div>';
     } else {
       h += '<div class="nw" style="margin-bottom:4px"><div><div class="k">Terkumpul</div><div class="v mono">' + rp(saved) + '</div></div>' +
@@ -1928,7 +1928,7 @@ function paydayCard(d) {
           '<div class="gt"><span>' + esc(x.name) + '</span><span>' + pct + '%</span></div>' +
           '<div class="gb"><i style="width:' + pct + '%"></i></div>' +
           '<div class="gm">' + rp(x.saved) + ' dari ' + rp(x.target) +
-            (sisa > 0 ? ' · sisa ' + rp(sisa) : ' · tercapai 🎉') + (x.due ? ' · ' + x.due : '') + '</div></button>';
+            (sisa > 0 ? ' Â· sisa ' + rp(sisa) : ' Â· tercapai ðŸŽ‰') + (x.due ? ' Â· ' + x.due : '') + '</div></button>';
       });
     }
     h += '<button class="btn ghost" data-act="goal-add" style="margin-top:12px">Tambah goal</button></div>';
@@ -1942,7 +1942,7 @@ function paydayCard(d) {
     var h = '<div class="card"><h2>Langganan</h2><div class="nw"><div><div class="k">Per bulan</div><div class="v mono">' + rp(Math.round(monthly)) + '</div></div>' +
       '<div><div class="k">Jumlah</div><div class="v mono">' + list.length + '</div></div><div></div></div>';
     list.forEach(function (x) {
-      h += '<div class="kv" style="margin-top:8px"><span>' + esc(x.name) + '<small>' + x.cycle + (x.day ? ' · tgl ' + x.day : '') + '</small></span>' +
+      h += '<div class="kv" style="margin-top:8px"><span>' + esc(x.name) + '<small>' + x.cycle + (x.day ? ' Â· tgl ' + x.day : '') + '</small></span>' +
         '<span class="mono">' + rp(x.cost) + '</span></div>';
     });
     h += '<button class="btn ghost" data-act="sub-add" style="margin-top:10px">Tambah langganan</button></div>';
@@ -1964,7 +1964,7 @@ function paydayCard(d) {
           .then(function (r) {
             el.disabled = false;
             if (r && r.ok) {
-              closeSheets(); toast('🎯 Goal disimpan');
+              closeSheets(); toast('ðŸŽ¯ Goal disimpan');
               var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll);
             } else if ($('gErr')) $('gErr').textContent = (r && r.error) || 'Gagal menyimpan';
           }).catch(function () { el.disabled = false; if ($('gErr')) $('gErr').textContent = 'Tidak bisa terhubung'; });
@@ -2030,7 +2030,7 @@ function paydayCard(d) {
     var d0 = state.data || {}, cur = null;
     (d0.goals || []).forEach(function (x) { if (x.name === name) cur = x; });
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Goals</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Goals</span><button class="iconbtn" data-close aria-label="Tutup">âœ•</button></h3>' +
       '<div class="fld"><label>Nama</label><input id="gName" value="' + esc(cur ? cur.name : '') + '" placeholder="Liburan Jepang"></div>' +
       '<div class="fld"><label>Target</label><input id="gTarget" class="mono" inputmode="numeric" value="' + (cur ? cur.target : '') + '"></div>' +
       '<div class="fld"><label>Terkumpul</label><input id="gSaved" class="mono" inputmode="numeric" value="' + (cur ? cur.saved : '') + '"></div>' +
@@ -2045,7 +2045,7 @@ function paydayCard(d) {
     var d0 = state.data || {}, cur = null;
     (d0.subs || []).forEach(function (x) { if (x.name === name) cur = x; });
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Langganan</span><button class="iconbtn" data-close aria-label="Tutup">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Langganan</span><button class="iconbtn" data-close aria-label="Tutup">âœ•</button></h3>' +
       '<div class="fld"><label>Nama</label><input id="sName" value="' + esc(cur ? cur.name : '') + '" placeholder="Netflix"></div>' +
       '<div class="fld"><label>Biaya</label><input id="sCost" class="mono" inputmode="numeric" value="' + (cur ? cur.cost : '') + '"></div>' +
       '<div class="fld"><label>Siklus</label><select id="sCycle"><option value="bulanan"' + (cur && cur.cycle === 'bulanan' ? ' selected' : '') + '>Bulanan</option>' +
@@ -2087,7 +2087,7 @@ function paydayCard(d) {
     var list = pt.list;
     var h = '<div class="card"><h2>Aset (' + list.length + ')</h2>';
     if (!list.length) {
-      h += '<div class="es" style="padding:10px 0 4px"><div class="emo">📈</div><div class="ttl">Belum ada aset</div>' +
+      h += '<div class="es" style="padding:10px 0 4px"><div class="emo">ðŸ“ˆ</div><div class="ttl">Belum ada aset</div>' +
         '<div class="hint">Tambahkan saham atau reksadana. Harga saham diambil otomatis, reksadana pakai NAV yang kamu isi.</div></div>';
     } else {
       list.forEach(function (a, idx) {
@@ -2100,13 +2100,13 @@ function paydayCard(d) {
         var color = assetTint(idx);
         var priceTxt = px > 0 ? rp(px) : rp(a.buyPrice);
         var line2 = px > 0
-          ? '<span class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '+' : '−') + rp(Math.abs(pl)) +
-              ' · ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</span>'
+          ? '<span class="apl ' + (pl >= 0 ? 'up' : 'down') + '">' + (pl >= 0 ? '+' : 'âˆ’') + rp(Math.abs(pl)) +
+              ' Â· ' + (pct >= 0 ? '+' : '') + pct.toFixed(1).replace('.', ',') + '%</span>'
           : '<span class="apl muted">harga belum diisi</span>';
         h += '<button class="arow" type="button" data-act="asset-edit" data-code="' + esc(a.code) + '" aria-label="Ubah aset ' + esc(a.code) + '">' +
           '<span class="abadge">' + assetInitials(a) + '</span>' +
           '<span class="amid"><span class="acode">' + esc(a.code) + '</span>' +
-            '<span class="asub">' + assetQtyText(a) + ' × ' + priceTxt + '</span></span>' +
+            '<span class="asub">' + assetQtyText(a) + ' Ã— ' + priceTxt + '</span></span>' +
           '<span class="aright"><span class="aval">' + rp(val) + '</span>' + line2 + '</span>' +
           '</button>';
       });
@@ -2131,7 +2131,7 @@ function paydayCard(d) {
       return '<option value="' + esc(a.name) + '">' + esc(a.name) + ' (' + rp(a.balance) + ')</option>';
     }).join('');
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay credit card</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay credit card</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="empty" style="padding:0 0 12px;font-size:12px">This lowers the card debt right away and takes the money out of the wallet you pick. It is not counted as spending or income.</div>' +
       '<div class="fld"><label for="cpCard">Card</label><select id="cpCard">' + cardOpts + '</select></div>' +
       '<div class="fld"><label for="cpFrom">Paid from</label><select id="cpFrom">' + walletOpts + '</select></div>' +
@@ -2146,7 +2146,7 @@ function paydayCard(d) {
     if (list.length < 2) { toast('Add at least two wallets first'); return; }
     var opts = list.map(function (a) { return '<option value="' + esc(a.name) + '">' + esc(a.name) + ' (' + rp(a.balance) + ')</option>'; }).join('');
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Move money</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Move money</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="empty" style="padding:0 0 12px;font-size:12px">Moving money between your own wallets is not spending, totals stay unchanged.</div>' +
       '<div class="fld"><label>From</label><select id="tFrom">' + opts + '</select></div>' +
       '<div class="fld"><label>To</label><select id="tTo">' + opts + '</select></div>' +
@@ -2160,7 +2160,7 @@ function paydayCard(d) {
     (d.accounts || []).forEach(function (a) { if (a.name === name) cur = a; });
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cur ? 'Edit wallet' : 'Add wallet') + '</span>' +
-      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="fld"><label>Name</label><input id="wName" value="' + esc(cur ? cur.name : '') + '" placeholder="GoPay"></div>' +
       '<div class="fld"><label>Type</label><select id="wKind">' +
         ['emoney', 'bank', 'cash', 'other'].map(function (k) {
@@ -2175,7 +2175,7 @@ function paydayCard(d) {
     (d.assets || []).forEach(function (a) { if (a.code === code) cur = a; });
     openBg(); $('sheetDetail').hidden = false; $('sheetDetail').dataset.kind = 'list';
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cur ? 'Edit asset' : 'Add asset') + '</span>' +
-      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      '<button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="fld"><label>Type</label><select id="aKind">' +
         ['saham', 'reksadana', 'crypto', 'emas'].map(function (k) {
           return '<option value="' + k + '"' + (cur && cur.kind === k ? ' selected' : '') + '>' + k + '</option>';
@@ -2206,20 +2206,20 @@ function paydayCard(d) {
       h += '<div class="empty" style="padding:0 0 10px">No paylater or instalments yet. Add one to see the real cost of your month.</div>';
     } else {
       h += '<div class="kv"><span>Every month<small>' + list.length + (list.length === 1 ? ' plan' : ' plans') + ' running</small></span>' +
-        '<span class="mono ' + (share > 30 ? 'neg' : '') + '">' + rp(monthly) + (income ? ' · ' + share + '%' : '') + '</span></div>';
+        '<span class="mono ' + (share > 30 ? 'neg' : '') + '">' + rp(monthly) + (income ? ' Â· ' + share + '%' : '') + '</span></div>';
       list.forEach(function (x) {
         var pct = x.tenor ? Math.round(x.paid / x.tenor * 100) : 0;
         if (x.left === 0) {
           h += '<div class="part" style="margin-top:12px;margin-bottom:0"><div class="parttop"><span>' + esc(x.name) + '</span>' +
             '<span class="mono pos" style="font-size:11.5px">Completed</span></div>' +
-            '<div class="empty" style="font-size:11px;padding-top:4px">' + x.paid + ' of ' + x.tenor + ' paid · no longer counted monthly</div></div>';
+            '<div class="empty" style="font-size:11px;padding-top:4px">' + x.paid + ' of ' + x.tenor + ' paid Â· no longer counted monthly</div></div>';
           return;
         }
         h += '<div class="part" style="margin-top:12px;margin-bottom:0">' +
-          '<div class="parttop"><span>' + uiIcon('calendar-clock') + esc(x.name) + '</span><span class="mono" style="font-size:11.5px">' + rp(x.per) + ' × ' + x.left + ' left</span></div>' +
+          '<div class="parttop"><span>' + uiIcon('calendar-clock') + esc(x.name) + '</span><span class="mono" style="font-size:11.5px">' + rp(x.per) + ' Ã— ' + x.left + ' left</span></div>' +
           '<div class="hbar" style="margin-top:6px"><span style="width:' + pct + '%"></span></div>' +
           '<div class="kv" style="border:0;padding:6px 0 0"><span class="empty" style="font-size:11px">Paid ' + x.paid + ' of ' + x.tenor +
-            (x.dueDay ? ' · due day ' + x.dueDay : '') + ' · remaining ' + rp(x.remaining) + '</span>' +
+            (x.dueDay ? ' Â· due day ' + x.dueDay : '') + ' Â· remaining ' + rp(x.remaining) + '</span>' +
             '<span style="display:inline-flex;gap:6px">' +
               (x.left > 0 ? '<button class="mini" data-act="cicilan-pay" data-name="' + esc(x.name) + '" data-per="' + x.per + '">' + uiIcon('banknote') + 'Pay</button>' : '') +
               '<button class="mini danger" data-act="cicilan-del" data-name="' + esc(x.name) + '">Remove</button>' +
@@ -2238,7 +2238,7 @@ function paydayCard(d) {
     openBg();
     $('sheetDetail').hidden = false;
     $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay instalment</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Pay instalment</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="empty" style="padding:0 0 12px;font-size:12px">This records the payment as an expense (category Cicilan) and marks one month as paid.</div>' +
       '<div class="fld"><label>Instalment</label><input value="' + esc(name) + '" disabled></div>' +
       '<div class="fld"><label>Amount</label><input id="cpAmt" class="mono" inputmode="numeric" value="' + per + '"></div>' +
@@ -2252,7 +2252,7 @@ function paydayCard(d) {
     openBg();
     $('sheetDetail').hidden = false;
     $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Add instalment</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Add instalment</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="fld"><label>Name</label><input id="ciName" placeholder="Shopee PayLater"></div>' +
       '<div class="fld"><label>Monthly instalment</label><input id="ciPer" class="mono" inputmode="numeric" placeholder="450000"></div>' +
       '<div class="fld"><label>Tenor (months)</label><input id="ciTenor" class="mono" inputmode="numeric" placeholder="6"></div>' +
@@ -2320,7 +2320,7 @@ function paydayCard(d) {
     }
 
     var L = d.loans || { persons: [] };
-    h += '<details class="card drop"' + (L.persons.length ? ' open' : '') + '><summary><span>Debts &amp; receivables</span><span class="chev">›</span></summary>';
+    h += '<details class="card drop"' + (L.persons.length ? ' open' : '') + '><summary><span>Debts &amp; receivables</span><span class="chev">â€º</span></summary>';
     if (!L.persons.length) h += '<div class="empty" style="margin-top:10px">No debts or receivables yet.</div>';
     else {
       h += '<div class="lsum"><span>Owed to you <b class="pos mono">' + rp(L.piutang || 0) + '</b></span><span>You owe <b class="neg mono">' + rp(L.hutang || 0) + '</b></span></div>';
@@ -2341,7 +2341,7 @@ function paydayCard(d) {
   }
   function viewSetelan() {
     var host = '';
-    try { var u = new URL(state.url); host = u.host + u.pathname.slice(0, 22) + '…'; } catch (e) { host = state.url; }
+    try { var u = new URL(state.url); host = u.host + u.pathname.slice(0, 22) + 'â€¦'; } catch (e) { host = state.url; }
     return '<div style="display:flex;align-items:center;gap:14px;margin:8px 2px 18px"><img src="icons/icon-192.png" alt="" style="width:60px;height:60px;border-radius:17px;box-shadow:var(--shadow)"><div><div style="font-weight:700;font-size:20px;letter-spacing:-.01em">Bamboo</div><div class="empty" style="padding:0;font-size:13px">Version ' + VERSION + '</div></div></div>' +
       '<div class="card"><h2>Connection</h2>' +
       '<div class="kv"><span>Google Sheets<small class="mono">' + esc(host) + '</small></span><span class="pos">connected</span></div>' +
@@ -2393,7 +2393,7 @@ function paydayCard(d) {
         '<span class="' + (p.on ? 'pos' : '') + '">' + (p.on ? 'on' : 'off') + '</span></div>';
       if (p.denied && !p.on) h += '<div class="empty" style="padding:0;font-size:12px">Notifications are blocked. Allow them in your browser or phone settings, then try again.</div>';
       h += '<button class="btn ' + (p.on ? 'ghost' : '') + '" data-act="push" style="margin-top:10px"' + (p.busy ? ' disabled' : '') + '>' +
-        (p.busy ? 'One moment…' : p.on ? 'Turn off notifications' : 'Turn on notifications') + '</button>';
+        (p.busy ? 'One momentâ€¦' : p.on ? 'Turn off notifications' : 'Turn on notifications') + '</button>';
       if (p.on) h += '<button class="btn ghost" data-act="push-test" style="margin-top:8px">Send test push</button>';
     }
     return h + '</div>';
@@ -2446,15 +2446,15 @@ function paydayCard(d) {
       return pushApi('subscribe', { subscription: sub.toJSON(), url: state.url, token: state.token }).then(function (res) {
         if (!res || !res.ok) { sub.unsubscribe(); throw new Error((res && res.error) || 'Could not turn notifications on'); }
       });
-    }).then(function () { pushDone('🔔 Notifications on'); }, function (e) { pushDone(e && e.message && !/^NET/.test(e.message) ? e.message : 'Could not turn notifications on'); });
+    }).then(function () { pushDone('ðŸ”” Notifications on'); }, function (e) { pushDone(e && e.message && !/^NET/.test(e.message) ? e.message : 'Could not turn notifications on'); });
   }
 
   function renderSetup() {
     $('hdr').hidden = true; $('tabbar').hidden = true;
     $('view').className = 'setup';
     $('view').innerHTML = '<img class="logo" src="icons/icon-192.png" alt="">' +
-      '<h1>Hi, I’m Bamboo</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough, it stays on this phone.</p>' +
-      '<div class="fld"><label for="sUrl">Web App URL (ends with /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(state.url) + '"></div>' +
+      '<h1>Hi, Iâ€™m Bamboo</h1><p>I record your money in and out to Google Sheets. Enter the Web App address from Apps Script and your secret code. Once is enough, it stays on this phone.</p>' +
+      '<div class="fld"><label for="sUrl">Web App URL (ends with /exec)</label><input id="sUrl" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/â€¦/exec" value="' + esc(state.url) + '"></div>' +
       '<div class="fld"><label for="sTok">Secret code (TOKEN)</label><input id="sTok" type="password" autocomplete="off" placeholder="Same code as in the script"></div>' +
       '<div class="err" id="sErr">' + esc(state.setupMsg) + '</div><button class="btn" data-act="connect" id="sGo">Connect</button>';
   }
@@ -2472,10 +2472,10 @@ function paydayCard(d) {
     var d = state.data;
     if (d) {
       var pl = d.label;
-      if (d.period && d.period.mode === 'payday') pl += ' · ' + shortDate(d.period.start) + ' – ' + shortDate(d.period.end);
-      $('monthLabel').textContent = pl + (state.fromCache ? ' ·' : '');
+      if (d.period && d.period.mode === 'payday') pl += ' Â· ' + shortDate(d.period.start) + ' â€“ ' + shortDate(d.period.end);
+      $('monthLabel').textContent = pl + (state.fromCache ? ' Â·' : '');
       $('prev').disabled = !d.prev; $('next').disabled = !d.next;
-      $('streak').innerHTML = '🔥 ' + d.streak + ' days';
+      $('streak').innerHTML = 'ðŸ”¥ ' + d.streak + ' days';
       var pb = $('privacyBtn');
       if (pb) {
         pb.style.color = state.privacy ? 'var(--mint)' : 'var(--mut)';
@@ -2496,7 +2496,7 @@ function paydayCard(d) {
     }
     if (state.fromCache && state.tab !== 'setelan' && d) {
       var note = document.createElement('div'); note.className = 'empty'; note.style.cssText = 'text-align:center;font-size:12px;margin-top:-4px;margin-bottom:10px';
-      note.textContent = 'Saved on this phone · updated ' + fmtSync(state.lastSync); $('view').insertBefore(note, $('view').firstChild);
+      note.textContent = 'Saved on this phone Â· updated ' + fmtSync(state.lastSync); $('view').insertBefore(note, $('view').firstChild);
     }
     var hero = $('heroNum');
     if (hero && !state.privacy) countUp(hero, state.prevKeluar, Number(hero.getAttribute('data-to')));
@@ -2547,8 +2547,8 @@ function paydayCard(d) {
   });
   function openPinSetup() {
     openBg(); $('sheetDetail').hidden = false;
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (LS.get('ck_pin', '') ? 'Change PIN' : 'Create PIN') + '</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
-      '<div class="empty" style="padding:0 0 10px;font-size:12px">4–6 digits. Asked every time the app opens.</div>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (LS.get('ck_pin', '') ? 'Change PIN' : 'Create PIN') + '</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
+      '<div class="empty" style="padding:0 0 10px;font-size:12px">4â€“6 digits. Asked every time the app opens.</div>' +
       '<div class="fld"><label for="pin1">New PIN</label><input id="pin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
       '<div class="fld"><label for="pin2">Repeat PIN</label><input id="pin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></div>' +
       '<div class="err" id="pinErr2"></div><button class="btn" data-act="pin-save">Save PIN</button>';
@@ -2559,8 +2559,8 @@ function paydayCard(d) {
   function testCapture() {
     var sample = 'Pembayaran QRIS Rp25.000 ke WARUNG BU TINI berhasil. Saldo Rp 1.200.000';
     openBg(); $('sheetDetail').hidden = false;
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
-      '<div class="empty" style="padding:8px 0">Sending a sample notification…</div>';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
+      '<div class="empty" style="padding:8px 0">Sending a sample notificationâ€¦</div>';
     var tail = state.url ? state.url.slice(-14) : '(no URL)';
     fetch(state.url, {
       method: 'POST',
@@ -2570,17 +2570,17 @@ function paydayCard(d) {
     }).then(function (r) { return r.text(); }).then(function (raw) {
       var d = null; try { d = JSON.parse(raw); } catch (e) {}
       var verdict;
-      if (!d) verdict = '<span class="bad">The server did not answer with JSON.</span><br>The URL is probably not the current Web App, or deployment access is not “Anyone”.';
-      else if (d.error === 'auth' || /token salah/i.test(d.msg || '')) verdict = '<span class="bad">Token rejected.</span><br>The TOKEN in the script differs from this app’s token.';
+      if (!d) verdict = '<span class="bad">The server did not answer with JSON.</span><br>The URL is probably not the current Web App, or deployment access is not â€œAnyoneâ€.';
+      else if (d.error === 'auth' || /token salah/i.test(d.msg || '')) verdict = '<span class="bad">Token rejected.</span><br>The TOKEN in the script differs from this appâ€™s token.';
       else if (d.status === 'dry') verdict = '<span class="pos">Server works.</span><br>Parsed: ' + esc(d.msg) + '<br><br>So the problem is on the Shortcut side (URL, token, or the automation not running).';
       else if (d.status === 'error' && /kosong/i.test(d.msg || '')) verdict = '<span class="bad">The server received an empty text.</span>';
       else verdict = '<span class="warn">Unexpected answer.</span>';
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
-        '<div class="kv"><span>URL used</span><span class="mono">…' + esc(tail) + '</span></div>' +
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
+        '<div class="kv"><span>URL used</span><span class="mono">â€¦' + esc(tail) + '</span></div>' +
         '<div class="revitem"><div class="revtext">' + verdict + '</div>' +
         '<div class="revmeta mono" style="margin-top:8px;word-break:break-all">' + esc(raw.slice(0, 240)) + '</div></div>';
     }).catch(function () {
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3><div class="err">Could not reach the server.</div>';
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Test capture</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3><div class="err">Could not reach the server.</div>';
     });
   }
 
@@ -2598,65 +2598,65 @@ function paydayCard(d) {
     return '<div class="card"><h2>Kesehatan finansial</h2><div class="hrow">' + scoreRing(h.score) +
       '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div>' +
       '<div class="empty" style="padding:2px 0 0;font-size:12px">' + esc((h.parts && h.parts[0] ? h.parts[0].detail : '')) + '</div></div></div>' +
-      '<button class="bc" data-act="goto-insights">See the full analysis →</button></div>';
+      '<button class="bc" data-act="goto-insights">See the full analysis â†’</button></div>';
   }
   function gcell(k, v) { return '<div class="gcell"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
   // ================= penyemangat + mutiara =================
   var PRAISE_BY_CAT = {
     'Makan': [
-      { t: 'Food logged.', s: 'Your kitchen is cheaper than your cravings.', e: '🍚' },
-      { t: 'One meal recorded.', s: 'That is how a month gets built.', e: '🥢' },
-      { t: 'Noted.', s: 'Food is the easiest place to save without feeling poorer.', e: '🍽️' }
+      { t: 'Food logged.', s: 'Your kitchen is cheaper than your cravings.', e: 'ðŸš' },
+      { t: 'One meal recorded.', s: 'That is how a month gets built.', e: 'ðŸ¥¢' },
+      { t: 'Noted.', s: 'Food is the easiest place to save without feeling poorer.', e: 'ðŸ½ï¸' }
     ],
     'Jajan': [
-      { t: 'That treat is logged.', s: 'Now it cannot hide.', e: '☕' },
-      { t: 'Small, but recorded.', s: 'Small amounts repeat more often than big ones.', e: '🍪' },
-      { t: 'Tracked.', s: 'If you buy it daily, it is not a treat, it is a subscription.', e: '🧋' }
+      { t: 'That treat is logged.', s: 'Now it cannot hide.', e: 'â˜•' },
+      { t: 'Small, but recorded.', s: 'Small amounts repeat more often than big ones.', e: 'ðŸª' },
+      { t: 'Tracked.', s: 'If you buy it daily, it is not a treat, it is a subscription.', e: 'ðŸ§‹' }
     ],
     'Transportasi': [
-      { t: 'Fuel logged.', s: 'The road is expensive; the record makes it visible.', e: '⛽' },
-      { t: 'Trip recorded.', s: 'The cheapest trip is the one you skip.', e: '🚗' },
-      { t: 'Noted.', s: 'Transport stays fixed until you actually look at it.', e: '🛣️' }
+      { t: 'Fuel logged.', s: 'The road is expensive; the record makes it visible.', e: 'â›½' },
+      { t: 'Trip recorded.', s: 'The cheapest trip is the one you skip.', e: 'ðŸš—' },
+      { t: 'Noted.', s: 'Transport stays fixed until you actually look at it.', e: 'ðŸ›£ï¸' }
     ],
     'Perawatan Kendaraan': [
-      { t: 'Maintenance recorded.', s: 'Cheap now, very expensive later.', e: '🔧' },
-      { t: 'Logged.', s: 'Skipping service is a loan from your future self.', e: '🛠️' },
-      { t: 'Good call.', s: 'A car you maintain is a car you keep.', e: '🚙' }
+      { t: 'Maintenance recorded.', s: 'Cheap now, very expensive later.', e: 'ðŸ”§' },
+      { t: 'Logged.', s: 'Skipping service is a loan from your future self.', e: 'ðŸ› ï¸' },
+      { t: 'Good call.', s: 'A car you maintain is a car you keep.', e: 'ðŸš™' }
     ],
     'Belanja': [
-      { t: 'Purchase logged.', s: 'Impulse is slower when it is written down.', e: '🛍️' },
-      { t: 'Recorded.', s: 'A wishlist is cheaper than a cart.', e: '📦' },
-      { t: 'Noted.', s: 'Buying in bulk saves money only if you finish it.', e: '🧾' }
+      { t: 'Purchase logged.', s: 'Impulse is slower when it is written down.', e: 'ðŸ›ï¸' },
+      { t: 'Recorded.', s: 'A wishlist is cheaper than a cart.', e: 'ðŸ“¦' },
+      { t: 'Noted.', s: 'Buying in bulk saves money only if you finish it.', e: 'ðŸ§¾' }
     ],
     'Belanja Kebutuhan Harian': [
-      { t: 'Groceries recorded.', s: 'Planning beats improvising.', e: '🧺' },
-      { t: 'Shopping logged.', s: 'A list is the cheapest tool you own.', e: '📝' },
-      { t: 'Noted.', s: 'Cook what expires first, that is free money.', e: '🥬' }
+      { t: 'Groceries recorded.', s: 'Planning beats improvising.', e: 'ðŸ§º' },
+      { t: 'Shopping logged.', s: 'A list is the cheapest tool you own.', e: 'ðŸ“' },
+      { t: 'Noted.', s: 'Cook what expires first, that is free money.', e: 'ðŸ¥¬' }
     ],
     'Tagihan & Utilitas': [
-      { t: 'Bill logged.', s: 'Nobody enjoys this, but everybody needs it.', e: '⚡' },
-      { t: 'Recorded.', s: 'A bill you expect is a bill you can plan.', e: '🧾' },
-      { t: 'Paid and noted.', s: 'Fixed costs deserve a fixed place in your month.', e: '💡' }
+      { t: 'Bill logged.', s: 'Nobody enjoys this, but everybody needs it.', e: 'âš¡' },
+      { t: 'Recorded.', s: 'A bill you expect is a bill you can plan.', e: 'ðŸ§¾' },
+      { t: 'Paid and noted.', s: 'Fixed costs deserve a fixed place in your month.', e: 'ðŸ’¡' }
     ],
     'Hiburan': [
-      { t: 'Fun logged, no guilt.', s: 'That is the point of a budget.', e: '🎬' },
-      { t: 'Recorded.', s: 'Enjoying money is allowed, as long as it is on purpose.', e: '🎧' },
-      { t: 'Noted.', s: 'Entertainment costs less when it is planned.', e: '🍿' }
+      { t: 'Fun logged, no guilt.', s: 'That is the point of a budget.', e: 'ðŸŽ¬' },
+      { t: 'Recorded.', s: 'Enjoying money is allowed, as long as it is on purpose.', e: 'ðŸŽ§' },
+      { t: 'Noted.', s: 'Entertainment costs less when it is planned.', e: 'ðŸ¿' }
     ],
     'Kesehatan': [
-      { t: 'Health logged.', s: 'The one spending you never regret.', e: '💊' },
-      { t: 'Recorded.', s: 'Prevention returns more than it costs.', e: '🩺' },
-      { t: 'Noted.', s: 'Cheap now, priceless later.', e: '🏃' }
+      { t: 'Health logged.', s: 'The one spending you never regret.', e: 'ðŸ’Š' },
+      { t: 'Recorded.', s: 'Prevention returns more than it costs.', e: 'ðŸ©º' },
+      { t: 'Noted.', s: 'Cheap now, priceless later.', e: 'ðŸƒ' }
     ],
     'Cicilan': [
-      { t: 'Payment recorded.', s: 'One month closer to free.', e: '💳' },
-      { t: 'Logged.', s: 'Debt you can see is debt you can finish.', e: '📉' },
-      { t: 'Noted.', s: 'Every instalment paid is a bill that leaves your life.', e: '✅' }
+      { t: 'Payment recorded.', s: 'One month closer to free.', e: 'ðŸ’³' },
+      { t: 'Logged.', s: 'Debt you can see is debt you can finish.', e: 'ðŸ“‰' },
+      { t: 'Noted.', s: 'Every instalment paid is a bill that leaves your life.', e: 'âœ…' }
     ],
     'Lainnya': [
-      { t: 'Recorded.', s: 'A tracked expense is a decision, not a leak.', e: '✅' },
-      { t: 'Noted.', s: 'Consistency beats intensity.', e: '🔗' },
-      { t: 'Saved.', s: 'Honest numbers are more useful than pretty ones.', e: '🫶' }
+      { t: 'Recorded.', s: 'A tracked expense is a decision, not a leak.', e: 'âœ…' },
+      { t: 'Noted.', s: 'Consistency beats intensity.', e: 'ðŸ”—' },
+      { t: 'Saved.', s: 'Honest numbers are more useful than pretty ones.', e: 'ðŸ«¶' }
     ]
   };
   var PEARLS_BY_CAT = {
@@ -2673,9 +2673,9 @@ function paydayCard(d) {
     'Lainnya': ['Track it and forget it, the record does the remembering.', 'Small entries add up to a clear picture.', 'If you can see it, you can change it.']
   };
   var EDIT_LINES = [
-    { t: 'Fixed, cleaner now.', s: 'Correcting a record is a form of caring.', e: '✏️' },
-    { t: 'Updated.', s: 'Good data in, good advice out.', e: '🔧' },
-    { t: 'Saved.', s: 'Accuracy compounds exactly like money.', e: '🫱' }
+    { t: 'Fixed, cleaner now.', s: 'Correcting a record is a form of caring.', e: 'âœï¸' },
+    { t: 'Updated.', s: 'Good data in, good advice out.', e: 'ðŸ”§' },
+    { t: 'Saved.', s: 'Accuracy compounds exactly like money.', e: 'ðŸ«±' }
   ];
   function praiseKey(name) { return PRAISE_BY_CAT[name] ? name : 'Lainnya'; }
   function bagPick(key, size) {
@@ -2706,10 +2706,10 @@ function paydayCard(d) {
       pearl = pl[bagPick('pearl_' + key, pl.length)];
     }
     var badge = (opts.streak && opts.streak >= 3)
-      ? '<span style="font-size:10.5px;font-weight:700;color:var(--amber);background:color-mix(in srgb,var(--amber) 18%,transparent);border-radius:var(--r-pill);padding:3px 8px;margin-left:6px">🔥 ' + opts.streak + '-day streak</span>'
+      ? '<span style="font-size:10.5px;font-weight:700;color:var(--amber);background:color-mix(in srgb,var(--amber) 18%,transparent);border-radius:var(--r-pill);padding:3px 8px;margin-left:6px">ðŸ”¥ ' + opts.streak + '-day streak</span>'
       : '';
     var nudge = (opts.pct != null && opts.pct >= 90)
-      ? '<div style="margin-top:8px;background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral);border-radius:12px;padding:8px 11px;font-size:11.5px;font-weight:600">⚠️ ' +
+      ? '<div style="margin-top:8px;background:color-mix(in srgb,var(--coral) 16%,transparent);color:var(--coral);border-radius:12px;padding:8px 11px;font-size:11.5px;font-weight:600">âš ï¸ ' +
         esc(opts.cat) + ' is at ' + opts.pct + '% of its budget, ' + (opts.pct >= 100 ? 'over the line' : 'almost there') + '.</div>'
       : '';
     var old = document.getElementById('praise'); if (old) old.remove();
@@ -2718,7 +2718,7 @@ function paydayCard(d) {
     el.innerHTML = '<div class="prow"><div class="pem">' + line.e + '</div><div style="flex:1;min-width:0">' +
         '<div class="pt">' + line.t + badge + '</div><div class="ps">' + line.s + '</div></div></div>' +
       nudge +
-      '<div class="pearl"><b>💡 Pearl:</b> ' + pearl + '</div>' +
+      '<div class="pearl"><b>ðŸ’¡ Pearl:</b> ' + pearl + '</div>' +
       '<div class="pbar"><i></i></div>';
     document.body.appendChild(el);
     requestAnimationFrame(function () { el.classList.add('on'); });
@@ -2817,7 +2817,7 @@ function paydayCard(d) {
     var i = 0;
     function next() {
       if (i >= plan.length) {
-        toast('✅ ' + plan.length + ' limit dibagi');
+        toast('âœ… ' + plan.length + ' limit dibagi');
         var pr = loadMonth(state.month, { silent: true });
         if (pr && pr.then) pr.then(function () { closeSheets(); setTab('insights'); });
         return;
@@ -2835,7 +2835,7 @@ function paydayCard(d) {
     var h = d.health || { score: 0, grade: ',', parts: [] };
     var b = d.behavior || {};
     var html = '<div class="card"><h2>Financial health</h2><div class="hrow big"><div class="hbig mono">' + h.score + '</div>' +
-      '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 · recalculated on every refresh</div></div></div>';
+      '<div class="hmeta"><div class="hgrade">' + esc(h.grade) + '</div><div class="empty" style="padding:2px 0 0;font-size:12px">out of 100 Â· recalculated on every refresh</div></div></div>';
     (h.parts || []).forEach(function (p2) {
       html += '<div class="part" style="margin-top:12px"><div class="parttop"><span>' + esc(p2.label) + '</span><span class="mono">' + p2.score + '/' + p2.max + '</span></div>' +
         '<div class="hbar"><span style="width:' + Math.round(p2.score / p2.max * 100) + '%"></span></div>' +
@@ -2847,14 +2847,14 @@ function paydayCard(d) {
       gcell('Projected month', rp(b.projected || 0)) +
       gcell('Weekend spending', (b.weekendShare || 0) + '%') +
       gcell('Small purchases', (b.smallShare || 0) + '% of entries') +
-      gcell('Top category', (b.topCat || ',') + ' · ' + (b.topShare || 0) + '%') +
+      gcell('Top category', (b.topCat || ',') + ' Â· ' + (b.topShare || 0) + '%') +
       gcell('Largest entry', b.largest ? rp(b.largest.amount) : ',') +
       '</div>';
     if ((b.movers || []).length) {
       html += '<div class="empty" style="padding:12px 0 0;font-size:11px">Biggest changes vs last month</div>';
       b.movers.forEach(function (m) {
-        html += '<div class="kv"><span>' + esc(m.name) + '<small>' + rp(m.before) + ' → ' + rp(m.now) + '</small></span>' +
-          '<span class="mono ' + (m.delta > 0 ? 'neg' : 'pos') + '">' + (m.delta > 0 ? '+' : '−') + rp(Math.abs(m.delta)) + '</span></div>';
+        html += '<div class="kv"><span>' + esc(m.name) + '<small>' + rp(m.before) + ' â†’ ' + rp(m.now) + '</small></span>' +
+          '<span class="mono ' + (m.delta > 0 ? 'neg' : 'pos') + '">' + (m.delta > 0 ? '+' : 'âˆ’') + rp(Math.abs(m.delta)) + '</span></div>';
       });
     }
     html += '</div>';
@@ -2874,8 +2874,8 @@ function paydayCard(d) {
       '<div class="brow"><div><div class="k">Batas pengeluaran</div><div class="big mono">' + rp(ceil) + '</div></div>' +
       '<span class="bstat">' + statTxt + '</span></div>' +
       '<div class="hbar" style="margin-top:10px"><span class="' + (remain < 0 ? 'over' : '') + '" style="width:' + Math.min(100, usedPct) + '%"></span></div>' +
-      '<div class="bmeta">' + usedPct + '% terpakai · sisa <b>' + rp(Math.max(0, remain)) + '</b>' +
-        (remain < 0 ? ' · kelebihan ' + rp(-remain) : '') + '</div></div>';
+      '<div class="bmeta">' + usedPct + '% terpakai Â· sisa <b>' + rp(Math.max(0, remain)) + '</b>' +
+        (remain < 0 ? ' Â· kelebihan ' + rp(-remain) : '') + '</div></div>';
 
     html += '<div class="bgrid">' +
       '<div><div class="k">Terpakai</div><div class="v mono">' + rp(spent) + '</div></div>' +
@@ -2894,7 +2894,7 @@ function paydayCard(d) {
         '<span><span class="dot" style="background:var(--amber)"></span>Wants <b>' + pw + '%</b></span>' +
         '<span><span class="dot" style="background:#5483B3"></span>Tabungan <b>' + ps + '%</b></span></div>';
     html += '<details style="margin-top:10px"><summary style="cursor:pointer;font-size:11.5px;color:var(--mut)">Cara menghitung batas</summary>' +
-      '<div class="bnote" style="margin-top:6px">Batas = pendapatan bulan ini × persentase. Needs ' + pn + '% = ' +
+      '<div class="bnote" style="margin-top:6px">Batas = pendapatan bulan ini Ã— persentase. Needs ' + pn + '% = ' +
       rp(env.groups.needs.ceiling) + ', Wants ' + pw + '% = ' + rp(env.groups.wants.ceiling) +
       '. Ubah persentase lewat tombol Atur rencana di bawah.</div></details>';
 
@@ -2907,7 +2907,7 @@ function paydayCard(d) {
       var gStat = gst === 'over' ? 'Lewat budget' : (gst === 'warn' ? 'Waspada' : 'Normal');
       html += '<div class="envbox ' + gst + '">' +
         '<div class="brow"><div class="envname">' + g.label + '</div><span class="bstat">' + gStat + '</span></div>' +
-        '<div class="bnote" style="margin-top:2px">' + g.pct + '% dari pendapatan · ' + esc(g.note) + '</div>' +
+        '<div class="bnote" style="margin-top:2px">' + g.pct + '% dari pendapatan Â· ' + esc(g.note) + '</div>' +
         '<div class="bamt mono">' + rp(g.spent) + ' <span>dari ' + rp(g.ceiling) + '</span></div>' +
         '<div class="hbar" style="margin-top:8px"><span class="' + (gst === 'over' ? 'over' : '') + '" style="width:' + Math.min(100, gp) + '%"></span></div>' +
         '<div class="bgrid" style="margin-top:9px">' +
@@ -2985,9 +2985,9 @@ function paydayCard(d) {
   }
   function txRowsHtml(rows) {
     return rows.map(function (t) {
-      return '<div class="txwrap"><span class="txact edit">✏️ Edit</span><span class="txact del">🗑️ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
+      return '<div class="txwrap"><span class="txact edit">âœï¸ Edit</span><span class="txact del">ðŸ—‘ï¸ Delete</span><button class="tx" data-act="detail" data-id="' + esc(t.id) + '">' +
         '<div class="ico cat-ico">' + catIcon(t.cat) + '</div>' +
-        '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(t.date) + ' · ' + esc(t.metode || '') + '</div></div>' +
+        '<div class="m"><div class="d">' + esc(t.desc) + '</div><div class="s">' + esc(t.date) + ' Â· ' + esc(t.metode || '') + '</div></div>' +
         '<div class="a mono neg">' + rp(t.amount) + '</div></button></div>';
     }).join('');
   }
@@ -2999,12 +2999,12 @@ function paydayCard(d) {
 
     var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
       '<i class="cidot">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
-      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+      '<button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>';
 
     html += '<div class="card" style="margin-top:6px">' +
       '<div class="empty" style="padding:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase">Spent this month</div>' +
       '<div class="mono" style="font-size:22px;font-weight:700;margin-top:2px">' + rp(total) + '</div>' +
-      '<div class="empty" style="padding:2px 0 0;font-size:12px">' + share + '% of all spending · ' +
+      '<div class="empty" style="padding:2px 0 0;font-size:12px">' + share + '% of all spending Â· ' +
         rows.length + (rows.length === 1 ? ' transaction' : ' transactions') + '</div></div>';
 
     html += rows.length
@@ -3030,7 +3030,7 @@ function paydayCard(d) {
 
     var html = '<div class="grab"></div><h3><span style="display:inline-flex;align-items:center;gap:9px">' +
       '<i class="cidot">' + catIcon(name) + '</i>' + esc(name) + '</span>' +
-      '<button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
+      '<button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>';
 
     html += '<div class="card" style="margin-top:6px">' +
       '<div class="empty" style="padding:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase">Used this month</div>' +
@@ -3038,8 +3038,8 @@ function paydayCard(d) {
       '<div class="empty" style="padding:2px 0 0;font-size:12px">of ' + rp(info.limit) + ' budget</div>' +
       '<div class="hbar" style="margin-top:10px"><span class="' + (total > info.limit ? 'over' : '') + '" style="width:' + Math.min(100, pct) + '%"></span></div>' +
       '<div class="empty" style="padding:8px 0 0;font-size:12px">' +
-        (left >= 0 ? rp(left) + ' left · ' + pct + '% used' : rp(-left) + ' over the limit · ' + pct + '% used') +
-        ' · ' + rows.length + (rows.length === 1 ? ' transaction' : ' transactions') +
+        (left >= 0 ? rp(left) + ' left Â· ' + pct + '% used' : rp(-left) + ' over the limit Â· ' + pct + '% used') +
+        ' Â· ' + rows.length + (rows.length === 1 ? ' transaction' : ' transactions') +
       '</div></div>';
 
     if (!rows.length) {
@@ -3073,14 +3073,14 @@ function paydayCard(d) {
     openBg();
     $('sheetDetail').hidden = false;
     $('sheetDetail').dataset.kind = 'list';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Income plan</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Income plan</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="empty" style="padding:0 0 12px;font-size:12px">How your monthly income is split. Needs + Wants + Savings should add up to 100%.</div>' +
       '<div class="fld"><label>Needs (%)</label><input id="pNeeds" class="mono" inputmode="numeric" value="' + p.needs + '"></div>' +
       '<div class="fld"><label>Wants (%)</label><input id="pWants" class="mono" inputmode="numeric" value="' + p.wants + '"></div>' +
       '<div class="fld"><label>Savings (%)</label><input id="pSav" class="mono" inputmode="numeric" value="' + p.savings + '"></div>' +
       '<div class="err" id="pErr"></div>' +
       '<button class="btn" data-act="plan-save">Save plan</button>' +
-      '<div class="empty" style="padding:10px 0 0;font-size:11px">Categories are grouped automatically: bills, transport, groceries and health → Needs; dining, fun and shopping → Wants.</div>';
+      '<div class="empty" style="padding:10px 0 0;font-size:11px">Categories are grouped automatically: bills, transport, groceries and health â†’ Needs; dining, fun and shopping â†’ Wants.</div>';
   }
 
   function openBudgetForm(cat) {
@@ -3088,7 +3088,7 @@ function paydayCard(d) {
     var d = state.data || {}, cats = (d.options && d.options.expense) || [], cur = null;
     (d.budgets || []).forEach(function (b) { if (b.name === cat) cur = b; });
     var opts = cats.map(function (c) { return '<option value="' + esc(c) + '"' + (c === cat ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cat ? 'Edit budget' : 'New budget') + '</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>' + (cat ? 'Edit budget' : 'New budget') + '</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
       '<div class="fld"><label for="bcat">Category</label><select id="bcat">' + opts + '</select></div>' +
       '<div class="fld"><label for="blim">Monthly limit</label><input id="blim" class="mono" inputmode="numeric" placeholder="500.000" value="' + (cur ? cur.limit : '') + '"></div>' +
       '<div class="err" id="bErr"></div><button class="btn" data-act="budget-save">Save budget</button>';
@@ -3199,31 +3199,31 @@ function paydayCard(d) {
   function openReview() {
     if (!connected()) return;
     openBg(); $('sheetDetail').hidden = false;
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
-      '<div class="empty" style="padding:18px 2px">Loading notifications…</div>';
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
+      '<div class="empty" style="padding:18px 2px">Loading notificationsâ€¦</div>';
     api('review_list').then(function (r) {
       if (!r || !r.ok) {
-        $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+        $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
           '<div class="err">' + esc((r && r.error) || 'Could not load notifications') + '</div>';
         return;
       }
       state.review = r.items || [];
       renderReview();
     }).catch(function () {
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Needs review</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>' +
         '<div class="err">Cannot reach the server. Check your connection.</div>';
     });
   }
   function renderReview() {
-    var items = state.review || [], h = '<div class="grab"></div><h3><span>Needs review (' + items.length + ')</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>';
-    if (!items.length) h += '<div class="empty" style="padding:18px 2px">Nothing waiting for review. 🎉</div>';
+    var items = state.review || [], h = '<div class="grab"></div><h3><span>Needs review (' + items.length + ')</span><button class="iconbtn" data-close aria-label="Close">âœ•</button></h3>';
+    if (!items.length) h += '<div class="empty" style="padding:18px 2px">Nothing waiting for review. ðŸŽ‰</div>';
     else {
       h += '<div class="empty" style="padding:0 2px 12px;font-size:12px">These notifications could not be read automatically. Tap <b>Add</b> to save one as a transaction, or <b>Dismiss</b> if it is not a transaction.</div>';
       var zeros = items.filter(function (x) { return !x.amount; });
       if (zeros.length) h += '<button class="btn ghost" data-act="rev-bulk" style="margin-bottom:12px">Dismiss ' + zeros.length + (zeros.length === 1 ? ' notification' : ' notifications') + ' without an amount</button>';
       items.forEach(function (it, i) {
         h += '<div class="revitem"><div class="revtext">' + esc(it.text) + '</div><div class="revmeta">' + esc(it.reason || '') +
-          (it.amount ? ' · suggested: ' + esc(it.kategori || '?') + ' ' + rp(it.amount) : '') + '</div>' +
+          (it.amount ? ' Â· suggested: ' + esc(it.kategori || '?') + ' ' + rp(it.amount) : '') + '</div>' +
           '<div class="revbtns"><button class="btn" data-act="rev-add" data-i="' + i + '">Add</button>' +
           '<button class="btn ghost" data-act="rev-del" data-i="' + i + '">Dismiss</button></div></div>';
       });
@@ -3236,7 +3236,7 @@ function paydayCard(d) {
     state.reviewRow = it.row;
     $('addTitle').textContent = 'Add from notification';
     $('revNote').hidden = false;
-    $('revNote').innerHTML = '<b>From notification ' + esc(it.source || 'bank') + (it.when ? ' · ' + esc(it.when) : '') + '</b>' + esc(it.text.slice(0, 160));
+    $('revNote').innerHTML = '<b>From notification ' + esc(it.source || 'bank') + (it.when ? ' Â· ' + esc(it.when) : '') + '</b>' + esc(it.text.slice(0, 160));
     $('desc').value = (it.merchant || it.text).slice(0, 80);
     if (it.amount) $('amt').value = grp(it.amount);
     if (it.when && it.when <= todayStr()) $('tgl').value = it.when;
@@ -3250,7 +3250,7 @@ function paydayCard(d) {
     var it = (state.review || [])[i]; if (!it) return;
     if (!confirm('Dismiss this notification without recording it?')) return;
     api('review_discard', { row: it.row }).then(function (r) {
-      if (r && r.ok) { state.review.splice(i, 1); renderReview(); toast('🗑️ Notification dismissed'); loadMonth(state.month, { silent: true }); }
+      if (r && r.ok) { state.review.splice(i, 1); renderReview(); toast('ðŸ—‘ï¸ Notification dismissed'); loadMonth(state.month, { silent: true }); }
       else toast((r && r.error) || 'Could not dismiss');
     }).catch(function () { toast('Cannot reach the server'); });
   }
@@ -3262,8 +3262,8 @@ function paydayCard(d) {
     var jam = String(d0.getHours()).padStart(2, '0') + ':' + String(d0.getMinutes()).padStart(2, '0');
     var now = new Date();
     var samaHari = d0.getFullYear() === now.getFullYear() && d0.getMonth() === now.getMonth() && d0.getDate() === now.getDate();
-    if (samaHari) return 'Hari ini · ' + jam;
-    return d0.getDate() + ' ' + bulan[d0.getMonth()] + ' ' + d0.getFullYear() + ' · ' + jam;
+    if (samaHari) return 'Hari ini Â· ' + jam;
+    return d0.getDate() + ' ' + bulan[d0.getMonth()] + ' ' + d0.getFullYear() + ' Â· ' + jam;
   }
 
   function openDetail(id, confirmDel) {
@@ -3272,9 +3272,9 @@ function paydayCard(d) {
     if (!t) return;
     var inc = t.tipe === 'Masuk' && !t.loan;
     function row(k, v) { return '<div class="kv"><span style="color:var(--mut)">' + k + '</span><span style="text-align:right">' + esc(v) + '</span></div>'; }
-    var backBtn = sheetStack.length ? '<button class="iconbtn" data-act="sheet-back" aria-label="Back">←</button>' : '';
+    var backBtn = sheetStack.length ? '<button class="iconbtn" data-act="sheet-back" aria-label="Back">â†</button>' : '';
     $('sheetDetail').dataset.kind = 'detail';
-    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><span style="display:inline-flex;gap:6px">' + backBtn + '<button class="iconbtn" data-close aria-label="Close">✕</button></span></h3>' +
+    $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Details</span><span style="display:inline-flex;gap:6px">' + backBtn + '<button class="iconbtn" data-close aria-label="Close">âœ•</button></span></h3>' +
       '<div style="text-align:center;margin:4px 0 14px"><div class="ico" style="margin:0 auto 8px;width:52px;height:52px;font-size:26px">' + esc(t.emoji) + '</div>' +
       '<div style="font-weight:700;font-size:17px">' + esc(t.desc) + '</div><div class="mono ' + (t.loan ? 'warn' : (inc ? 'pos' : '')) + '" style="font-size:28px;margin-top:4px">' + (inc ? '+' : '') + rp(t.amount) + '</div></div>' +
       row('Date', dlabel(t.date) + ' ' + t.date.slice(0, 4)) +
@@ -3341,12 +3341,12 @@ function paydayCard(d) {
     if (editing) { p.id = state.editId; p.remember = !$('rememberBox').hidden && $('remember').checked; }
     LS.set('ck_last_met', p.metode || ''); LS.set('ck_last_kat', p.kategori || '');
     var fromReview = state.reviewRow; if (fromReview) p.row = fromReview;
-    btn.disabled = true; btn.textContent = 'Menyimpan…';
+    btn.disabled = true; btn.textContent = 'Menyimpanâ€¦';
     function done() { btn.disabled = false; btn.textContent = label; }
     api(editing ? 'update' : (fromReview ? 'review_add' : 'add'), p).then(function (r) {
       done();
       if (r && r.ok) {
-        closeSheets(); toast('✅ ' + (r.msg || 'Saved')); state.busy = false;
+        closeSheets(); toast('âœ… ' + (r.msg || 'Saved')); state.busy = false;
         showPraise({ cat: p.kategori, isEdit: !!editing, pct: budgetPctOf(p.kategori, editing ? 0 : p.amount), streak: (state.data && state.data.streak) || 0 });
         loadMonth(state.month, { silent: true });
       }
@@ -3356,7 +3356,7 @@ function paydayCard(d) {
       done();
       if (e.code === 'NET') {
         if (editing) { $('formErr').textContent = 'You need internet to save changes.'; return; }
-        state.pending.push(p); persistPending(); closeSheets(); toast('📥 Saved on this phone, will send when you have signal'); renderAll();
+        state.pending.push(p); persistPending(); closeSheets(); toast('ðŸ“¥ Saved on this phone, will send when you have signal'); renderAll();
       } else $('formErr').textContent = 'The Web App did not respond correctly.';
     });
   });
@@ -3387,7 +3387,7 @@ function paydayCard(d) {
       var recSwipe = null;
       ((state.data && state.data.recent) || []).forEach(function (x) { if (x.id === id) recSwipe = x; });
       api('delete', { id: id }).then(function (r) {
-        if (r && r.ok) { toast('🗑️ Dihapus', 'Urungkan', function () { undoDelete(recSwipe); }); loadMonth(state.month, { silent: true }); }
+        if (r && r.ok) { toast('ðŸ—‘ï¸ Dihapus', 'Urungkan', function () { undoDelete(recSwipe); }); loadMonth(state.month, { silent: true }); }
         else toast((r && r.error) || 'Could not delete');
       }).catch(function () { toast('Cannot reach the server'); });
     }
@@ -3435,7 +3435,7 @@ function paydayCard(d) {
     var cat = s.getAttribute('data-bucket'), val = s.value;
     saveSetting('bucket:' + cat, val).then(function (r) {
       if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
-      toast(cat + ' → ' + (val === 'needs' ? 'Needs' : val === 'wants' ? 'Wants' : 'Not counted'));
+      toast(cat + ' â†’ ' + (val === 'needs' ? 'Needs' : val === 'wants' ? 'Wants' : 'Not counted'));
       afterSettings();
     }).catch(function () { toast('Cannot reach the server'); });
   });
@@ -3451,7 +3451,7 @@ function paydayCard(d) {
       var next = cur === 'needs' ? 'wants' : cur === 'wants' ? 'off' : 'needs';
       saveSetting('bucket:' + bc, next).then(function (r) {
         if (!r || !r.ok) { toast((r && r.error) || 'Could not save'); return; }
-        toast(bc + ' → ' + (next === 'needs' ? 'Needs' : next === 'wants' ? 'Wants' : 'Not counted'));
+        toast(bc + ' â†’ ' + (next === 'needs' ? 'Needs' : next === 'wants' ? 'Wants' : 'Not counted'));
         afterSettings();
       }).catch(function () { toast('Cannot reach the server'); });
     }
@@ -3474,7 +3474,7 @@ function paydayCard(d) {
       el.disabled = true;
       api('goal_set', { nama: gn, target: $('gTarget').value, terkumpul: $('gSaved').value, tenggat: $('gDue').value }).then(function (r) {
         el.disabled = false;
-        if (r && r.ok) { closeSheets(); toast('🎯 Goal disimpan'); var pz0 = loadMonth(state.month, { silent: true }); if (pz0 && pz0.then) pz0.then(renderAll); }
+        if (r && r.ok) { closeSheets(); toast('ðŸŽ¯ Goal disimpan'); var pz0 = loadMonth(state.month, { silent: true }); if (pz0 && pz0.then) pz0.then(renderAll); }
         else $('gErr').textContent = (r && r.error) || 'Gagal';
       }).catch(function () { el.disabled = false; $('gErr').textContent = 'Tidak bisa terhubung'; });
     }
@@ -3537,7 +3537,7 @@ function paydayCard(d) {
     }
     else if (act === 'ai') {
       var out = $('aiOut'); if (!out) return;
-      out.hidden = false; out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your month…</div>';
+      out.hidden = false; out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your monthâ€¦</div>';
       var aiUrl = PUSH_ENDPOINT ? PUSH_ENDPOINT.replace(/\/api\/push\/?$/, '/api/ai/insight') : '';
       if (!aiUrl) { out.textContent = 'AI advisor is not configured.'; return; }
       fetch(aiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ digest: buildDigest() }) })
@@ -3560,9 +3560,9 @@ function paydayCard(d) {
     }
     else if (act === 'cats-toggle') { state.catsAll = !state.catsAll; renderAll(); }
     else if (act === 'no-spend') {
-      el.disabled = true; el.textContent = 'Saving…';
+      el.disabled = true; el.textContent = 'Savingâ€¦';
       api('no_spend', {}).then(function (r) {
-        if (r && r.ok) { toast('✅ Marked: no spending today'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
+        if (r && r.ok) { toast('âœ… Marked: no spending today'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
         else { el.disabled = false; el.textContent = 'No spending today'; toast((r && r.error) || 'Could not save'); }
       }).catch(function () { el.disabled = false; el.textContent = 'No spending today'; toast('Cannot reach the server'); });
     }
@@ -3637,22 +3637,22 @@ function paydayCard(d) {
         else setTimeout(function () { openDetail(jid, false); }, 800);
       } else openDetail(jid, false);
     }
-    else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Reloading…'); }
+    else if (act === 'sync') { loadMonth(state.month, { silent: true, manual: true }); toast('Reloadingâ€¦'); }
     else if (act === 'test-capture') testCapture();
     else if (act === 'push-test') {
-      toast('Sending test push…');
+      toast('Sending test pushâ€¦');
       pushApi('test', { token: state.token }).then(function (r) {
-        if (r && r.ok) toast('✅ Test push sent (' + r.sent + ')');
-        else if (r && r.sent === 0) toast('⚠️ No subscription yet, turn notifications on first');
+        if (r && r.ok) toast('âœ… Test push sent (' + r.sent + ')');
+        else if (r && r.sent === 0) toast('âš ï¸ No subscription yet, turn notifications on first');
         else toast((r && r.error) || 'Could not send the test push');
       }).catch(function () { toast('Cannot reach the notification server'); });
     }
     else if (act === 'purge') {
       if (!confirm('Remove leftover deleted rows from the sheet? Copies already sit in the Trash tab.')) return;
-      el.disabled = true; el.textContent = 'Tidying…';
+      el.disabled = true; el.textContent = 'Tidyingâ€¦';
       api('purge_deleted', {}).then(function (r) {
         el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)';
-        if (r && r.ok) { toast('🧹 ' + (r.removed || 0) + ' row(s) removed'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
+        if (r && r.ok) { toast('ðŸ§¹ ' + (r.removed || 0) + ' row(s) removed'); var pz = loadMonth(state.month, { silent: true }); if (pz && pz.then) pz.then(renderAll); }
         else toast((r && r.error) || 'Could not tidy');
       }).catch(function () { el.disabled = false; el.textContent = 'Tidy sheet (remove deleted rows)'; toast('Cannot reach the server'); });
     }
@@ -3680,12 +3680,12 @@ function paydayCard(d) {
       toast(state.hide.all ? 'Semua nominal disembunyikan' : 'Nominal ditampilkan');
     }
     else if (act === 'ping') {
-      toast('Checking server…');
+      toast('Checking serverâ€¦');
       api('ping').then(function (r) {
-        toast(r && r.ok ? '✅ Server version ' + r.v : '⚠️ Server not updated yet (old script)');
+        toast(r && r.ok ? 'âœ… Server version ' + r.v : 'âš ï¸ Server not updated yet (old script)');
       }).catch(function () { toast('Cannot reach the server'); });
     }
-    else if (act === 'flush') { flushPending(); toast('Mengirim…'); }
+    else if (act === 'flush') { flushPending(); toast('Mengirimâ€¦'); }
     else if (act === 'pin-set') openPinSetup();
     else if (act === 'pin-off') { if (confirm('Remove PIN? The app will open without a lock.')) { LS.del('ck_pin'); renderAll(); toast('PIN removed'); } }
     else if (act === 'clear') { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('ck_cache_') === 0) LS.del(k); }); LS.del('ck_lastmonth'); toast('Saved data cleared'); }
@@ -3720,9 +3720,9 @@ function paydayCard(d) {
     var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
     if (act === 'edit') openEdit(id);
     else if (act === 'flag-ok') {
-      el.disabled = true; el.textContent = 'Marking…';
+      el.disabled = true; el.textContent = 'Markingâ€¦';
       api('flag_clear', { id: id }).then(function (r) {
-        if (r && r.ok) { closeSheets(); toast('✅ Marked as checked'); loadMonth(state.month, { silent: true }); }
+        if (r && r.ok) { closeSheets(); toast('âœ… Marked as checked'); loadMonth(state.month, { silent: true }); }
         else { el.disabled = false; el.textContent = 'Mark as checked'; toast((r && r.error) || 'Could not update the entry'); }
       }).catch(function () {
         el.disabled = false; el.textContent = 'Mark as checked'; toast('Cannot reach the server');
@@ -3737,7 +3737,7 @@ function paydayCard(d) {
       api('review_discard_bulk', { rows: zeros.map(function (x) { return x.row; }) }).then(function (res) {
         if (res && res.ok) {
           state.review = (state.review || []).filter(function (x) { return x.amount; });
-          renderReview(); toast('🗑️ ' + (res.count || zeros.length) + ' notifications dismissed');
+          renderReview(); toast('ðŸ—‘ï¸ ' + (res.count || zeros.length) + ' notifications dismissed');
           loadMonth(state.month, { silent: true });
         } else toast((res && res.error) || 'Could not dismiss');
       }).catch(function () { toast('Cannot reach the server'); });
@@ -3757,13 +3757,13 @@ function paydayCard(d) {
       var pn = el.getAttribute('data-name');
       var amt = String($('cpAmt').value).replace(/\D/g, '');
       if (!amt || Number(amt) <= 0) { $('cpErr').textContent = 'Enter the amount paid'; return; }
-      el.disabled = true; el.textContent = 'Recording…';
+      el.disabled = true; el.textContent = 'Recordingâ€¦';
       api('cicilan_pay', { nama: pn, amount: Number(amt), metode: $('cpMet').value, tanggal: $('cpDate').value })
         .then(function (r) {
           if (r && r.ok) {
             LS.set('ck_last_met', $('cpMet').value || 'Transfer');
             closeSheets();
-            toast(r.left > 0 ? '✅ Paid, ' + r.left + ' months left' : '🎉 Instalment finished');
+            toast(r.left > 0 ? 'âœ… Paid, ' + r.left + ' months left' : 'ðŸŽ‰ Instalment finished');
             var pr4 = loadMonth(state.month, { silent: true });
             if (pr4 && pr4.then) pr4.then(renderAll); else renderAll();
           } else { el.disabled = false; el.textContent = 'Record payment'; $('cpErr').textContent = (r && r.error) || 'Could not record'; }
@@ -3773,18 +3773,18 @@ function paydayCard(d) {
       var from = $('tFrom').value, to = $('tTo').value, amt = String($('tAmt').value).replace(/\D/g, '');
       if (from === to) { $('tErr').textContent = 'Pick two different wallets'; return; }
       if (!amt || Number(amt) <= 0) { $('tErr').textContent = 'Enter the amount'; return; }
-      el.disabled = true; el.textContent = 'Moving…';
+      el.disabled = true; el.textContent = 'Movingâ€¦';
       api('transfer_add', { dari: from, ke: to, jumlah: Number(amt), tanggal: $('tDate').value }).then(function (r) {
-        if (r && r.ok) { closeSheets(); toast('✅ ' + rp(amt) + ' moved'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
+        if (r && r.ok) { closeSheets(); toast('âœ… ' + rp(amt) + ' moved'); var p0 = loadMonth(state.month, { silent: true }); if (p0 && p0.then) p0.then(renderAll); }
         else { el.disabled = false; el.textContent = 'Move money'; $('tErr').textContent = (r && r.error) || 'Could not move'; }
       }).catch(function () { el.disabled = false; el.textContent = 'Move money'; $('tErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'wallet-save') {
       var wn = $('wName').value.trim();
       if (!wn) { $('wErr').textContent = 'Give the wallet a name'; return; }
-      el.disabled = true; el.textContent = 'Saving…';
+      el.disabled = true; el.textContent = 'Savingâ€¦';
       api('dompet_set', { nama: wn, jenis: $('wKind').value, saldo: $('wBal').value }).then(function (r) {
-        if (r && r.ok) { closeSheets(); toast('✅ Wallet saved'); var p1 = loadMonth(state.month, { silent: true }); if (p1 && p1.then) p1.then(renderAll); }
+        if (r && r.ok) { closeSheets(); toast('âœ… Wallet saved'); var p1 = loadMonth(state.month, { silent: true }); if (p1 && p1.then) p1.then(renderAll); }
         else { el.disabled = false; el.textContent = 'Save wallet'; $('wErr').textContent = (r && r.error) || 'Could not save'; }
       }).catch(function () { el.disabled = false; el.textContent = 'Save wallet'; $('wErr').textContent = 'Cannot reach the server'; });
     }
@@ -3794,20 +3794,20 @@ function paydayCard(d) {
       var unitSel = $('aUnit') ? $('aUnit').value : 'lembar';
       var qty = Number(String($('aUnits').value).replace(/\D/g, '')) || 0;
       if (unitSel === 'lot') qty = qty * 100;   // 1 lot IDX = 100 lembar
-      el.disabled = true; el.textContent = 'Saving…';
+      el.disabled = true; el.textContent = 'Savingâ€¦';
       api('aset_set', { jenis: $('aKind').value, kode: ak, nama: $('aName').value, jumlah: qty, hargaBeli: $('aBuy').value, hargaKini: $('aNow').value })
         .then(function (r) {
-          if (r && r.ok) { closeSheets(); toast('✅ Asset saved'); var p2b = loadMonth(state.month, { silent: true }); if (p2b && p2b.then) p2b.then(renderAll); }
+          if (r && r.ok) { closeSheets(); toast('âœ… Asset saved'); var p2b = loadMonth(state.month, { silent: true }); if (p2b && p2b.then) p2b.then(renderAll); }
           else { el.disabled = false; el.textContent = 'Save asset'; $('aErr').textContent = (r && r.error) || 'Could not save'; }
         }).catch(function () { el.disabled = false; el.textContent = 'Save asset'; $('aErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'cicilan-save') {
       var nm = String($('ciName').value || '').trim();
       if (!nm) { $('ciErr').textContent = 'Give the instalment a name'; return; }
-      el.disabled = true; el.textContent = 'Saving…';
+      el.disabled = true; el.textContent = 'Savingâ€¦';
       api('cicilan_add', { nama: nm, per: $('ciPer').value, tenor: $('ciTenor').value, paid: $('ciPaid').value, due: $('ciDue').value })
         .then(function (r) {
-          if (r && r.ok) { closeSheets(); toast('✅ Instalment saved'); var pr3 = loadMonth(state.month, { silent: true }); if (pr3 && pr3.then) pr3.then(renderAll); }
+          if (r && r.ok) { closeSheets(); toast('âœ… Instalment saved'); var pr3 = loadMonth(state.month, { silent: true }); if (pr3 && pr3.then) pr3.then(renderAll); }
           else { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = (r && r.error) || 'Could not save'; }
         }).catch(function () { el.disabled = false; el.textContent = 'Save instalment'; $('ciErr').textContent = 'Cannot reach the server'; });
     }
@@ -3832,16 +3832,16 @@ function paydayCard(d) {
     else if (act === 'budget-save') {
       var bcat = $('bcat').value, blim = String($('blim').value).replace(/\D/g, '');
       if (!blim) { $('bErr').textContent = 'Enter a monthly limit'; return; }
-      el.disabled = true; el.textContent = 'Saving…';
+      el.disabled = true; el.textContent = 'Savingâ€¦';
       api('budget_set', { kategori: bcat, limit: Number(blim) }).then(function (r) {
-        if (r && r.ok) { toast('✅ Budget saved'); afterBudgetChange(); }
+        if (r && r.ok) { toast('âœ… Budget saved'); afterBudgetChange(); }
         else { el.disabled = false; el.textContent = 'Save budget'; $('bErr').textContent = (r && r.error) || 'Could not save'; }
       }).catch(function () { el.disabled = false; el.textContent = 'Save budget'; $('bErr').textContent = 'Cannot reach the server'; });
     }
     else if (act === 'ai') {
       var out = $('aiOut'); if (!out) return;
       out.hidden = false;
-      out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your month…</div>';
+      out.innerHTML = '<div class="revtext" style="font-weight:400">Reading your monthâ€¦</div>';
       var aiUrl = PUSH_ENDPOINT ? PUSH_ENDPOINT.replace(/\/api\/push\/?$/, '/api/ai/insight') : '';
       if (!aiUrl) { out.textContent = 'AI advisor is not configured.'; return; }
       fetch(aiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ digest: buildDigest() }) })
@@ -3856,17 +3856,17 @@ function paydayCard(d) {
     else if (act === 'sheet-back') { sheetBack(); }
     else if (act === 'pin-save') {
       var p1 = $('pin1').value.trim(), p2 = $('pin2').value.trim();
-      if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN must be 4–6 digits'; return; }
+      if (!/^\d{4,6}$/.test(p1)) { $('pinErr2').textContent = 'PIN must be 4â€“6 digits'; return; }
       if (p1 !== p2) { $('pinErr2').textContent = 'PINs do not match'; return; }
-      pinHash(p1, function (hv) { LS.set('ck_pin', hv); closeSheets(); toast('🔒 PIN enabled'); renderAll(); });
+      pinHash(p1, function (hv) { LS.set('ck_pin', hv); closeSheets(); toast('ðŸ”’ PIN enabled'); renderAll(); });
     }
     else if (act === 'del0') openDetail(id, false);
     else if (act === 'del2') {
-      el.disabled = true; el.textContent = 'Menghapus…';
+      el.disabled = true; el.textContent = 'Menghapusâ€¦';
       var recDel = null;
       ((state.data && state.data.recent) || []).forEach(function (x) { if (x.id === id) recDel = x; });
       api('delete', { id: id }).then(function (r) {
-        if (r && r.ok) { closeSheets(); toast('🗑️ Dihapus', 'Urungkan', function () { undoDelete(recDel); }); loadMonth(state.month, { silent: true }); }
+        if (r && r.ok) { closeSheets(); toast('ðŸ—‘ï¸ Dihapus', 'Urungkan', function () { undoDelete(recDel); }); loadMonth(state.month, { silent: true }); }
         else { $('delErr').textContent = (r && r.error) || 'Could not delete'; el.disabled = false; el.textContent = 'Yes, delete this entry'; }
       }).catch(function (e2) { $('delErr').textContent = e2.code === 'NET' ? 'You need internet to delete.' : 'Delete failed.'; el.disabled = false; el.textContent = 'Yes, delete this entry'; });
     }
@@ -3880,16 +3880,16 @@ function paydayCard(d) {
 
   function connect() {
     var url = $('sUrl').value.trim().replace(/\/macros\/u\/\d+\/s\//, '/macros/s/'), tok = $('sTok').value.trim();
-    if (!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/)?macros\/s\/[^/]+\/exec$/.test(url)) { $('sErr').textContent = 'The address must look like https://script.google.com/macros/s/…/exec'; return; }
+    if (!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+\/)?macros\/s\/[^/]+\/exec$/.test(url)) { $('sErr').textContent = 'The address must look like https://script.google.com/macros/s/â€¦/exec'; return; }
     if (!tok) { $('sErr').textContent = 'Enter the secret code'; return; }
-    var go = $('sGo'); go.disabled = true; go.textContent = 'Menghubungkan…'; $('sErr').textContent = '';
+    var go = $('sGo'); go.disabled = true; go.textContent = 'Menghubungkanâ€¦'; $('sErr').textContent = '';
     state.url = url; state.token = tok;
     api('data', { month: '' }).then(function (d) {
       go.disabled = false; go.textContent = 'Hubungkan';
       if (d && d.ok) {
         LS.set('ck_url', url); LS.set('ck_token', tok); state.setupMsg = ''; state.data = d; state.month = d.month; state.fromCache = false;
         LS.set(cacheKey(d.month), JSON.stringify(d)); pruneCache(6); LS.set('ck_lastmonth', d.month); state.lastSync = new Date().toISOString(); LS.set('ck_sync', state.lastSync);
-        state.tab = 'ringkasan'; renderAll(); toast('✅ Connected');
+        state.tab = 'ringkasan'; renderAll(); toast('âœ… Connected');
       } else { state.token = ''; $('sErr').textContent = d && d.error === 'auth' ? 'Wrong secret code.' : ((d && d.error) || 'Could not connect'); }
     }).catch(function (e) {
       go.disabled = false; go.textContent = 'Hubungkan'; state.token = '';
@@ -3902,15 +3902,15 @@ function paydayCard(d) {
   document.addEventListener('touchstart', function (e) { ptrY = (window.scrollY <= 0 && e.touches.length === 1 && !sheetOpen() && connected()) ? e.touches[0].clientY : null; ptrDy = 0; }, { passive: true });
   document.addEventListener('touchmove', function (e) {
     if (ptrY == null) return; ptrDy = e.touches[0].clientY - ptrY;
-    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? '↑ Release to refresh' : '↓ Pull to refresh'; p.classList.toggle('pull90', ptrDy > 90); }
+    if (ptrDy > 8) { var p = $('ptr'); p.style.transform = 'translateY(' + Math.min(ptrDy * 0.4, 46) + 'px)'; p.style.opacity = Math.min(ptrDy / 90, 1); p.textContent = ptrDy > 90 ? 'â†‘ Release to refresh' : 'â†“ Pull to refresh'; p.classList.toggle('pull90', ptrDy > 90); }
   }, { passive: true });
   document.addEventListener('touchend', function () {
     var p = $('ptr'); p.style.opacity = 0; p.style.transform = ''; p.classList.remove('pull90');
-    if (ptrY != null && ptrDy > 90) { toast('Reloading…'); loadMonth(state.month, { silent: true, manual: true }); }
+    if (ptrY != null && ptrDy > 90) { toast('Reloadingâ€¦'); loadMonth(state.month, { silent: true, manual: true }); }
     ptrY = null; ptrDy = 0;
   });
 
-  // Bulan hanya berpindah lewat tombol ‹ › (gestur geser dihapus: bertabrakan dengan kartu & mudah tersenggol).
+  // Bulan hanya berpindah lewat tombol â€¹ â€º (gestur geser dihapus: bertabrakan dengan kartu & mudah tersenggol).
   var monthLbl = document.querySelector('.monthbar .lbl');
   if (monthLbl) monthLbl.addEventListener('click', function () {
     if (!state.data) return;
@@ -3929,7 +3929,7 @@ function paydayCard(d) {
     var el = $('offbar'); if (!el) return;
     if (navigator.onLine) { el.hidden = true; return; }
     var n = (state.pending || []).length;
-    el.textContent = n ? 'Offline · ' + n + ' waiting to send' : 'Offline · showing saved data';
+    el.textContent = n ? 'Offline Â· ' + n + ' waiting to send' : 'Offline Â· showing saved data';
     el.hidden = false;
   }
   window.addEventListener('offline', function () { updateOffline(); toast('Offline, new entries stay on this phone'); });
@@ -3944,7 +3944,7 @@ function paydayCard(d) {
       'Scroll down and choose <b>Add to Home Screen</b>, then <b>Add</b>'
     ];
     if (/Android/i.test(navigator.userAgent)) return [
-      'Open the browser menu (<b>⋮</b>) at the top right',
+      'Open the browser menu (<b>â‹®</b>) at the top right',
       'Choose <b>Install app</b> or <b>Add to Home screen</b>',
       'Confirm, Bamboo gets its own icon'
     ];
@@ -3964,7 +3964,7 @@ function paydayCard(d) {
       }).join('');
       openBg();
       $('sheetDetail').hidden = false;
-      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">✕</button></h3>' +
+      $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Install Bamboo</span><button class="iconbtn" data-act="install-ok" aria-label="Close">âœ•</button></h3>' +
         '<div class="empty" style="padding:0 0 14px">Add it to your Home Screen, it then opens full screen, works offline, and can send notifications.</div>' +
         steps +
         '<button class="btn" data-act="install-ok" style="margin-top:16px">Got it</button>' +
