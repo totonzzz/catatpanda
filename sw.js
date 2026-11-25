@@ -55,3 +55,4 @@ self.addEventListener('notificationclick', function (e) {
     return self.clients.openWindow('./');
   }));
 });
+/* rebuild-nudge */
