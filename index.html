@@ -740,7 +740,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '3.89';
+  var VERSION = '3.90';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1262,7 +1262,7 @@ function paydayCard(d) {
         '<span style="font-size:12px;color:var(--mut)">Safe to spend per day</span>' +
         '<b class="mono" style="font-size:15px">' + rp(perDay) + '</b></div>' +
       '<div class="hbar" style="margin-top:12px"><span style="width:' + pct + '%"></span></div>' +
-      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div><button type="button" class="cchit" data-act="wallet-flip" data-i="' + i + '" aria-label="Buka dompet ' + esc(a.name) + '"></button></div>';
+      '<div class="empty" style="padding:6px 0 0;font-size:10.5px">Period ' + info.start.getDate() + ' ' + months[info.start.getMonth()] + ' → ' + info.date.getDate() + ' ' + months[info.date.getMonth()] + ' · payday ' + (paydayMode() === 'fixed' ? 'every ' + payday() + 'th' : 'on the last weekday of the month') + '</div></div>';
   }
 
   function syncNav() {
@@ -1596,7 +1596,7 @@ function paydayCard(d) {
           '<div class="cc-chip"></div></div>' +
         '<div><div class="em-lbl">Balance</div><div class="em-amt">' + rp(a.balance) + '</div>' +
           '<div class="em-type">start ' + rp(a.opening) + ' · ' + (a.masuk ? '+' + rp(a.masuk) : '–') + ' / ' + (a.keluar ? '−' + rp(a.keluar) : '–') + '</div></div>' +
-        '</div>';
+        '<button type="button" class="cchit" data-act="wallet-flip" data-i="' + i + '" aria-label="Buka dompet ' + esc(a.name) + '"></button></div>';
     });
     h += '</div><div class="cc-hint">Tap the front card to flip through</div></div>';
     return h;
