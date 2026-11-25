@@ -737,7 +737,7 @@ body.dark{
 .cc-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1}
 .cc-mark img{height:16px;width:auto;max-width:96px;display:block;filter:brightness(0) invert(1);opacity:.92}
 .cc-mark span{font-weight:800;font-size:12px;letter-spacing:.06em}
-.cc::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.10;
+.cc::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.055;
   background:repeating-linear-gradient(135deg, rgba(255,255,255,.9) 0 2px, transparent 2px 16px)}
 </style>
 </head>
@@ -820,7 +820,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.06';
+  var VERSION = '4.07';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
