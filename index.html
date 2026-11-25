@@ -806,7 +806,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.01';
+  var VERSION = '4.04';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1281,6 +1281,7 @@ body.dark{
       '<div class="err" id="rcErr"></div>' +
       '<button class="btn" data-act="recurring-save">Simpan</button>' +
       (cur ? '<button class="btn ghost" data-act="recurring-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus tagihan</button>' : '');
+    sheetFormActs();
   }
 
   function openCardMetaForm() {
@@ -1298,6 +1299,7 @@ body.dark{
     $('sheetDetail').innerHTML = '<div class="grab"></div><h3><span>Limit & biaya tahunan</span><button class="iconbtn" data-close aria-label="Close">✕</button></h3>' +
       '<div class="empty" style="padding:0 0 6px;font-size:12px">Isi limit supaya pemakaian kartu muncul dalam persen. Isi tanggal biaya tahunan untuk pengingat.</div>' +
       rows + '<div class="err" id="cmErr"></div><button class="btn" data-act="card-meta-save" style="margin-top:12px">Simpan</button>';
+    sheetFormActs();
   }
 
   function budgetAlertCard(d) {
@@ -1452,6 +1454,7 @@ function paydayCard(d) {
   }
 
   function autoTapable() {
+    if (typeof MutationObserver !== 'function') return;
     var pending = false;
     var run = function () { pending = false; makeTapable(); };
     new MutationObserver(function () {
@@ -2160,9 +2163,6 @@ function paydayCard(d) {
       '<div class="fld"><label>Tenggat (opsional)</label><input id="gDue" type="date" value="' + esc(cur ? cur.due : '') + '"></div>' +
       '<div class="err" id="gErr"></div><button class="btn" data-act="goal-save" data-name="' + esc(cur ? cur.name : '') + '">Simpan goal</button>' +
       (cur ? '<button class="btn ghost" data-act="goal-del" data-name="' + esc(cur.name) + '" style="margin-top:8px;color:var(--coral)">Hapus goal</button>' : '');
-    sheetFormActs();
-  keyboardTap();
-  autoTapable();
   }
   function openSubForm(name) {
     var d0 = state.data || {}, cur = null;
@@ -2262,6 +2262,7 @@ function paydayCard(d) {
       '<div class="fld"><label for="cpDate">Date</label><input id="cpDate" type="date" value="' + esc((d.today || '').slice(0, 10)) + '"></div>' +
       '<div class="err" id="cpPayErr"></div>' +
       '<button class="btn" data-act="card-pay-save">Pay card</button>';
+    sheetFormActs();
   }
 
   function openTransferForm() {
@@ -4129,6 +4130,9 @@ function paydayCard(d) {
 
   // mulai
   if (LS.get('ck_pin', '')) lockNow();
+  keyboardTap();
+  autoTapable();
+  sheetFormActs();
   applyTheme(THEME);
   if (connected()) loadMonth(''); else renderAll();
   setTimeout(maybeInstallSheet, 2200);
