@@ -781,6 +781,10 @@ body.dark .cc{background:#0C1726 !important;border-color:rgba(193,232,255,.18) !
 .cc-tag{background:rgba(10,24,38,.07) !important;color:var(--tx) !important}
 body.dark .cc-tag{background:rgba(193,232,255,.12) !important}
 .cc-mark img{height:20px}
+
+/* Kartu belakang dalam tumpukan: sedikit lebih terang dan berbingkai */
+.cc:not(.front){background:#F6F8FB !important}
+body.dark .cc:not(.front){background:#152233 !important}
 </style>
 </head>
 <body>
@@ -862,7 +866,7 @@ body.dark .cc-tag{background:rgba(193,232,255,.12) !important}
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.11';
+  var VERSION = '4.12';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1806,7 +1810,7 @@ function paydayCard(d) {
     var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
     for (var i = 0; i < n; i++) {
       var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 1);
-      el.style.transform = 'translateY(' + (vis * 14) + 'px) scale(' + (1 - vis * 0.05).toFixed(3) + ')';
+      el.style.transform = 'translateY(' + (vis * 12) + 'px) scale(' + (1 - vis * 0.03).toFixed(3) + ')';
       el.style.zIndex = String(n - rel);
       el.style.opacity = rel === 0 ? '1' : (rel === 1 ? '0.55' : '0');
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
@@ -1854,7 +1858,7 @@ function paydayCard(d) {
       el.style.opacity = vis >= 3 ? '0' : '1';
       el.style.zIndex = String(100 - rel);
     }
-    deck.style.height = (200 + Math.min(n - 1, 1) * 14 + 8) + 'px';
+    deck.style.height = (190 + Math.min(n - 1, 1) * 12 + 6) + 'px';
   }
 
   function walletsCard(d) {
