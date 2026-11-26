@@ -838,6 +838,19 @@ body.dark .cc-deco{background:radial-gradient(circle at 78% 18%, color-mix(in sr
 .cc .cc-logo{height:24px}
 .cc-badge{background:color-mix(in srgb, var(--brand) 12%, transparent);color:var(--brand)}
 body.dark .cc-badge{background:color-mix(in srgb, var(--brand) 30%, transparent);color:#E9F4FF}
+
+/* Samakan dengan acuan: tanpa baris tipe, chevron di kanan tengah, kartu lebih ringkas */
+.cc{height:174px;padding:16px 18px}
+.cc-row{margin-top:2px}
+.cc-body{margin-top:6px}
+.cc-amount{font-size:28px}
+.cc-bottom{display:none}
+.cc-go{position:absolute;right:16px;top:50%;transform:translateY(-38%);width:34px;height:34px;z-index:2}
+.cc-subline{max-width:78%}
+/* Kartu belakang memakai warna brand seperti acuan */
+.cc:not(.front){background:linear-gradient(150deg,var(--brand),color-mix(in srgb,var(--brand) 55%,#000)) !important;border-color:transparent !important}
+.cc:not(.front) .cc-row,.cc:not(.front) .cc-body{visibility:hidden}
+body.dark .cc:not(.front){background:linear-gradient(150deg,color-mix(in srgb,var(--brand) 70%,#000),color-mix(in srgb,var(--brand) 35%,#000)) !important}
 </style>
 </head>
 <body>
@@ -919,7 +932,7 @@ body.dark .cc-badge{background:color-mix(in srgb, var(--brand) 30%, transparent)
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.16';
+  var VERSION = '4.17';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1919,7 +1932,7 @@ function paydayCard(d) {
       el.style.opacity = vis >= 3 ? '0' : '1';
       el.style.zIndex = String(100 - rel);
     }
-    deck.style.height = (196 + 20 + Math.min(n - 1, 1) * 8 + 6) + 'px';
+    deck.style.height = (174 + 20 + Math.min(n - 1, 1) * 8 + 6) + 'px';
   }
 
   function walletsCard(d) {
