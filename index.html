@@ -787,20 +787,20 @@ body.dark .cc-tag{background:rgba(193,232,255,.12) !important}
 body.dark .cc:not(.front){background:#152233 !important}
 
 /* Kartu kredit gaya wallet card: tumpukan ke atas, permukaan netral, angka besar */
-.ccdeck{margin-top:18px}
-.cc{height:196px;border-radius:24px;padding:16px 18px;overflow:hidden;position:absolute;
+.ccdeck{margin-top:10px;padding-top:20px}
+.cc{height:196px;border-radius:24px;padding:16px 18px;overflow:hidden;position:absolute;top:20px;
   background:#FFFFFF;border:1px solid rgba(10,24,38,.10);color:#0B1B2B;
   box-shadow:0 2px 10px rgba(6,18,32,.07);display:flex;flex-direction:column;justify-content:flex-start}
 body.dark .cc{background:linear-gradient(160deg,#101F31,#0A1522 70%);border-color:rgba(193,232,255,.14);color:#E9F4FF}
 .cc::before,.cc::after{display:none}
-.cc-deco{position:absolute;right:-46px;top:-36px;width:190px;height:190px;border-radius:50%;
-  background:radial-gradient(circle at 32% 32%, rgba(47,111,178,.20), transparent 70%)}
-body.dark .cc-deco{background:radial-gradient(circle at 32% 32%, rgba(111,166,232,.30), transparent 70%)}
+.cc-deco{position:absolute;right:-58px;top:-46px;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 34% 34%, rgba(47,111,178,.13), transparent 72%)}
+body.dark .cc-deco{background:radial-gradient(circle at 34% 34%, rgba(111,166,232,.20), transparent 72%)}
 .cc-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
 .cc-brandrow{display:inline-flex;align-items:center;gap:9px}
 .cc .cc-logo{height:26px;width:auto;max-width:120px;filter:none;opacity:1}
 .cc-fallback{font-weight:800;font-size:15px}
-.cc-bankname{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.cc-bankname{display:none}
 .cc-badge{font-size:11px;font-weight:700;color:#2F6FB2;background:rgba(47,111,178,.13);
   border-radius:var(--r-pill);padding:5px 11px;white-space:nowrap}
 body.dark .cc-badge{color:#C1E8FF;background:rgba(193,232,255,.15)}
@@ -903,7 +903,7 @@ body.dark .cc-tag{background:rgba(193,232,255,.12);color:#E9F4FF}
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.14';
+  var VERSION = '4.15';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1855,7 +1855,7 @@ function paydayCard(d) {
     var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
     for (var i = 0; i < n; i++) {
       var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 1);
-      el.style.transform = 'translateY(-' + (vis * 16) + 'px) scale(' + (1 - vis * 0.05).toFixed(3) + ')';
+      el.style.transform = 'translateY(-' + (vis * 20) + 'px) scale(' + (1 - vis * 0.045).toFixed(3) + ')';
       el.style.zIndex = String(n - rel);
       el.style.opacity = rel === 0 ? '1' : (rel === 1 ? '0.55' : '0');
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
@@ -1903,7 +1903,7 @@ function paydayCard(d) {
       el.style.opacity = vis >= 3 ? '0' : '1';
       el.style.zIndex = String(100 - rel);
     }
-    deck.style.height = (196 + Math.min(n - 1, 1) * 10 + 10) + 'px';
+    deck.style.height = (196 + 20 + Math.min(n - 1, 1) * 8 + 6) + 'px';
   }
 
   function walletsCard(d) {
