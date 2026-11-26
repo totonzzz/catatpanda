@@ -739,6 +739,31 @@ body.dark{
 .cc-mark span{font-weight:800;font-size:12px;letter-spacing:.06em}
 .cc::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.055;
   background:repeating-linear-gradient(135deg, rgba(255,255,255,.9) 0 2px, transparent 2px 16px)}
+
+/* Kartu kredit: permukaan netral, aksen brand hanya garis dan logo */
+.cc{height:200px;border-radius:22px;background:var(--sheet-bg);border:1px solid var(--line);color:var(--tx);
+  padding:18px;box-shadow:var(--e1)}
+.cc::after,.cc::before{display:none}
+.cc.front{box-shadow:var(--e2)}
+.cc-accent{width:46px;height:4px;border-radius:var(--r-pill);background:var(--brand,var(--accent-blue));opacity:.95}
+.cc-name{font-size:15px;color:var(--tx)}
+.cc-digits{color:var(--mut)}
+.cc .cc-lbl{color:var(--mut);opacity:1}
+.cc .cc-val{color:var(--tx)}
+.cc .cc-val.second{color:var(--tx)}
+.cc-tag{background:color-mix(in srgb,var(--tx) 7%,transparent);color:var(--tx)}
+.cc-tag.fee{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber)}
+.cc-mark img{filter:none;opacity:1;height:22px}
+.cc-empty{opacity:.78}
+.cc-bca{--brand:#0a63c4}
+.cc-danamon{--brand:#d92b2b}
+.cc-bni{--brand:#f97316}
+.cc-dbs{--brand:#2b2b2b}
+.cc-octo{--brand:#B00022}
+.cc-mandiri{--brand:#14539b}
+.cc-other{--brand:var(--accent-blue)}
+body.dark .cc{background:#0C1726;border-color:rgba(193,232,255,.16)}
+body.dark .cc-dbs{--brand:#EC1C24}
 </style>
 </head>
 <body>
@@ -820,7 +845,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.08';
+  var VERSION = '4.09';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1721,6 +1746,7 @@ function paydayCard(d) {
         if (dday >= 0 && dday <= 45) feeTxt = 'Biaya tahunan ' + (dday === 0 ? 'hari ini' : dday + ' hari lagi');
       }
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '">' +
+        '<div class="cc-accent"></div>' +
         '<div class="cc-head">' +
           '<div>' +
           '<div class="cc-name">' + esc(cardName) + '</div>' +
@@ -1762,10 +1788,10 @@ function paydayCard(d) {
     var deck = $('ccdeck'); if (!deck || !deck.querySelectorAll) return;
     var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
     for (var i = 0; i < n; i++) {
-      var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 3);
-      el.style.transform = 'translateY(' + (vis * 18) + 'px) scale(' + (1 - vis * 0.04).toFixed(3) + ')';
+      var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 1);
+      el.style.transform = 'translateY(' + (vis * 14) + 'px) scale(' + (1 - vis * 0.05).toFixed(3) + ')';
       el.style.zIndex = String(n - rel);
-      el.style.opacity = rel > 3 ? '0' : '1';
+      el.style.opacity = rel > 1 ? '0' : '1';
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
     }
     var dots = $('cc-dots');
@@ -1811,7 +1837,7 @@ function paydayCard(d) {
       el.style.opacity = vis >= 3 ? '0' : '1';
       el.style.zIndex = String(100 - rel);
     }
-    deck.style.height = (184 + Math.min(n - 1, 3) * 18 + 8) + 'px';
+    deck.style.height = (200 + Math.min(n - 1, 1) * 14 + 8) + 'px';
   }
 
   function walletsCard(d) {
