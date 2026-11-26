@@ -728,14 +728,14 @@ body.dark{
 
 /* Muka kartu kredit: nama, digit tersamar, logo bank, pola diagonal halus */
 .cc{padding:16px 18px;border-radius:20px}
-.cc-head{position:relative;z-index:1}
+.cc-head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .cc-name{font-size:14px;font-weight:700;letter-spacing:-.01em}
 .cc-digits{font-family:'DM Mono',ui-monospace,monospace;font-size:12.5px;letter-spacing:.14em;opacity:.86;margin-top:3px}
 .cc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .cc-tag{font-size:9.5px;font-weight:700;padding:3px 7px;border-radius:var(--r-pill);background:rgba(255,255,255,.18)}
 .cc-tag.fee{background:rgba(255,255,255,.26)}
 .cc-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1}
-.cc-mark img{height:16px;width:auto;max-width:96px;display:block;filter:brightness(0) invert(1);opacity:.92}
+.cc-mark img{height:20px;width:auto;max-width:110px;display:block;filter:brightness(0) invert(1);opacity:.95}
 .cc-mark span{font-weight:800;font-size:12px;letter-spacing:.06em}
 .cc::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.055;
   background:repeating-linear-gradient(135deg, rgba(255,255,255,.9) 0 2px, transparent 2px 16px)}
@@ -820,7 +820,7 @@ body.dark{
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.07';
+  var VERSION = '4.08';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1722,22 +1722,29 @@ function paydayCard(d) {
       }
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '">' +
         '<div class="cc-head">' +
+          '<div>' +
           '<div class="cc-name">' + esc(cardName) + '</div>' +
           '<div class="cc-digits">' + masked + '</div>' +
           ((usageTxt || feeTxt) ? '<div class="cc-tags">' +
             (usageTxt ? '<span class="cc-tag">' + usageTxt + '</span>' : '') +
             (feeTxt ? '<span class="cc-tag fee">' + feeTxt + '</span>' : '') +
           '</div>' : '') +
+          '</div>' +
+          '<div class="cc-mark">' +
+            '<img src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+            '<span style="display:none">' + esc(b.label) + '</span>' +
+          '</div>' +
         '</div>' +
         '<div class="cc-foot">' +
           '<div>' +
             '<div class="cc-lbl">' + (empty ? 'No entries yet' : billLbl) + '</div>' +
             '<div class="cc-val">' + (empty ? '—' : billVal) + '</div>' +
           '</div>' +
-          '<div class="cc-mark">' +
-            '<img src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
-            '<span style="display:none">' + esc(b.label) + '</span>' +
-          '</div>' +
+          (empty ? '' :
+            '<div style="text-align:right">' +
+              '<div class="cc-lbl">' + rightLbl + '</div>' +
+              '<div class="cc-val second">' + rightVal + '</div>' +
+            '</div>') +
         '</div>' +
         '<button type="button" class="cchit" data-act="card" data-i="' + i + '" aria-label="Buka kartu kredit ' + esc(b.label) + '"></button></div>';
 
