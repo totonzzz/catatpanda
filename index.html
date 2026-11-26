@@ -822,6 +822,22 @@ body.dark .cc-go{background:rgba(193,232,255,.14)}
 .cc-tag{background:rgba(10,24,38,.07);color:inherit}
 body.dark .cc-tag{background:rgba(193,232,255,.12);color:#E9F4FF}
 .cc-empty{opacity:.85}
+
+/* Varian kartu: aksen brand lembut, teks tetap kontras */
+.cc-bca{--brand:#0A63C4;--brand-soft:rgba(10,99,196,.13)}
+.cc-danamon{--brand:#E2542A;--brand-soft:rgba(226,84,42,.13)}
+.cc-bni{--brand:#F05A22;--brand-soft:rgba(240,90,34,.13)}
+.cc-octo{--brand:#E4002B;--brand-soft:rgba(228,0,43,.12)}
+.cc-dbs{--brand:#EC1C24;--brand-soft:rgba(236,28,36,.12)}
+.cc-mandiri{--brand:#14539B;--brand-soft:rgba(20,83,155,.13)}
+.cc-other{--brand:var(--accent-blue);--brand-soft:rgba(84,131,179,.13)}
+.cc-deco{background:radial-gradient(circle at 78% 18%, var(--brand-soft), transparent 62%)}
+body.dark .cc-deco{background:radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--brand) 26%, transparent), transparent 64%)}
+/* garis aksen tipis di kiri atas mengikuti referensi */
+.cc-brandrow::before{content:'';width:0;height:0}
+.cc .cc-logo{height:24px}
+.cc-badge{background:color-mix(in srgb, var(--brand) 12%, transparent);color:var(--brand)}
+body.dark .cc-badge{background:color-mix(in srgb, var(--brand) 30%, transparent);color:#E9F4FF}
 </style>
 </head>
 <body>
@@ -903,7 +919,7 @@ body.dark .cc-tag{background:rgba(193,232,255,.12);color:#E9F4FF}
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.15';
+  var VERSION = '4.16';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1823,7 +1839,7 @@ function paydayCard(d) {
             '<span class="cc-fallback" style="display:none">' + esc(b.label) + '</span>' +
             '<span class="cc-bankname">' + esc(b.label) + '</span>' +
           '</span>' +
-          '<span class="cc-badge">Primary</span>' +
+          (i === 0 ? '<span class="cc-badge">Primary</span>' : '') +
         '</div>' +
         '<div class="cc-body">' +
           '<div class="cc-product">' + esc(product) + '</div>' +
