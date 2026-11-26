@@ -851,6 +851,42 @@ body.dark .cc-badge{background:color-mix(in srgb, var(--brand) 30%, transparent)
 .cc:not(.front){background:linear-gradient(150deg,var(--brand),color-mix(in srgb,var(--brand) 55%,#000)) !important;border-color:transparent !important}
 .cc:not(.front) .cc-row,.cc:not(.front) .cc-body{visibility:hidden}
 body.dark .cc:not(.front){background:linear-gradient(150deg,color-mix(in srgb,var(--brand) 70%,#000),color-mix(in srgb,var(--brand) 35%,#000)) !important}
+
+/* Komponen kartu rekening: netral, aksen brand tipis, sesuai acuan */
+.wdeck{position:relative;height:245px;margin-top:12px}
+.wcard{position:absolute;inset:0;height:205px;padding:20px;border-radius:22px;text-align:left;
+  background:#FFFFFF;color:#171923;border:1px solid #E7EAF0;box-shadow:0 12px 28px rgba(20,30,50,.08);
+  font:inherit;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .38s ease}
+body.dark .wcard{background:#20242E;color:#F5F6FA;border-color:#343B49;box-shadow:0 14px 30px rgba(0,0,0,.24)}
+.wcard::after{content:"";position:absolute;right:0;bottom:0;width:5px;height:72%;
+  background:var(--bank-accent);opacity:.65;border-radius:5px 0 0 5px}
+.wcard[data-pos="0"]{transform:translateY(0) scale(1)}
+.wcard[data-pos="1"]{transform:translateY(-12px) scale(.965)}
+.wcard[data-pos="2"]{transform:translateY(-23px) scale(.93)}
+.wcard[data-pos="3"]{transform:translateY(-30px) scale(.90);opacity:0;pointer-events:none}
+.wcard:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+.wcard-head{display:flex;justify-content:space-between;align-items:center}
+.wcard-bank{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
+.wcard-mark{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  color:var(--bank-accent);background:color-mix(in srgb, var(--bank-accent) 10%, transparent);font-weight:800;font-size:13px}
+.wcard-primary{font-size:11px;font-weight:600;padding:6px 10px;border-radius:20px;
+  color:var(--bank-accent);background:color-mix(in srgb, var(--bank-accent) 10%, transparent)}
+.wcard-account{margin-top:15px;font-size:12px;color:#788397}
+body.dark .wcard-account{color:#A0A9BA}
+.wcard-balance{margin-top:5px;font-size:25px;line-height:1.3;font-weight:700;letter-spacing:-.7px;
+  font-variant-numeric:tabular-nums}
+.wcard-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:12px;
+  border-top:1px solid #E7EAF0;color:#788397;font-size:12px}
+body.dark .wcard-foot{border-top-color:#343B49;color:#A0A9BA}
+.wcard-go{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:color-mix(in srgb, currentColor 10%, transparent);font-size:16px;line-height:1}
+.wdots{display:flex;justify-content:center;gap:7px;margin-top:12px}
+.wdot{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#CBD0DA;cursor:pointer}
+body.dark .wdot{background:#4A5160}
+.wdot.active{width:20px;border-radius:8px;background:#667085}
+body.dark .wdot.active{background:#C1E8FF}
+@media (prefers-reduced-motion: reduce){ .wcard{transition:none} }
 </style>
 </head>
 <body>
@@ -932,7 +968,7 @@ body.dark .cc:not(.front){background:linear-gradient(150deg,color-mix(in srgb,va
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.17';
+  var VERSION = '4.18';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1904,24 +1940,64 @@ function paydayCard(d) {
   }
   function emoneyDeck(d) {
     var rp = function (n) { return mrp(n, 'wallet'); };
-    var list = (d.accounts || []).filter(function (a) { return a.kind === 'emoney'; });
+    var list = (d.accounts || []).filter(function (a) { return a.kind !== 'utang'; });
     if (!list.length) return '';
-    var act = state.walletActive || 0;
-    var h = '<div class="card"><div style="display:flex;align-items:center;gap:8px"><h2 style="margin:0">E-money</h2>' + eyeBtnHtml('wallet') + '</div>' +
-      '<div class="ccdeck" id="walletdeck" style="margin-top:12px">';
+    var act = Math.min(state.walletActive || 0, list.length - 1);
+    var ACCENT = {
+      gopay: '#00A8D6', shopee: '#EE4D2D', shopeepay: '#EE4D2D', octo: '#B00022', octopay: '#B00022',
+      ovo: '#4C3494', dana: '#118EEA', cash: '#2E7D5B', tunai: '#2E7D5B'
+    };
+    function accentOf(name) {
+      var k = String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+      var hit = Object.keys(ACCENT).filter(function (key) { return k.indexOf(key) === 0; })[0];
+      return hit ? ACCENT[hit] : 'var(--accent-blue)';
+    }
+    function markOf(name) {
+      var s = String(name || '').trim();
+      return s ? s.slice(0, 2).toUpperCase() : '?';
+    }
+    var h = '<div class="card"><div style="display:flex;align-items:center;gap:8px"><h2 style="margin:0">Accounts</h2>' + eyeBtnHtml('wallet') + '</div>' +
+      '<div class="wdeck" id="walletdeck">';
     list.forEach(function (a, i) {
-      h += '<div class="cc wallet" style="background:' + emoneyColor(a.name) + '">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
-          '<div><div class="em-brand">' + esc(a.name) + '</div>' +
-          '<div class="em-type">E-money wallet</div></div>' +
-          '<div class="cc-chip"></div></div>' +
-        '<div><div class="em-lbl">Balance</div><div class="em-amt">' + rp(a.balance) + '</div>' +
-          '<div class="em-type">in ' + rp(a.masuk || 0) + ' · out ' + rp(a.keluar || 0) + '</div></div>' +
-        '<button type="button" class="cchit" data-act="wallet-flip" data-i="' + i + '" aria-label="Buka dompet ' + esc(a.name) + '"></button></div>';
+      var pos = (i - act + list.length) % list.length;
+      h += '<button type="button" class="wcard" data-pos="' + Math.min(pos, 3) + '" data-act="wallet-flip" data-i="' + i + '" ' +
+        'style="--bank-accent:' + accentOf(a.name) + ';z-index:' + (10 - pos) + (pos > 2 ? ';opacity:0;pointer-events:none' : '') + '" ' +
+        'aria-label="' + esc(a.name) + ', saldo ' + rp(a.balance) + '">' +
+        '<span class="wcard-head">' +
+          '<span class="wcard-bank"><span class="wcard-mark">' + esc(markOf(a.name)) + '</span>' + esc(a.name) + '</span>' +
+          (i === 0 ? '<span class="wcard-primary">Primary</span>' : '') +
+        '</span>' +
+        '<span class="wcard-account">' + (a.kind === 'emoney' ? 'E-money wallet' : 'Bank account') + '</span>' +
+        '<span class="wcard-balance">' + rp(a.balance) + '</span>' +
+        '<span class="wcard-foot"><span>' + (a.kind === 'emoney' ? 'E-money' : 'Account') + '</span><span class="wcard-go">›</span></span>' +
+      '</button>';
     });
-    h += '</div><div class="cc-hint">Tap the front card to flip through</div></div>';
+    h += '</div><div class="wdots" id="wdots">';
+    list.forEach(function (a, i) {
+      h += '<button type="button" class="wdot' + (i === act ? ' active' : '') + '" data-act="wallet-dot" data-i="' + i + '" aria-label="Pilih ' + esc(a.name) + '"></button>';
+    });
+    h += '</div></div>';
     return h;
   }
+
+  function layoutWalletCards() {
+    var deck = $('walletdeck');
+    if (!deck) return;
+    var cards = Array.prototype.slice.call(deck.querySelectorAll('.wcard'));
+    var n = cards.length, act = Math.min(state.walletActive || 0, Math.max(n - 1, 0));
+    cards.forEach(function (el, i) {
+      var pos = (i - act + n) % n;
+      el.setAttribute('data-pos', String(Math.min(pos, 3)));
+      el.style.zIndex = String(10 - pos);
+      el.style.opacity = pos > 2 ? '0' : '1';
+      el.style.pointerEvents = pos > 2 ? 'none' : 'auto';
+    });
+    var dots = $('wdots');
+    if (dots) Array.prototype.slice.call(dots.children).forEach(function (b, i) {
+      b.className = 'wdot' + (i === act ? ' active' : '');
+    });
+  }
+
   function layoutDeck(id, active) {
     var deck = $(id); if (!deck) return;
     var cards = deck.querySelectorAll('.cc'), n = cards.length;
@@ -2775,8 +2851,8 @@ function paydayCard(d) {
       if (window.requestAnimationFrame) requestAnimationFrame(layoutCards); else setTimeout(layoutCards, 30);
       state.walletActive = 0;
       loadPrices();
-      if (window.requestAnimationFrame) requestAnimationFrame(function () { layoutDeck('walletdeck', 0); });
-      else setTimeout(function () { layoutDeck('walletdeck', 0); }, 30);
+      if (window.requestAnimationFrame) requestAnimationFrame(function () { layoutWalletCards(); });
+      else setTimeout(function () { layoutWalletCards(); }, 30);
     }
     if (state.fromCache && state.tab !== 'setelan' && d) {
       var note = document.createElement('div'); note.className = 'empty'; note.style.cssText = 'text-align:center;font-size:12px;margin-top:-4px;margin-bottom:10px';
@@ -3746,9 +3822,15 @@ function paydayCard(d) {
     else if (act === 'cat-view') openCategoryDetail(el.getAttribute('data-cat'));
     else if (act === 'budget-edit') openBudgetForm(el.getAttribute('data-cat'));
     else if (act === 'wallet-flip') {
-      var n0 = ((state.data && state.data.accounts) || []).filter(function (a) { return a.kind === 'emoney'; }).length;
-      state.walletActive = ((state.walletActive || 0) + 1) % Math.max(n0, 1);
-      layoutDeck('walletdeck', state.walletActive);
+      var n0 = ((state.data && state.data.accounts) || []).filter(function (a) { return a.kind !== 'utang'; }).length;
+      var want = el.getAttribute('data-i');
+      if (want !== null && want !== '') state.walletActive = Number(want) || 0;
+      else state.walletActive = ((state.walletActive || 0) + 1) % Math.max(n0, 1);
+      layoutWalletCards();
+    }
+    else if (act === 'wallet-dot') {
+      state.walletActive = Number(el.getAttribute('data-i')) || 0;
+      layoutWalletCards();
     }
     else if (act === 'goal-add') openGoalForm('');
     else if (act === 'goal-edit') openGoalForm(el.getAttribute('data-name'));
