@@ -764,6 +764,23 @@ body.dark{
 .cc-other{--brand:var(--accent-blue)}
 body.dark .cc{background:#0C1726;border-color:rgba(193,232,255,.16)}
 body.dark .cc-dbs{--brand:#EC1C24}
+
+/* Perbaikan muka kartu: jarak rapat, permukaan solid, tumpukan tipis */
+.cc{height:190px;justify-content:flex-start;background:#FFFFFF !important;border-color:rgba(10,24,38,.12) !important;
+  box-shadow:0 1px 2px rgba(6,18,32,.05),0 6px 18px rgba(6,18,32,.07)}
+body.dark .cc{background:#0C1726 !important;border-color:rgba(193,232,255,.18) !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.35),0 8px 20px rgba(0,0,0,.35)}
+.cc-aware .cc-accent{margin:0 0 16px}
+.cc-foot{margin-top:auto}
+.cc:not(.front){box-shadow:none}
+.cc .cc-name{color:var(--tx) !important}
+.cc .cc-digits{color:var(--mut) !important;opacity:1}
+.cc .cc-lbl{color:var(--mut) !important;opacity:1}
+.cc .cc-val{color:var(--tx) !important}
+.cc .cc-val.second{color:var(--tx) !important}
+.cc-tag{background:rgba(10,24,38,.07) !important;color:var(--tx) !important}
+body.dark .cc-tag{background:rgba(193,232,255,.12) !important}
+.cc-mark img{height:20px}
 </style>
 </head>
 <body>
@@ -845,7 +862,7 @@ body.dark .cc-dbs{--brand:#EC1C24}
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.09';
+  var VERSION = '4.10';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
