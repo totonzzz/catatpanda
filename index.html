@@ -785,6 +785,43 @@ body.dark .cc-tag{background:rgba(193,232,255,.12) !important}
 /* Kartu belakang dalam tumpukan: sedikit lebih terang dan berbingkai */
 .cc:not(.front){background:#F6F8FB !important}
 body.dark .cc:not(.front){background:#152233 !important}
+
+/* Kartu kredit gaya wallet card: tumpukan ke atas, permukaan netral, angka besar */
+.ccdeck{margin-top:18px}
+.cc{height:196px;border-radius:24px;padding:16px 18px;overflow:hidden;position:absolute;
+  background:#FFFFFF;border:1px solid rgba(10,24,38,.10);color:#0B1B2B;
+  box-shadow:0 2px 10px rgba(6,18,32,.07);display:flex;flex-direction:column;justify-content:flex-start}
+body.dark .cc{background:linear-gradient(160deg,#101F31,#0A1522 70%);border-color:rgba(193,232,255,.14);color:#E9F4FF}
+.cc::before,.cc::after{display:none}
+.cc-deco{position:absolute;right:-46px;top:-36px;width:190px;height:190px;border-radius:50%;
+  background:radial-gradient(circle at 32% 32%, rgba(47,111,178,.20), transparent 70%)}
+body.dark .cc-deco{background:radial-gradient(circle at 32% 32%, rgba(111,166,232,.30), transparent 70%)}
+.cc-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.cc-brandrow{display:inline-flex;align-items:center;gap:9px}
+.cc .cc-logo{height:26px;width:auto;max-width:120px;filter:none;opacity:1}
+.cc-fallback{font-weight:800;font-size:15px}
+.cc-bankname{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.cc-badge{font-size:11px;font-weight:700;color:#2F6FB2;background:rgba(47,111,178,.13);
+  border-radius:var(--r-pill);padding:5px 11px;white-space:nowrap}
+body.dark .cc-badge{color:#C1E8FF;background:rgba(193,232,255,.15)}
+.cc-body{position:relative;z-index:1;margin-top:8px}
+.cc-product{font-size:12.5px;font-weight:600;color:#5C7488}
+body.dark .cc-product{color:#8FB3D9}
+.cc-amount{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:2px;
+  font-variant-numeric:tabular-nums}
+.cc-subline{font-size:11px;color:#5C7488;margin-top:3px}
+body.dark .cc-subline{color:#8FB3D9}
+.cc-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:auto;
+  position:relative;z-index:1;padding-top:10px}
+.cc-type{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#5C7488}
+body.dark .cc-type{color:#8FB3D9}
+.cc-type .uico{margin:0;color:inherit}
+.cc-go{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(10,24,38,.07);font-size:20px;line-height:1;color:inherit}
+body.dark .cc-go{background:rgba(193,232,255,.14)}
+.cc-tag{background:rgba(10,24,38,.07);color:inherit}
+body.dark .cc-tag{background:rgba(193,232,255,.12);color:#E9F4FF}
+.cc-empty{opacity:.85}
 </style>
 </head>
 <body>
@@ -866,7 +903,7 @@ body.dark .cc:not(.front){background:#152233 !important}
 <script>
 (function () {
   'use strict';
-  var VERSION = '4.13';
+  var VERSION = '4.14';
   // Notifikasi push dilayani Cloudflare Worker di folder worker/ (lihat worker/README.md).
   // Setelah Worker di-deploy, isi dengan alamatnya, contoh:
   //   var PUSH_ENDPOINT = 'https://bamboo-push.budi.workers.dev/api/push';
@@ -1766,32 +1803,40 @@ function paydayCard(d) {
         var dday = Math.ceil((new Date(fees[m.name] + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
         if (dday >= 0 && dday <= 45) feeTxt = 'Biaya tahunan ' + (dday === 0 ? 'hari ini' : dday + ' hari lagi');
       }
+      var st = (state.data && state.data.settings) || {};
+      var labels = st.kkLabels || {}, nums = st.kkNums || {}, lims = st.kkLimits || {}, fees = st.kkFees || {};
+      var cardName = labels[m.name] || b.label;
+      var digits = nums[m.name] || '';
+      var product = cardName + ' · ' + (digits || '••••');
+      var unbill = (typeof m.unbilled === 'number' && !empty) ? ('Unbilled ' + rp(m.unbilled)) : '';
+      var usageTxt = '', feeTxt = '';
+      if (lims[m.name] > 0) usageTxt = Math.round(Math.abs(m.value || 0) / lims[m.name] * 100) + '% dari limit';
+      if (fees[m.name]) {
+        var dday = Math.ceil((new Date(fees[m.name] + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
+        if (dday >= 0 && dday <= 45) feeTxt = 'Biaya tahunan ' + (dday === 0 ? 'hari ini' : dday + ' hari lagi');
+      }
       h += '<div class="cc cc-' + b.id + (empty ? ' cc-empty' : '') + '">' +
-        '<div class="cc-accent"></div>' +
-        '<div class="cc-head">' +
-          '<div>' +
-          '<div class="cc-name">' + esc(cardName) + '</div>' +
-          '<div class="cc-digits">' + masked + '</div>' +
+        '<div class="cc-deco"></div>' +
+        '<div class="cc-row">' +
+          '<span class="cc-brandrow">' +
+            '<img class="cc-logo" src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'inline\'">' +
+            '<span class="cc-fallback" style="display:none">' + esc(b.label) + '</span>' +
+            '<span class="cc-bankname">' + esc(b.label) + '</span>' +
+          '</span>' +
+          '<span class="cc-badge">Primary</span>' +
+        '</div>' +
+        '<div class="cc-body">' +
+          '<div class="cc-product">' + esc(product) + '</div>' +
+          '<div class="cc-amount">' + (empty ? '—' : (billVal || rp(0))) + '</div>' +
+          '<div class="cc-subline">' + (empty ? 'No entries yet' : (billLbl + (unbill ? ' · ' + unbill : ''))) + '</div>' +
           ((usageTxt || feeTxt) ? '<div class="cc-tags">' +
             (usageTxt ? '<span class="cc-tag">' + usageTxt + '</span>' : '') +
             (feeTxt ? '<span class="cc-tag fee">' + feeTxt + '</span>' : '') +
           '</div>' : '') +
-          '</div>' +
-          '<div class="cc-mark">' +
-            '<img src="icons/banks/' + b.id + '.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
-            '<span style="display:none">' + esc(b.label) + '</span>' +
-          '</div>' +
         '</div>' +
-        '<div class="cc-foot">' +
-          '<div>' +
-            '<div class="cc-lbl">' + (empty ? 'No entries yet' : billLbl) + '</div>' +
-            '<div class="cc-val">' + (empty ? '—' : billVal) + '</div>' +
-          '</div>' +
-          (empty ? '' :
-            '<div style="text-align:right">' +
-              '<div class="cc-lbl">' + rightLbl + '</div>' +
-              '<div class="cc-val second">' + rightVal + '</div>' +
-            '</div>') +
+        '<div class="cc-bottom">' +
+          '<span class="cc-type">' + uiIcon('credit-card') + 'Credit Card</span>' +
+          '<span class="cc-go">›</span>' +
         '</div>' +
         '<button type="button" class="cchit" data-act="card" data-i="' + i + '" aria-label="Buka kartu kredit ' + esc(b.label) + '"></button></div>';
 
@@ -1810,7 +1855,7 @@ function paydayCard(d) {
     var cards = deck.querySelectorAll('.cc'), n = cards.length, act = state.cardActive || 0;
     for (var i = 0; i < n; i++) {
       var rel = (i - act + n) % n, el = cards[i], vis = Math.min(rel, 1);
-      el.style.transform = 'translateY(' + (vis * 17) + 'px) scale(' + (1 - vis * 0.045).toFixed(3) + ')';
+      el.style.transform = 'translateY(-' + (vis * 16) + 'px) scale(' + (1 - vis * 0.05).toFixed(3) + ')';
       el.style.zIndex = String(n - rel);
       el.style.opacity = rel === 0 ? '1' : (rel === 1 ? '0.55' : '0');
       if (rel === 0) el.classList.add('front'); else el.classList.remove('front');
@@ -1858,7 +1903,7 @@ function paydayCard(d) {
       el.style.opacity = vis >= 3 ? '0' : '1';
       el.style.zIndex = String(100 - rel);
     }
-    deck.style.height = (190 + Math.min(n - 1, 1) * 17 + 6) + 'px';
+    deck.style.height = (196 + Math.min(n - 1, 1) * 10 + 10) + 'px';
   }
 
   function walletsCard(d) {
